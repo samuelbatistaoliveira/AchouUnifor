@@ -1,10 +1,10 @@
-# 🔎 UNIFOR Achados e Perdidos
+# 🔎 AchouUnifor
 
 Sistema web criado para auxiliar a comunidade acadêmica da Universidade de Fortaleza (UNIFOR) na comunicação e no gerenciamento de objetos perdidos e encontrados dentro do campus.
 
 ## 🎯 Objetivo
 
-O **UNIFOR Achados e Perdidos** tem como proposta oferecer um espaço único para que estudantes, professores e colaboradores possam registrar e procurar pertences que tenham sido perdidos ou encontrados na universidade.
+O **AchouUnifor** tem como proposta oferecer um espaço único para que estudantes, professores e colaboradores possam registrar e procurar pertences que tenham sido perdidos ou encontrados na universidade.
 
 A ideia é reduzir a dificuldade de localizar objetos e facilitar o processo de devolução, disponibilizando informações organizadas sobre cada item cadastrado.
 

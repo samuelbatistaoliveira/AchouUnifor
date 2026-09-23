@@ -1,8 +1,10 @@
 const express = require("express");
+const itensRoutes = require('./routes/itensRoutes');
 
 const app = express();
 
 app.use(express.json());
+app.use('/itens', itensRoutes);
 
 app.get("/", (req, res) => {
     res.send("Backend do AchouUNIFOR funcionando!");

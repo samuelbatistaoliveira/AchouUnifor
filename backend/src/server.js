@@ -1,30 +1,18 @@
-const express = require("express");
-const itensRoutes = require('./routes/itensRoutes');
+const express = require("express")
+const itensRoutes = require("./routes/itensRoutes")
+const authRoutes = require("./routes/authRoutes")
 
-const app = express();
-const cors = require('cors');
-app.use(cors());
+const app = express()
 
-app.use(express.json());
-app.use('/itens', itensRoutes);
+app.use(express.json())
+
+app.use("/itens", itensRoutes)
+app.use("/auth", authRoutes)
 
 app.get("/", (req, res) => {
-    res.send("Backend do AchouUNIFOR funcionando!");
-});
-
-app.post("/login", (req, res) => {
-    const email = req.body.email;
-    const senha = req.body.senha;
-
-    console.log("Email recebido:", email);
-    console.log("Senha recebida:", senha);
-
-    res.json({
-        mensagem: "Dados do login recebidos!"
-    });
-});
+    res.send("Backend do AchouUNIFOR funcionando!")
+})
 
 app.listen(3000, () => {
-    console.log("Servidor rodando na porta 3000");
-});
-
+    console.log("Servidor rodando na porta 3000")
+})

@@ -1,0 +1,408 @@
+/* Reseta margens e garante fontes corretas */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, sans-serif; /* Recomendado usar Inter ou similar */
+}
+
+/* Configuração do Container Geral */
+.container-geral {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Barra de Navegação (Header) --- */
+.navbar {
+  background-color: #0d1e3a; /* Azul escuro da foto */
+  color: white;
+  padding: 10px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.navbar-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-esquerda h1 {
+  font-size: 1.6rem;
+}
+
+.destaque-unifor {
+  font-weight: bold;
+}
+
+.divisor-v {
+  width: 1px;
+  height: 25px;
+  background-color: #ffffff4d;
+}
+
+.icone-sacola {
+  color: white;
+}
+
+.navbar-esquerda span {
+  font-size: 0.9rem;
+  font-weight: 300;
+}
+
+.navbar-direita {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-direita a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-direita a:hover {
+  text-decoration: underline;
+}
+
+/* --- Conteúdo Principal com Fundo --- */
+.conteudo-principal {
+  flex: 1;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('./assets/fundo-unifor.jpg'); /* Adicione sua imagem aqui */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  padding-top: 80px; /* Espaço para a navbar fixa */
+}
+
+.flex-layout {
+  display: flex;
+  width: 100%;
+  padding: 60px;
+}
+
+/* --- Coluna da Esquerda (Texto) --- */
+.secao-texto {
+  flex: 1;
+  color: white;
+  padding-right: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.secao-texto h2 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.secao-texto h3 {
+  font-size: 1.8rem;
+  font-weight: normal;
+  margin-bottom: 30px;
+}
+
+.secao-texto p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-bottom: 50px;
+}
+
+.lista-recursos {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.item-recurso {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.circulo-icone {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-recurso strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.item-recurso p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0;
+  max-width: 400px;
+}
+
+/* --- Coluna da Direita (Cartão de Login) --- */
+.secao-form {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cartao-login {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.logo-cartao {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.icone-sacola-grande {
+  color: #0b3d91;
+}
+
+.logo-cartao h4 {
+  font-size: 1.5rem;
+  color: #0d1e3a;
+}
+
+.logo-cartao h4 .destaque-unifor {
+  color: #0b3d91;
+}
+
+.logo-cartao p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.logo-navbar {
+  height: 45px;
+  width: auto;
+  border-radius: 4px; /* Suaviza os cantos caso a imagem tenha fundo branco */
+}
+
+.divisor-h {
+  height: 1px;
+  background-color: #eee;
+  margin: 25px 0;
+}
+
+.instrucao-login {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grupo-input label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.input-com-icone {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icone-input {
+  position: absolute;
+  left: 15px;
+  color: #888;
+}
+
+.input-com-icone input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input-com-icone input:focus {
+  border-color: #0b3d91;
+  outline: none;
+}
+
+.icone-olho {
+  position: absolute;
+  right: 15px;
+  color: #888;
+  cursor: pointer;
+}
+
+.linha-acoes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+/* Custom Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  color: #444;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #eee;
+  border-radius: 4px;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #0b3d91;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.link-esqueceu {
+  color: #0b3d91;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.link-esqueceu:hover {
+  text-decoration: underline;
+}
+
+.botao-entrar {
+  background-color: #1a73e8; /* Azul do botão da foto */
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.botao-entrar:hover {
+  background-color: #0b3d91;
+}
+
+.divisor-ou {
+  text-align: center;
+  position: relative;
+  margin: 30px 0;
+}
+
+.divisor-ou span {
+  background-color: white;
+  padding: 0 15px;
+  color: #888;
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.divisor-ou::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #eee;
+  z-index: 0;
+}
+
+.info-alerta {
+  background-color: #e8f0fe;
+  color: #0b3d91;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  gap: 15px;
+  align-items: start;
+}
+
+.info-alerta strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+.info-alerta p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 0;
+}

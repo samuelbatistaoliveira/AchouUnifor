@@ -17,6 +17,10 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "lucide-react": "^1.48.0",
     "pg": "^8.23.0"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }

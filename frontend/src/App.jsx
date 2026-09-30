@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HelpCircle, Info, Search, FileText, Bell, User, Lock, EyeOff, ExternalLink, ArrowRight } from 'lucide-react';
+import { HelpCircle, Info, Search, FileText, Bell, User, Lock, Eye, EyeOff, ExternalLink, ArrowRight } from 'lucide-react';
 import './App.css';
 import logoUnifor from './assets/logo-achouunifor.png';
 
@@ -7,15 +7,14 @@ function App() {
   const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
   const [lembrar, setLembrar] = useState(true);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   return (
     <div className="container-geral">
       {/* Barra de Navegação Superior */}
       <header className="navbar">
         <div className="navbar-esquerda">
-          {/* Substituímos o <h1> pela tag img */}
           <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
-
           <div className="divisor-v" />
           <Search size={24} className="icone-sacola" />
           <span>Sistema de Achados e Perdidos</span>
@@ -29,6 +28,7 @@ function App() {
       {/* Conteúdo Principal com Imagem de Fundo */}
       <main className="conteudo-principal">
         <div className="flex-layout">
+
           {/* Coluna da Esquerda (Texto e Recursos) */}
           <div className="secao-texto">
             <h2>AchouUNIFOR</h2>
@@ -40,21 +40,23 @@ function App() {
             <div className="lista-recursos">
               <div className="item-recurso">
                 <div className="circulo-icone"><Search size={20} /></div>
-                <div>
+                <div className="conteudo-texto">
                   <strong>Consulte itens</strong>
                   <p>Veja se seu objeto foi encontrado no setor de segurança da UNIFOR.</p>
                 </div>
               </div>
+
               <div className="item-recurso">
                 <div className="circulo-icone"><FileText size={20} /></div>
-                <div>
+                <div className="conteudo-texto">
                   <strong>Registre uma denúncia</strong>
                   <p>Informe os detalhes do seu item perdido e seja notificado quando ele for encontrado.</p>
                 </div>
               </div>
+
               <div className="item-recurso">
                 <div className="circulo-icone"><Bell size={20} /></div>
-                <div>
+                <div className="conteudo-texto">
                   <strong>Receba notificações</strong>
                   <p>Acompanhe o status da sua denúncia em tempo real.</p>
                 </div>
@@ -66,7 +68,7 @@ function App() {
           <div className="secao-form">
             <div className="cartao-login">
               <div className="logo-cartao">
-                <Search size={40} className="icone-sacola-grande" /> {/* Usando Search como sacola temporária */}
+                <Search size={40} className="icone-sacola-grande" />
                 <h4>
                   Achou<span className="destaque-unifor">UNIFOR</span>
                 </h4>
@@ -84,7 +86,13 @@ function App() {
                   <label>Matrícula</label>
                   <div className="input-com-icone">
                     <User size={18} className="icone-input" />
-                    <input type="text" placeholder="Ex.: 20212345" />
+                    <input
+                      type="text"
+                      placeholder="Ex.: 20212345"
+                      maxLength={8}
+                      value={matricula}
+                      onChange={(e) => setMatricula(e.target.value.replace(/\D/g, ''))}
+                    />
                   </div>
                 </div>
 
@@ -92,8 +100,22 @@ function App() {
                   <label>Senha</label>
                   <div className="input-com-icone">
                     <Lock size={18} className="icone-input" />
-                    <input type="password" placeholder="Digite sua senha" />
-                    <EyeOff size={18} className="icone-olho" />
+
+                    {/* O tipo muda entre 'text' e 'password' dependendo do estado */}
+                    <input
+                      type={mostrarSenha ? "text" : "password"}
+                      placeholder="Digite sua senha"
+                      maxLength={8}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value.replace(/\D/g, ''))}
+                    />
+
+                    {/* O ícone muda e ao clicar inverte o valor de mostrarSenha */}
+                    {mostrarSenha ? (
+                      <Eye size={18} className="icone-olho" onClick={() => setMostrarSenha(false)} />
+                    ) : (
+                      <EyeOff size={18} className="icone-olho" onClick={() => setMostrarSenha(true)} />
+                    )}
                   </div>
                 </div>
 
@@ -126,6 +148,7 @@ function App() {
               </div>
             </div>
           </div>
+
         </div>
       </main>
     </div>

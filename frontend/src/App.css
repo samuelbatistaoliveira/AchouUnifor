@@ -123,13 +123,14 @@
 .lista-recursos {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 15px; /* Reduzimos o gap porque a margem será dada pela animação */
+  align-items: flex-start;
 }
 
 .item-recurso {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 20px;
+  cursor: pointer;
 }
 
 .circulo-icone {
@@ -141,19 +142,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+  transition: transform 0.4s ease, background-color 0.4s ease;
 }
 
-.item-recurso strong {
+/* Estado inicial do texto (escondido) */
+.conteudo-texto {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-left: 0;
+  transform: translateX(-20px);
+  transition: all 0.5s ease;
+}
+
+.conteudo-texto strong {
   display: block;
   font-size: 1.1rem;
   margin-bottom: 4px;
+  white-space: nowrap; /* Evita que o título quebre linha na animação */
 }
 
-.item-recurso p {
+.conteudo-texto p {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 0;
+  width: 380px; /* Largura fixa para o texto não bugar ao expandir */
+}
+
+/* O QUE ACONTECE AO PASSAR O RATO (HOVER) */
+.item-recurso:hover .circulo-icone {
+  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.item-recurso:hover .conteudo-texto {
   max-width: 400px;
+  opacity: 1;
+  margin-left: 20px; /* Empurra o texto para a direita */
+  transform: translateX(0);
 }
 
 /* --- Coluna da Direita (Cartão de Login) --- */

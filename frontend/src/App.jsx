@@ -9,6 +9,40 @@ function App() {
   const [lembrar, setLembrar] = useState(true);
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  async function handleLogin(e) {
+  e.preventDefault();
+  console.log("handleLogin foi chamado");
+
+
+  try {
+    const resposta = await fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        matricula: matricula,
+        senha: senha
+      })
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      alert(dados.mensagem);
+      return;
+    }
+
+    localStorage.setItem("token", dados.token);
+
+    alert("Login realizado com sucesso!");
+
+  } catch (erro) {
+    console.error("Erro ao realizar login:", erro);
+    alert("Não foi possível conectar ao servidor.");
+  }
+}
+
   return (
     <div className="container-geral">
       {/* Barra de Navegação Superior */}
@@ -81,7 +115,7 @@ function App() {
                 Use sua matrícula e a senha da sua conta institucional da UNIFOR para acessar o sistema.
               </p>
 
-              <form className="formulario">
+              <form className="formulario" onSubmit={handleLogin}>
                 <div className="grupo-input">
                   <label>Matrícula</label>
                   <div className="input-com-icone">

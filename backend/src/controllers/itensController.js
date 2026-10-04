@@ -1,36 +1,48 @@
-const itens = [
-  { id: 1, nomeObjeto: "Garrafa Térmica", categoria: "Garrafa", bloco: "Bloco A", data: "12/09/2026", status: "Achado" },
-  { id: 2, nomeObjeto: "Mochila Preta", categoria: "Mochila", bloco: "Bloco M", data: "16/09/2026", status: "Perdido" },
-  { id: 3, nomeObjeto: "Chaves com chaveiro", categoria: "Chave", bloco: "Biblioteca", data: "12/09/2026", status: "Achado" },
-  { id: 4, nomeObjeto: "Carregador USB-C", categoria: "Carregador", bloco: "Bloco D", data: "12/09/2026", status: "Achado" },
-  { id: 5, nomeObjeto: "Caderno Azul", categoria: "Caderno", bloco: "Bloco B", data: "16/09/2026", status: "Devolvido" },
-  { id: 6, nomeObjeto: "Óculos de grau", categoria: "Óculos", bloco: "Biblioteca F", data: "12/09/2026", status: "Perdido" },
-];
+const pool = require('../config/database');
 
-function getItens(req, res) {
-  const { busca, categoria, bloco, status } = req.query;
+async function getItens(req, res) {
+  try {
+    const { busca, categoria, bloco, status } = req.query;
 
-  let resultado = itens;
+    let query = `
+      SELECT itens.*, categorias.nome AS categoria
+      FROM itens
+      JOIN categorias ON itens.id_categoria = categorias.id_categoria
+    `;
+    const condicoes = [];
+    const valores = [];
 
-  if (busca) {
-    resultado = resultado.filter((item) =>
-      item.nomeObjeto.toLowerCase().includes(busca.toLowerCase())
-    );
+    if (busca) {
+      valores.push(`%${busca}%`);
+      condicoes.push(`itens.nome_objeto ILIKE $${valores.length}`);
+    }
+
+    if (categoria) {
+      valores.push(categoria);
+      condicoes.push(`categorias.nome = $${valores.length}`);
+    }
+
+    if (bloco) {
+      valores.push(`%${bloco}%`);
+      condicoes.push(`itens.local_encontrado ILIKE $${valores.length}`);
+    }
+
+    if (status) {
+      valores.push(status);
+      condicoes.push(`itens.status = $${valores.length}`);
+    }
+
+    if (condicoes.length > 0) {
+      query += ' WHERE ' + condicoes.join(' AND ');
+    }
+
+    const resultado = await pool.query(query, valores);
+    res.json(resultado.rows);
+
+  } catch (erro) {
+    console.error('Erro ao buscar itens:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
   }
-
-  if (categoria) {
-    resultado = resultado.filter((item) => item.categoria === categoria);
-  }
-
-  if (bloco) {
-    resultado = resultado.filter((item) => item.bloco === bloco);
-  }
-
-  if (status) {
-    resultado = resultado.filter((item) => item.status === status);
-  }
-
-  res.json(resultado);
 }
 
 module.exports = { getItens };

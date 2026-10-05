@@ -8,6 +8,36 @@ function App() {
   const [senha, setSenha] = useState('');
   const [lembrar, setLembrar] = useState(true);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+  async function entrar(e) {
+    e.preventDefault();
+    setErro('');
+    setCarregando(true);
+
+    try {
+      const resposta = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matricula, senha }),
+      });
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        setErro(dados.mensagem);
+        return;
+      }
+
+      // "Lembrar de mim": localStorage sobrevive ao fechar o navegador, sessionStorage não
+      (lembrar ? localStorage : sessionStorage).setItem('token', dados.token);
+      alert(`Bem-vindo, ${dados.usuario.nome}!`); // trocar pela navegação quando existir outra tela
+    } catch {
+      setErro('Não foi possível conectar ao servidor.');
+    } finally {
+      setCarregando(false);
+    }
+  }
 
   return (
     <div className="container-geral">
@@ -81,13 +111,16 @@ function App() {
                 Use sua matrícula e a senha da sua conta institucional da UNIFOR para acessar o sistema.
               </p>
 
-              <form className="formulario">
+              <form className="formulario" onSubmit={entrar}>
                 <div className="grupo-input">
-                  <label>Matrícula</label>
+                  <label htmlFor="matricula">Matrícula</label>
                   <div className="input-com-icone">
                     <User size={18} className="icone-input" />
                     <input
+                      id="matricula"
                       type="text"
+                      inputMode="numeric"
+                      required
                       placeholder="Ex.: 20212345"
                       maxLength={8}
                       value={matricula}
@@ -97,25 +130,29 @@ function App() {
                 </div>
 
                 <div className="grupo-input">
-                  <label>Senha</label>
+                  <label htmlFor="senha">Senha</label>
                   <div className="input-com-icone">
                     <Lock size={18} className="icone-input" />
 
                     {/* O tipo muda entre 'text' e 'password' dependendo do estado */}
                     <input
+                      id="senha"
                       type={mostrarSenha ? "text" : "password"}
                       placeholder="Digite sua senha"
-                      maxLength={8}
+                      required
                       value={senha}
-                      onChange={(e) => setSenha(e.target.value.replace(/\D/g, ''))}
+                      onChange={(e) => setSenha(e.target.value)}
                     />
 
-                    {/* O ícone muda e ao clicar inverte o valor de mostrarSenha */}
-                    {mostrarSenha ? (
-                      <Eye size={18} className="icone-olho" onClick={() => setMostrarSenha(false)} />
-                    ) : (
-                      <EyeOff size={18} className="icone-olho" onClick={() => setMostrarSenha(true)} />
-                    )}
+                    {/* button (e não só o ícone) para funcionar pelo teclado */}
+                    <button
+                      type="button"
+                      className="icone-olho"
+                      onClick={() => setMostrarSenha(!mostrarSenha)}
+                      aria-label={mostrarSenha ? 'Esconder senha' : 'Mostrar senha'}
+                    >
+                      {mostrarSenha ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
                   </div>
                 </div>
 
@@ -130,8 +167,10 @@ function App() {
                   </a>
                 </div>
 
-                <button type="submit" className="botao-entrar">
-                  Entrar <ArrowRight size={18} />
+                {erro && <p className="mensagem-erro" role="alert">{erro}</p>}
+
+                <button type="submit" className="botao-entrar" disabled={carregando}>
+                  {carregando ? 'Entrando...' : <>Entrar <ArrowRight size={18} /></>}
                 </button>
               </form>
 

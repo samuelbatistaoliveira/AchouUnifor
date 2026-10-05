@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { HelpCircle, Info, Search, FileText, Bell, User, Lock, Eye, EyeOff, ExternalLink, ArrowRight, Mail } from 'lucide-react';
-import './App.css';
+import './Login.css';
 import logoUnifor from './assets/logo-achouunifor.png';
 import Cadastro from './Cadastro';
 import { motion } from 'framer-motion';
@@ -27,7 +27,7 @@ function App() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          matricula: matricula,
+          email: email.trim(),
           senha: senha
         })
       });
@@ -130,7 +130,7 @@ function App() {
                 <div className="divisor-h" />
 
                 <p className="instrucao-login">
-                  Use sua matrícula e a senha da sua conta institucional da UNIFOR para acessar o sistema.
+                  Use seu e-mail institucional (@edu.unifor.br) e a senha da sua conta da UNIFOR para acessar o sistema.
                 </p>
 
                 <form className="formulario" onSubmit={handleLogin}>
@@ -142,7 +142,10 @@ function App() {
                       <Mail size={18} className="icone-input" />
                       <input
                         type="email"
-                        placeholder="Ex.: aluno@unifor.br"
+                        required
+                        pattern=".+@edu\.unifor\.br"
+                        title="Use seu e-mail institucional (@edu.unifor.br)"
+                        placeholder="seuemail@edu.unifor.br"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -156,6 +159,7 @@ function App() {
                       <Lock size={18} className="icone-input" />
                       <input
                         type={mostrarSenha ? "text" : "password"}
+                        required
                         placeholder="Digite sua senha"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}

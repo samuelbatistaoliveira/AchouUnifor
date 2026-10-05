@@ -5,7 +5,7 @@ import logoUnifor from './assets/logo-achouunifor.png';
 import Cadastro from './Cadastro';
 import { motion } from 'framer-motion';
 
-function App() {
+function Login({ aoEntrar }) {
   const [telaAtual, setTelaAtual] = useState('login');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -41,7 +41,7 @@ function App() {
 
       localStorage.setItem("token", dados.token);
 
-      alert("Login realizado com sucesso!");
+      aoEntrar();
 
     } catch (erro) {
       console.error("Erro ao realizar login:", erro);
@@ -220,4 +220,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;

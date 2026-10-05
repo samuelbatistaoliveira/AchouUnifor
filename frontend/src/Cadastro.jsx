@@ -10,10 +10,10 @@ function Cadastro({ aoVoltar }) {
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   return (
-    <motion.div 
+    <motion.div
       className="container-geral"
-      initial={{ opacity: 0, x: 30 }} 
-      animate={{ opacity: 1, x: 0 }} 
+      initial={{ opacity: 0, x: 30 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 1.0, ease: "easeOut" }}
     >
       <main className="conteudo-principal">
@@ -79,7 +79,7 @@ function Cadastro({ aoVoltar }) {
         </div>
       </main>
     </motion.div>
-  );
+  )
 }
 
 export default Cadastro;

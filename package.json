@@ -17,6 +17,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "framer-motion": "^14.0.0",
     "lucide-react": "^1.48.0",
     "pg": "^8.23.0"
   },

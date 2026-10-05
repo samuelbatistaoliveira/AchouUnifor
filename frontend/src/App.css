@@ -291,6 +291,15 @@
   right: 15px;
   color: #888;
   cursor: pointer;
+  background: none;
+  border: none;
+  display: flex;
+}
+
+.mensagem-erro {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .linha-acoes {

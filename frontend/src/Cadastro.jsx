@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, User, Lock, Mail, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import './App.css';
+import './Login.css';
 
 function Cadastro({ aoVoltar }) {
   const [nome, setNome] = useState('');

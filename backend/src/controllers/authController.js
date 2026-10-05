@@ -4,23 +4,29 @@ const jwt = require("jsonwebtoken")
 
 async function login(req, res) {
     try {
-        const matricula = req.body.matricula
+        const email = String(req.body.email || "").trim().toLowerCase()
         const senha = req.body.senha
 
-        if (!matricula || !senha) {
+        if (!email || !senha) {
             return res.status(400).json({
-                mensagem: "Matrícula e senha são obrigatórias."
+                mensagem: "E-mail e senha são obrigatórios."
+            })
+        }
+
+        if (!email.endsWith("@edu.unifor.br")) {
+            return res.status(400).json({
+                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
             })
         }
 
         const resultado = await pool.query(
-            "SELECT * FROM usuarios WHERE matricula = $1",
-            [matricula]
+            "SELECT * FROM usuarios WHERE LOWER(email_institucional) = $1",
+            [email]
         )
 
         if (resultado.rows.length === 0) {
             return res.status(401).json({
-                mensagem: "Matrícula ou senha inválida."
+                mensagem: "E-mail ou senha inválidos."
             })
         }
 
@@ -39,7 +45,7 @@ async function login(req, res) {
 
         if (!senhaCorreta) {
             return res.status(401).json({
-                mensagem: "Matrícula ou senha inválida."
+                mensagem: "E-mail ou senha inválidos."
             })
         }
 
@@ -60,7 +66,7 @@ async function login(req, res) {
             usuario: {
                 id_usuario: usuario.id_usuario,
                 nome: usuario.nome,
-                matricula: usuario.matricula,
+                email: usuario.email_institucional,
                 tipo_usuario: usuario.tipo_usuario
             }
         })

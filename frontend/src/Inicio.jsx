@@ -27,7 +27,7 @@ function App() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          email: email.trim(),
+          matricula: matricula,
           senha: senha
         })
       });
@@ -130,7 +130,7 @@ function App() {
                 <div className="divisor-h" />
 
                 <p className="instrucao-login">
-                  Use seu e-mail institucional (@edu.unifor.br) e a senha da sua conta da UNIFOR para acessar o sistema.
+                  Use sua matrícula e a senha da sua conta institucional da UNIFOR para acessar o sistema.
                 </p>
 
                 <form className="formulario" onSubmit={handleLogin}>
@@ -142,10 +142,7 @@ function App() {
                       <Mail size={18} className="icone-input" />
                       <input
                         type="email"
-                        required
-                        pattern=".+@edu\.unifor\.br"
-                        title="Use seu e-mail institucional (@edu.unifor.br)"
-                        placeholder="seuemail@edu.unifor.br"
+                        placeholder="Ex.: aluno@unifor.br"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -159,7 +156,6 @@ function App() {
                       <Lock size={18} className="icone-input" />
                       <input
                         type={mostrarSenha ? "text" : "password"}
-                        required
                         placeholder="Digite sua senha"
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}

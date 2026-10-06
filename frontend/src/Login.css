@@ -15,7 +15,7 @@
 
 /* --- Barra de Navegação (Header) --- */
 .navbar {
-  background-color: #0d1e3a; /* Azul escuro da foto */
+  background-color: #093f97; /* Azul escuro da foto */
   color: white;
   padding: 10px 40px;
   display: flex;
@@ -215,7 +215,7 @@
 
 .logo-cartao h4 {
   font-size: 1.5rem;
-  color: #0d1e3a;
+  color: #093f97;
 }
 
 .logo-cartao h4 .destaque-unifor {

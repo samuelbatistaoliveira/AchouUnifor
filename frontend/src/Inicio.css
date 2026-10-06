@@ -1,13 +1,158 @@
-.inicio { max-width: 900px; margin: 0 auto; padding: 24px; }
-.inicio-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.inicio-topo button { padding: 8px 16px; cursor: pointer; }
-.inicio-filtros { display: flex; gap: 10px; margin-bottom: 20px; }
-.inicio-filtros input { flex: 1; padding: 8px; }
-.inicio-filtros select { padding: 8px; }
-.inicio-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.inicio-card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
-.inicio-status { align-self: flex-start; padding: 2px 10px; border-radius: 10px; font-size: 0.85rem; background: #eee; }
-.inicio-status.Achado { background: #d7f5dd; }
-.inicio-status.Perdido { background: #fde0e0; }
-.inicio-status.Devolvido { background: #dbe8fd; }
-.inicio-erro { color: #d32f2f; margin-bottom: 12px; }
+.inicio {
+  min-height: 100vh;
+  background: #f4f6fa;
+}
+
+/* topbar */
+.inicio-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: #093f97;
+}
+
+.inicio-logo {
+  height: 68px;
+}
+
+.inicio-direita {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.inicio-menu {
+  display: flex;
+  gap: 4px;
+}
+
+.inicio-menu button {
+  padding: 18px 16px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #cfd8e8;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.inicio-menu button:hover {
+  color: white;
+}
+
+.inicio-menu button.ativo {
+  color: white;
+  border-bottom-color: #4da3ff;
+}
+
+.inicio-perfil {
+  display: flex;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+}
+
+/* filtros */
+.inicio-conteudo {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.inicio-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.inicio-filtros input[type="search"] {
+  flex: 1 1 220px;
+}
+
+.inicio-filtros input,
+.inicio-filtros select {
+  padding: 10px;
+  border: 1px solid #ccd3e0;
+  border-radius: 8px;
+  background: white;
+  font-size: 1rem;
+}
+
+/* cards */
+.inicio-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.inicio-card {
+  overflow: hidden;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.inicio-foto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.inicio-sem-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6eaf2;
+  color: #8a94a8;
+}
+
+.inicio-card-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+}
+
+.inicio-card-corpo p {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* status */
+.inicio-status {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.inicio-status.achado {
+  background: #cfe4ff;
+  color: #1a4d8f;
+}
+
+.inicio-status.perdido {
+  background: #fcd5d5;
+  color: #a32020;
+}
+
+.inicio-status.devolvido {
+  background: #d3f2da;
+  color: #1e6b32;
+}
+
+.inicio-erro {
+  margin-bottom: 12px;
+  color: #d32f2f;
+}

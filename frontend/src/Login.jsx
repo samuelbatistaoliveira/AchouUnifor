@@ -3,6 +3,7 @@ import { HelpCircle, Info, Search, FileText, Bell, User, Lock, Eye, EyeOff, Exte
 import './Login.css';
 import logoUnifor from './assets/logo-achouunifor.png';
 import Cadastro from './Cadastro';
+import EsqueceuSenha from './EsqueceuSenha';
 import { motion } from 'framer-motion';
 
 function Login({ aoEntrar }) {
@@ -14,11 +15,9 @@ function Login({ aoEntrar }) {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // ... (o seu handleLogin continua aqui)
   async function handleLogin(e) {
     e.preventDefault();
     console.log("handleLogin foi chamado");
-
 
     try {
       const resposta = await fetch("http://localhost:3000/auth/login", {
@@ -48,9 +47,15 @@ function Login({ aoEntrar }) {
       alert("Não foi possível conectar ao servidor.");
     }
   }
+
   // Lógica para trocar de ecrã
   if (telaAtual === 'cadastro') {
     return <Cadastro aoVoltar={() => setTelaAtual('login')} />;
+  }
+
+  // NOVA CONDIÇÃO: Mostra a tela de Esqueceu a Senha
+  if (telaAtual === 'esqueceu-senha') {
+    return <EsqueceuSenha aoVoltar={() => setTelaAtual('login')} />;
   }
 
   return (
@@ -60,8 +65,6 @@ function Login({ aoEntrar }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 1.0, ease: "easeOut" }}
     >
-      {/* O SEU CÓDIGO DA NAVBAR E CONTEÚDO CONTINUA AQUI PARA BAIXO */}
-      {/* ... */}
       <div className="container-geral">
         {/* Barra de Navegação Superior */}
         <header className="navbar">
@@ -178,9 +181,15 @@ function Login({ aoEntrar }) {
                       <span className="checkmark"></span>
                       Lembrar de mim
                     </label>
-                    <a href="#" className="link-esqueceu">
+
+                    {/* ATUALIZADO: Adicionado o evento onClick para mudar de tela */}
+                    <span
+                      className="link-esqueceu"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setTelaAtual('esqueceu-senha')}
+                    >
                       Esqueci minha senha <ExternalLink size={14} />
-                    </a>
+                    </span>
                   </div>
 
                   {/* BOTÕES ATUALIZADOS */}
@@ -220,4 +229,4 @@ function Login({ aoEntrar }) {
   );
 }
 
-export default Login;
+export default Login; 

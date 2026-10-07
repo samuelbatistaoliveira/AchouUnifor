@@ -78,7 +78,7 @@
 /* --- Conteúdo Principal com Fundo --- */
 .conteudo-principal {
   flex: 1;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('./assets/fundo-unifor.jpg'); /* Adicione sua imagem aqui */
+  background-image: url('./assets/fundo-animado.gif'); /* Substitua pelo nome do seu GIF */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

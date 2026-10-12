@@ -85,4 +85,48 @@ async function uploadImagem(req, res) {
     }
 }
 
-module.exports = { uploadImagem };
+async function listarImagensItem(req, res) {
+    try {
+        const { id_item } = req.params;
+
+        const resultado = await pool.query(
+            `SELECT id_imagem, id_item, caminho
+             FROM imagens_itens
+             WHERE id_item = $1
+             ORDER BY id_imagem`,
+            [id_item]
+        );
+
+        const imagens = await Promise.all(
+            resultado.rows.map(async (imagem) => {
+                const { data, error } = await supabase.storage
+                    .from('itens')
+                    .createSignedUrl(imagem.caminho, 3600);
+
+                if (error) {
+                    throw error;
+                }
+
+                return {
+                    id_imagem: imagem.id_imagem,
+                    id_item: imagem.id_item,
+                    url: data.signedUrl
+                };
+            })
+        );
+
+        return res.status(200).json({ imagens });
+
+    } catch (erro) {
+        console.error('Erro ao buscar imagens:', erro);
+
+        return res.status(500).json({
+            mensagem: 'Erro ao buscar imagens do item.'
+        });
+    }
+}
+
+module.exports = {
+    uploadImagem,
+    listarImagensItem
+};

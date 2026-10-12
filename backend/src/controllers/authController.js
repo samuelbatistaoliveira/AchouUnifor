@@ -80,6 +80,61 @@ async function login(req, res) {
     }
 }
 
+async function cadastro(req, res) {
+    try {
+        const nome = String(req.body.nome || "").trim();
+        const email = String(req.body.email || "").trim().toLowerCase();
+        const senha = req.body.senha;
+
+        if (!nome || !email || typeof senha !== "string") {
+            return res.status(400).json({
+                mensagem: "Nome, e-mail e senha são obrigatórios."
+            });
+        }
+
+        if (!email.endsWith("@edu.unifor.br")) {
+            return res.status(400).json({
+                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
+            });
+        }
+
+        if (senha.length < 8) {
+            return res.status(400).json({
+                mensagem: "A senha deve ter pelo menos 8 caracteres."
+            });
+        }
+
+        const senhaHash = await bcrypt.hash(senha, 12);
+
+        const resultado = await pool.query(
+            `INSERT INTO usuarios
+                (nome, email_institucional, senha_hash, tipo_usuario)
+             VALUES ($1, $2, $3, 'aluno')
+             RETURNING id_usuario, nome, email_institucional, tipo_usuario`,
+            [nome, email, senhaHash]
+        );
+
+        return res.status(201).json({
+            mensagem: "Cadastro realizado com sucesso.",
+            usuario: resultado.rows[0]
+        });
+
+    } catch (erro) {
+        if (erro.code === "23505") {
+            return res.status(409).json({
+                mensagem: "Este e-mail já está cadastrado."
+            });
+        }
+
+        console.error("Erro no cadastro:", erro);
+
+        return res.status(500).json({
+            mensagem: "Erro interno do servidor."
+        });
+    }
+}
+
 module.exports = {
-    login
+    login,
+    cadastro
 }

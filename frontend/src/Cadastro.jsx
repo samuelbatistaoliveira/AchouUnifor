@@ -8,6 +8,61 @@ function Cadastro({ aoVoltar }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+async function realizarCadastro(evento) {
+  evento.preventDefault();
+
+  setErro('');
+
+  if (!nome.trim() || !email.trim() || !senha) {
+    setErro('Preencha todos os campos.');
+    return;
+  }
+
+  if (!email.trim().toLowerCase().endsWith('@edu.unifor.br')) {
+    setErro('Utilize seu e-mail institucional (@edu.unifor.br).');
+    return;
+  }
+
+  if (senha.length < 8) {
+    setErro('A senha deve ter pelo menos 8 caracteres.');
+    return;
+  }
+
+  setCarregando(true);
+
+  try {
+    const resposta = await fetch('http://localhost:3000/auth/cadastro', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nome: nome.trim(),
+        email: email.trim().toLowerCase(),
+        senha
+      })
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      setErro(dados.mensagem || 'Não foi possível realizar o cadastro.');
+      return;
+    }
+
+    alert('Cadastro realizado com sucesso! Faça seu login.');
+    aoVoltar();
+
+  } catch (erro) {
+    console.error('Erro ao cadastrar:', erro);
+    setErro('Não foi possível conectar ao servidor.');
+  } finally {
+    setCarregando(false);
+  }
+}
 
   return (
     <motion.div
@@ -34,7 +89,7 @@ function Cadastro({ aoVoltar }) {
 
               <div className="divisor-h" />
 
-              <form className="formulario">
+              <form className="formulario" onSubmit={realizarCadastro}>
                 <div className="grupo-input">
                   <label>Nome completo</label>
                   <div className="input-com-icone">
@@ -47,7 +102,7 @@ function Cadastro({ aoVoltar }) {
                   <label>E-mail institucional</label>
                   <div className="input-com-icone">
                     <Mail size={18} className="icone-input" />
-                    <input type="email" placeholder="Ex.: aluno@unifor.br" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <input type="email" placeholder="Ex.: aluno@edu.unifor.br" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                 </div>
 
@@ -55,7 +110,7 @@ function Cadastro({ aoVoltar }) {
                   <label>Crie uma Senha</label>
                   <div className="input-com-icone">
                     <Lock size={18} className="icone-input" />
-                    <input type={mostrarSenha ? "text" : "password"} placeholder="Mínimo de 6 caracteres" value={senha} onChange={(e) => setSenha(e.target.value)} />
+                    <input type={mostrarSenha ? "text" : "password"} placeholder="Mínimo de 8 caracteres" value={senha} onChange={(e) => setSenha(e.target.value)} />
                     {mostrarSenha ? (
                       <Eye size={18} className="icone-olho" onClick={() => setMostrarSenha(false)} />
                     ) : (
@@ -64,9 +119,20 @@ function Cadastro({ aoVoltar }) {
                   </div>
                 </div>
 
+                {erro && (
+                  <p role="alert" style={{ color: '#dc2626', fontSize: '14px' }}>
+                  {erro}
+                </p>
+              )}
+
                 <div className="botoes-acao" style={{ marginTop: '24px' }}>
-                  <button type="submit" className="botao-entrar">
-                    Cadastrar <ArrowRight size={18} />
+                  <button
+                    type="submit"
+                    className="botao-entrar"
+                    disabled={carregando}
+                  >
+                    {carregando ? 'Cadastrando...' : 'Cadastrar'}
+                    {!carregando && <ArrowRight size={18} />}
                   </button>
                   <button type="button" className="botao-criar-conta" onClick={aoVoltar}>
                     <ArrowLeft size={18} style={{ marginRight: '8px' }} /> Já tenho conta

@@ -11,3 +11,11 @@
 .inicio-status.Perdido { background: #fde0e0; }
 .inicio-status.Devolvido { background: #dbe8fd; }
 .inicio-erro { color: #d32f2f; margin-bottom: 12px; }
+.inicio-imagem {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background-color: #f5f5f5;
+}

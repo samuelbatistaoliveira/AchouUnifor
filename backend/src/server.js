@@ -2,6 +2,7 @@ const express = require("express")
 const cors = require("cors")
 const itensRoutes = require("./routes/itensRoutes")
 const authRoutes = require("./routes/authRoutes")
+const usuariosRoutes = require("./routes/usuariosRoutes")
 
 const app = express()
 
@@ -11,6 +12,7 @@ app.use(cors())
 
 app.use("/itens", itensRoutes)
 app.use("/auth", authRoutes)
+app.use("/usuarios", usuariosRoutes)
 
 app.get("/", (req, res) => {
     res.send("Backend do AchouUNIFOR funcionando!")

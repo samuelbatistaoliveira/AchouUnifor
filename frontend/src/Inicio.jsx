@@ -1,8 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import './Inicio.css';
+import DetalhesItem from './DetalhesItem';
 
 function Inicio({ aoSair }) {
+  const [itemSelecionado, setItemSelecionado] = useState(null);
   const [itens, setItens] = useState([]);
   const [imagens, setImagens] = useState({});
   const [busca, setBusca] = useState('');
@@ -78,6 +79,16 @@ function Inicio({ aoSair }) {
     };
   }, [itens]);
 
+  // Se houver um item selecionado, exibe a tela de detalhes com os dados do item
+  if (itemSelecionado) {
+    return (
+      <DetalhesItem
+        item={itemSelecionado}
+        aoVoltar={() => setItemSelecionado(null)}
+      />
+    );
+  }
+
   return (
     <div className="inicio">
       <header className="inicio-topo">
@@ -108,8 +119,12 @@ function Inicio({ aoSair }) {
 
       <div className="inicio-lista">
         {itens.map((item) => (
-          <div key={item.id_item} className="inicio-card">
-
+          <div 
+            key={item.id_item} 
+            className="inicio-card"
+            onClick={() => setItemSelecionado(item)}
+            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+          >
             {imagens[item.id_item] && (
               <img
                 src={imagens[item.id_item]}

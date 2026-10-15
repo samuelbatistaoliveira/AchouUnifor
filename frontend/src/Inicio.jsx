@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './Inicio.css';
 import DetalhesItem from './DetalhesItem';
+import Notificacoes from './Notificacoes';
 
 function Inicio({ aoSair }) {
   const [itemSelecionado, setItemSelecionado] = useState(null);
@@ -9,6 +10,7 @@ function Inicio({ aoSair }) {
   const [busca, setBusca] = useState('');
   const [status, setStatus] = useState('');
   const [erro, setErro] = useState('');
+  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
 
   // Busca os itens no backend
   useEffect(() => {
@@ -79,12 +81,21 @@ function Inicio({ aoSair }) {
     };
   }, [itens]);
 
-  // Se houver um item selecionado, exibe a tela de detalhes com os dados do item
+  // 1. Se o estado de notificações for verdadeiro, mostra a tela de notificações
+  if (mostrarNotificacoes) {
+    return <Notificacoes aoVoltar={() => setMostrarNotificacoes(false)} />;
+  }
+
+  // 2. Se houver um item selecionado, exibe a tela de detalhes com a função de notificações ativada
   if (itemSelecionado) {
     return (
       <DetalhesItem
         item={itemSelecionado}
         aoVoltar={() => setItemSelecionado(null)}
+        aoAbrirNotificacoes={() => {
+          setItemSelecionado(null); // Fecha a tela de detalhes
+          setMostrarNotificacoes(true); // Abre a tela de notificações
+        }}
       />
     );
   }
@@ -119,8 +130,8 @@ function Inicio({ aoSair }) {
 
       <div className="inicio-lista">
         {itens.map((item) => (
-          <div 
-            key={item.id_item} 
+          <div
+            key={item.id_item}
             className="inicio-card"
             onClick={() => setItemSelecionado(item)}
             style={{ cursor: 'pointer', transition: 'transform 0.2s' }}

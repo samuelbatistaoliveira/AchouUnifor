@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { User, ImageOff } from 'lucide-react';
 import logoUnifor from './assets/logo-achouunifor.png';
@@ -14,6 +15,7 @@ function formatarDataHora(iso) {
 
 function Inicio({ aoAbrirPerfil }) {
   const [itens, setItens] = useState([]);
+  const [imagens, setImagens] = useState({});
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [bloco, setBloco] = useState('');
@@ -33,6 +35,55 @@ function Inicio({ aoAbrirPerfil }) {
   const itensVisiveis = data
     ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
     : itens;
+
+  // Busca as imagens dos itens no Supabase por meio do backend
+  useEffect(() => {
+    let cancelado = false;
+
+    async function carregarImagens() {
+      const token = localStorage.getItem('token');
+
+      if (!token) return;
+
+      const resultados = await Promise.all(
+        itens.map(async (item) => {
+          try {
+            const resposta = await fetch(
+              `http://localhost:3000/imagens/item/${item.id_item}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              }
+            );
+
+            if (!resposta.ok) {
+              return [item.id_item, null];
+            }
+
+            const dados = await resposta.json();
+
+            return [
+              item.id_item,
+              dados.imagens?.[0]?.url ?? null
+            ];
+          } catch {
+            return [item.id_item, null];
+          }
+        })
+      );
+
+      if (!cancelado) {
+        setImagens(Object.fromEntries(resultados));
+      }
+    }
+
+    carregarImagens();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [itens]);
 
   return (
     <div className="inicio">
@@ -80,9 +131,8 @@ function Inicio({ aoAbrirPerfil }) {
         <div className="inicio-lista">
           {itensVisiveis.map((item) => (
             <article key={item.id_item} className="inicio-card">
-              {/* "foto" é o nome provisório da coluna; troque quando ela existir no banco */}
-              {item.foto ? (
-                <img className="inicio-foto" src={item.foto} alt={item.nome_objeto} />
+              {imagens[item.id_item] ? (
+                <img className="inicio-foto" src={imagens[item.id_item]} alt={item.nome_objeto} />
               ) : (
                 <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
               )}

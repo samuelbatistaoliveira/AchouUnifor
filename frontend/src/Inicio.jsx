@@ -12,7 +12,7 @@ function formatarDataHora(iso) {
   return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function Inicio({ aoSair }) {
+function Inicio({ aoAbrirPerfil }) {
   const [itens, setItens] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -46,8 +46,7 @@ function Inicio({ aoSair }) {
             <button>Notificações</button>
             <button>Painel Adm.</button>
           </nav>
-          {/* temporário: o perfil ainda não existe, então o ícone faz o logout */}
-          <button className="inicio-perfil" onClick={aoSair} aria-label="Perfil">
+          <button className="inicio-perfil" onClick={aoAbrirPerfil} aria-label="Perfil">
             <User size={22} />
           </button>
         </div>

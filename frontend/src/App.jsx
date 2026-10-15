@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import Login from './Login.jsx';
 import Inicio from './Inicio.jsx';
+import Perfil from './Perfil.jsx';
 
 function App() {
   const temToken = () => !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
   const [logado, setLogado] = useState(temToken);
+  const [tela, setTela] = useState('inicio');
 
   function sair() {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
+    setTela('inicio');
     setLogado(false);
   }
 
-  return logado ? <Inicio aoSair={sair} /> : <Login aoEntrar={() => setLogado(true)} />;
+  if (!logado) return <Login aoEntrar={() => setLogado(true)} />;
+  if (tela === 'perfil') return <Perfil aoVoltar={() => setTela('inicio')} aoSair={sair} />;
+  return <Inicio aoAbrirPerfil={() => setTela('perfil')} />;
 }
 
 export default App;

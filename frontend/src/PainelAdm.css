@@ -195,7 +195,91 @@
   color: #6b7280;
 }
 
+/* seção Categorias: tabela + cartão "Nova categoria" ao lado */
+.pa-titulo-solo {
+  margin-bottom: 20px;
+}
+
+.pc-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  align-items: start;
+  gap: 24px;
+}
+
+.pc-layout .pa-tabela {
+  margin-top: -10px;
+}
+
+.pc-nome {
+  color: #1f2937;
+}
+
+.pc-remover {
+  min-width: 90px;
+  padding: 8px 14px;
+  border: 2px solid #9ca3af;
+  border-radius: 8px;
+  background: white;
+  color: #4b5563;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pc-remover:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.pc-remover:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pc-edicao {
+  display: flex;
+  gap: 10px;
+}
+
+.pc-edicao input,
+.pc-nova input {
+  flex: 1;
+  padding: 9px 10px;
+  border: 1px solid #ccd3e0;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.pc-nova {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  background: white;
+  border: 1px solid #e3e8f0;
+  border-radius: 10px;
+}
+
+.pc-nova h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.pc-nova label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 @media (max-width: 760px) {
+  .pc-layout {
+    grid-template-columns: 1fr;
+  }
+
   .pa-layout {
     flex-direction: column;
   }

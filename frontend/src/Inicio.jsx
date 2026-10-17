@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
-import { CATEGORIAS, BLOCOS } from './constantes';
+import { BLOCOS } from './constantes';
+import useCategorias from './useCategorias';
 import useImagensItens from './useImagensItens';
 import './Inicio.css';
 import DetalhesItem from './DetalhesItem';
@@ -39,6 +40,7 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
     : itens;
 
   const imagens = useImagensItens(itens);
+  const { categorias } = useCategorias();
 
   // 1. Se o estado de notificações for verdadeiro, mostra a tela de notificações
   if (mostrarNotificacoes) {
@@ -73,7 +75,7 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
           />
           <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
             <option value="">Categoria</option>
-            {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
+            {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
           </select>
           <select value={bloco} onChange={(e) => setBloco(e.target.value)}>
             <option value="">Bloco</option>

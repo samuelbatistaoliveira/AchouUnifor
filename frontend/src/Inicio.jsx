@@ -1,8 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { User, ImageOff } from 'lucide-react';
 import logoUnifor from './assets/logo-achouunifor.png';
 import './Inicio.css';
+import DetalhesItem from './DetalhesItem';
+import Notificacoes from './Notificacoes';
 
 const CATEGORIAS = ['Caderno', 'Chave', 'Documento', 'Eletrônico', 'Garrafa', 'Mochila', 'Outros', 'Roupa'];
 const BLOCOS = ['Bloco A', 'Bloco B', 'Bloco D', 'Bloco M', 'Biblioteca'];
@@ -14,6 +15,7 @@ function formatarDataHora(iso) {
 }
 
 function Inicio({ aoSair }) {
+  const [itemSelecionado, setItemSelecionado] = useState(null);
   const [itens, setItens] = useState([]);
   const [imagens, setImagens] = useState({});
   const [busca, setBusca] = useState('');
@@ -22,6 +24,7 @@ function Inicio({ aoSair }) {
   const [data, setData] = useState('');
   const [status, setStatus] = useState('');
   const [erro, setErro] = useState('');
+  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams({ busca, categoria, bloco, status });
@@ -85,6 +88,25 @@ function Inicio({ aoSair }) {
     };
   }, [itens]);
 
+  // 1. Se o estado de notificações for verdadeiro, mostra a tela de notificações
+  if (mostrarNotificacoes) {
+    return <Notificacoes aoVoltar={() => setMostrarNotificacoes(false)} />;
+  }
+
+  // 2. Se houver um item selecionado, exibe a tela de detalhes com a função de notificações ativada
+  if (itemSelecionado) {
+    return (
+      <DetalhesItem
+        item={itemSelecionado}
+        aoVoltar={() => setItemSelecionado(null)}
+        aoAbrirNotificacoes={() => {
+          setItemSelecionado(null); // Fecha a tela de detalhes
+          setMostrarNotificacoes(true); // Abre a tela de notificações
+        }}
+      />
+    );
+  }
+
   return (
     <div className="inicio">
       <header className="inicio-topbar">
@@ -131,7 +153,12 @@ function Inicio({ aoSair }) {
 
         <div className="inicio-lista">
           {itensVisiveis.map((item) => (
-            <article key={item.id_item} className="inicio-card">
+            <article
+              key={item.id_item}
+              className="inicio-card"
+              onClick={() => setItemSelecionado(item)}
+              style={{ cursor: 'pointer' }}
+            >
               {imagens[item.id_item] ? (
                 <img className="inicio-foto" src={imagens[item.id_item]} alt={item.nome_objeto} />
               ) : (

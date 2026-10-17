@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import Topbar from './components/Topbar';
-import { CATEGORIAS, BLOCOS } from './constantes';
+import { BLOCOS } from './constantes';
+import useCategorias from './useCategorias';
 import './GerenciarItem.css';
 
 const API = 'http://localhost:3000';
@@ -18,6 +19,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const { categorias } = useCategorias();
 
   // libera as pré-visualizações ao sair da tela
   const fotosRef = useRef(fotos);
@@ -144,7 +146,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
               Categoria
               <select value={form.categoria} onChange={mudar('categoria')}>
                 <option value="">Selecione</option>
-                {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
+                {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
               </select>
             </label>
 

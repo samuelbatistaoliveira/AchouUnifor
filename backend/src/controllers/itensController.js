@@ -61,7 +61,7 @@ async function criarItem(req, res) {
       `INSERT INTO itens (nome_objeto, descricao, data_horario, local_encontrado, id_categoria, id_usuario)
        SELECT $1, $2, $3, $4, id_categoria, $6
        FROM categorias
-       WHERE nome = $5
+       WHERE nome = $5 AND status = 'ativo'
        RETURNING *`,
       [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.usuario.id_usuario]
     );

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import useImagensItens from './useImagensItens';
+import CategoriasAdm from './CategoriasAdm';
 import './PainelAdm.css';
 
 const API = 'http://localhost:3000';
@@ -68,12 +69,14 @@ function PainelAdm({ aoNavegar, aoAbrirPerfil }) {
             ))}
           </nav>
           <button className="pa-voltar" onClick={() => aoNavegar('inicio')}>
-            <ArrowLeft size={16} /> Voltar ao site
+            <ArrowLeft size={16} /> Voltar ao início
           </button>
         </aside>
 
         <main className="pa-conteudo">
-          {secao !== 'Itens' ? (
+          {secao === 'Categorias' ? (
+            <CategoriasAdm />
+          ) : secao !== 'Itens' ? (
             <>
               <h1 className="pa-titulo">{secao}</h1>
               <p className="pa-vazio">Esta seção ainda está em construção.</p>

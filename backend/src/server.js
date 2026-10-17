@@ -4,6 +4,7 @@ const itensRoutes = require("./routes/itensRoutes")
 const authRoutes = require("./routes/authRoutes")
 const usuariosRoutes = require("./routes/usuariosRoutes")
 const imagensRoutes = require("./routes/imagensRoutes")
+const categoriasRoutes = require("./routes/categoriasRoutes")
 
 const app = express()
 
@@ -14,6 +15,7 @@ app.use("/itens", itensRoutes)
 app.use("/auth", authRoutes)
 app.use("/usuarios", usuariosRoutes)
 app.use("/imagens", imagensRoutes)
+app.use("/categorias", categoriasRoutes)
 
 app.get("/", (req, res) => {
     res.send("Backend do AchouUNIFOR funcionando!")

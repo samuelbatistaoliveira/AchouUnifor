@@ -4,6 +4,7 @@ import Topbar from './components/Topbar';
 import { BLOCOS } from './constantes';
 import useCategorias from './useCategorias';
 import useImagensItens from './useImagensItens';
+import { buscar } from './api';
 import './Inicio.css';
 import DetalhesItem from './DetalhesItem';
 import Notificacoes from './Notificacoes';
@@ -28,10 +29,9 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
 
   useEffect(() => {
     const params = new URLSearchParams({ busca, categoria, bloco, status });
-    fetch(`http://localhost:3000/itens?${params}`)
-      .then((r) => r.json())
+    buscar(`/itens?${params}`)
       .then((dados) => { setItens(dados); setErro(''); })
-      .catch(() => setErro('Não foi possível carregar os itens.'));
+      .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
   }, [busca, categoria, bloco, status]);
 
   // o backend ainda não filtra por data: comparamos só o dia, ignorando a hora

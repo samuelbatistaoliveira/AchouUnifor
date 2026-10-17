@@ -1,0 +1,9 @@
+.aluno-sair {
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  background: none;
+  color: white;
+  font-size: 0.95rem;
+  cursor: pointer;
+}

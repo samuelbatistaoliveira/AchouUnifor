@@ -337,6 +337,47 @@
   color: #6b7280;
 }
 
+/* seção Denúncias */
+.pd-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.pd-detalhe {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.pd-motivo {
+  margin: 8px 0 0;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.pd-status {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.pd-status.pendente {
+  background: #fdecc8;
+  color: #92400e;
+}
+
+.pd-status.resolvida {
+  background: #d3f2da;
+  color: #1e6b32;
+}
+
 @media (max-width: 760px) {
   .pc-layout {
     grid-template-columns: 1fr;

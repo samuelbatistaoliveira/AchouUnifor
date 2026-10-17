@@ -61,7 +61,7 @@ async function criarItem(req, res) {
       `INSERT INTO itens (nome_objeto, descricao, data_horario, local_encontrado, id_categoria, id_usuario)
        SELECT $1, $2, $3, $4, id_categoria, $6
        FROM categorias
-       WHERE nome = $5
+       WHERE nome = $5 AND status = 'ativo'
        RETURNING *`,
       [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.usuario.id_usuario]
     );
@@ -78,4 +78,31 @@ async function criarItem(req, res) {
   }
 }
 
-module.exports = { getItens, criarItem };
+const STATUS_VALIDOS = ['achado', 'perdido', 'devolvido'];
+
+async function atualizarStatus(req, res) {
+  try {
+    const { status } = req.body;
+
+    if (!STATUS_VALIDOS.includes(status)) {
+      return res.status(400).json({ mensagem: 'Status inválido.' });
+    }
+
+    const resultado = await pool.query(
+      'UPDATE itens SET status = $1 WHERE id_item = $2 RETURNING *',
+      [status, req.params.id_item]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensagem: 'Item não encontrado.' });
+    }
+
+    res.json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao atualizar status:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+module.exports = { getItens, criarItem, atualizarStatus };

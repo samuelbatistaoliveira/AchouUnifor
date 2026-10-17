@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import { CATEGORIAS, BLOCOS } from './constantes';
+import useImagensItens from './useImagensItens';
 import './Inicio.css';
 import DetalhesItem from './DetalhesItem';
 import Notificacoes from './Notificacoes';
@@ -16,7 +17,6 @@ function formatarDataHora(iso) {
 function Inicio({ aoAbrirPerfil, aoNavegar }) {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [itens, setItens] = useState([]);
-  const [imagens, setImagens] = useState({});
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [bloco, setBloco] = useState('');
@@ -38,54 +38,7 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
     ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
     : itens;
 
-  // Busca as imagens dos itens no Supabase por meio do backend
-  useEffect(() => {
-    let cancelado = false;
-
-    async function carregarImagens() {
-      const token = localStorage.getItem('token');
-
-      if (!token) return;
-
-      const resultados = await Promise.all(
-        itens.map(async (item) => {
-          try {
-            const resposta = await fetch(
-              `http://localhost:3000/imagens/item/${item.id_item}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              }
-            );
-
-            if (!resposta.ok) {
-              return [item.id_item, null];
-            }
-
-            const dados = await resposta.json();
-
-            return [
-              item.id_item,
-              dados.imagens?.[0]?.url ?? null
-            ];
-          } catch {
-            return [item.id_item, null];
-          }
-        })
-      );
-
-      if (!cancelado) {
-        setImagens(Object.fromEntries(resultados));
-      }
-    }
-
-    carregarImagens();
-
-    return () => {
-      cancelado = true;
-    };
-  }, [itens]);
+  const imagens = useImagensItens(itens);
 
   // 1. Se o estado de notificações for verdadeiro, mostra a tela de notificações
   if (mostrarNotificacoes) {

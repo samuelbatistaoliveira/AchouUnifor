@@ -28,8 +28,8 @@ function Topbar({ ativo, aoNavegar, aoAbrirPerfil }) {
             <button
               key={tela}
               className={tela === ativo ? 'ativo' : undefined}
-              // notificações e painel ainda não têm tela própria
-              onClick={tela === 'inicio' || tela === 'gerenciar' ? () => aoNavegar(tela) : undefined}
+              // notificações ainda não tem tela própria no menu
+              onClick={tela === 'notificacoes' ? undefined : () => aoNavegar(tela)}
             >
               {rotulo}
             </button>

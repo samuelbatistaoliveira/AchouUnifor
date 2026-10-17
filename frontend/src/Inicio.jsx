@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { User, ImageOff } from 'lucide-react';
-import logoUnifor from './assets/logo-achouunifor.png';
+import { ImageOff } from 'lucide-react';
+import Topbar from './components/Topbar';
+import { CATEGORIAS, BLOCOS } from './constantes';
 import './Inicio.css';
 import DetalhesItem from './DetalhesItem';
 import Notificacoes from './Notificacoes';
 
-const CATEGORIAS = ['Caderno', 'Chave', 'Documento', 'Eletrônico', 'Garrafa', 'Mochila', 'Outros', 'Roupa'];
-const BLOCOS = ['Bloco A', 'Bloco B', 'Bloco D', 'Bloco M', 'Biblioteca'];
 const STATUS = ['achado', 'perdido', 'devolvido'];
 
 // "2026-12-25T12:03:01.000Z" -> "25/12/2026 12:03"
@@ -14,7 +13,7 @@ function formatarDataHora(iso) {
   return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function Inicio({ aoAbrirPerfil }) {
+function Inicio({ aoAbrirPerfil, aoNavegar }) {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [itens, setItens] = useState([]);
   const [imagens, setImagens] = useState({});
@@ -109,24 +108,7 @@ function Inicio({ aoAbrirPerfil }) {
 
   return (
     <div className="inicio">
-      <header className="inicio-topbar">
-        {/* já é a tela inicial: a logo só volta ao topo da lista */}
-        <button className="logo-botao" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Ir para o início">
-          <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
-        </button>
-
-        <div className="inicio-direita">
-          <nav className="inicio-menu">
-            <button className="ativo">Início</button>
-            <button>Gerenciar Item</button>
-            <button>Notificações</button>
-            <button>Painel Adm.</button>
-          </nav>
-          <button className="inicio-perfil" onClick={aoAbrirPerfil} aria-label="Perfil">
-            <User size={22} />
-          </button>
-        </div>
-      </header>
+      <Topbar ativo="inicio" aoNavegar={aoNavegar} aoAbrirPerfil={aoAbrirPerfil} />
 
       <main className="inicio-conteudo">
         <div className="inicio-filtros">

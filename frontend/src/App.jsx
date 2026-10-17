@@ -4,6 +4,8 @@ import Inicio from './Inicio.jsx';
 import Perfil from './Perfil.jsx';
 import GerenciarItem from './GerenciarItem.jsx';
 import PainelAdm from './PainelAdm.jsx';
+import AreaAluno from './AreaAluno.jsx';
+import { tipoUsuario } from './api';
 
 function App() {
   const temToken = () => !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
@@ -18,6 +20,8 @@ function App() {
   }
 
   if (!logado) return <Login aoEntrar={() => setLogado(true)} />;
+  // login é o mesmo para todos; as telas abaixo são só de administrador
+  if (tipoUsuario() !== 'administrador') return <AreaAluno aoSair={sair} />;
   if (tela === 'perfil') return <Perfil aoVoltar={() => setTela('inicio')} aoSair={sair} />;
   if (tela === 'painel') return <PainelAdm aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
   if (tela === 'gerenciar') return <GerenciarItem aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;

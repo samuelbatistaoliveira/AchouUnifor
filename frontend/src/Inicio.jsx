@@ -110,7 +110,10 @@ function Inicio({ aoAbrirPerfil }) {
   return (
     <div className="inicio">
       <header className="inicio-topbar">
-        <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
+        {/* já é a tela inicial: a logo só volta ao topo da lista */}
+        <button className="logo-botao" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Ir para o início">
+          <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
+        </button>
 
         <div className="inicio-direita">
           <nav className="inicio-menu">

@@ -15,8 +15,9 @@
   background: #093f97;
 }
 
+/* mesmo tamanho da logo do login (.logo-navbar em Login.css) */
 .inicio-logo {
-  height: 68px;
+  height: 45px;
 }
 
 .inicio-direita {

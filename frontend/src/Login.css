@@ -17,7 +17,7 @@
 .navbar {
   background-color: #093f97; /* Azul escuro da foto */
   color: white;
-  padding: 10px 40px;
+  padding: 4px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;

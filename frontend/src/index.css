@@ -1,0 +1,10 @@
+
+
+/* logo clicável nas telas de quem está logado */
+.logo-botao {
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}

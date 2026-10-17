@@ -1,0 +1,46 @@
+import { User } from 'lucide-react';
+import logoUnifor from '../assets/logo-achouunifor.png';
+import '../Inicio.css';
+
+const MENU = [
+  ['inicio', 'Início'],
+  ['gerenciar', 'Gerenciar Item'],
+  ['notificacoes', 'Notificações'],
+  ['painel', 'Painel Adm.'],
+];
+
+// Barra superior das telas de quem está logado; `ativo` é a tela atual
+function Topbar({ ativo, aoNavegar, aoAbrirPerfil }) {
+  function clicarLogo() {
+    if (ativo === 'inicio') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else aoNavegar('inicio');
+  }
+
+  return (
+    <header className="inicio-topbar">
+      <button className="logo-botao" onClick={clicarLogo} aria-label="Ir para o início">
+        <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
+      </button>
+
+      <div className="inicio-direita">
+        <nav className="inicio-menu">
+          {MENU.map(([tela, rotulo]) => (
+            <button
+              key={tela}
+              className={tela === ativo ? 'ativo' : undefined}
+              // notificações e painel ainda não têm tela própria
+              onClick={tela === 'inicio' || tela === 'gerenciar' ? () => aoNavegar(tela) : undefined}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </nav>
+        <button className="inicio-perfil" onClick={aoAbrirPerfil} aria-label="Perfil">
+          <User size={22} />
+        </button>
+      </div>
+    </header>
+  );
+}
+
+export default Topbar;

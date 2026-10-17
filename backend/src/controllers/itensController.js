@@ -45,4 +45,37 @@ async function getItens(req, res) {
   }
 }
 
-module.exports = { getItens };
+async function criarItem(req, res) {
+  try {
+    const { nome_objeto, descricao, categoria, data_horario, local_encontrado } = req.body;
+
+    if (!nome_objeto?.trim() || !categoria || !data_horario || !local_encontrado?.trim()) {
+      return res.status(400).json({ mensagem: 'Preencha nome, categoria, data, horário e local.' });
+    }
+
+    if (Number.isNaN(Date.parse(data_horario))) {
+      return res.status(400).json({ mensagem: 'Data ou horário inválido.' });
+    }
+
+    const resultado = await pool.query(
+      `INSERT INTO itens (nome_objeto, descricao, data_horario, local_encontrado, id_categoria, id_usuario)
+       SELECT $1, $2, $3, $4, id_categoria, $6
+       FROM categorias
+       WHERE nome = $5
+       RETURNING *`,
+      [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.usuario.id_usuario]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(400).json({ mensagem: 'Categoria não encontrada.' });
+    }
+
+    res.status(201).json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao criar item:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+module.exports = { getItens, criarItem };

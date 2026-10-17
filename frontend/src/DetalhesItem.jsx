@@ -52,7 +52,9 @@ function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
             {/* Barra de Navegação Superior (Para contextualizar como o wireframe) */}
             <header className="navbar-detalhes">
                 <div className="navbar-esquerda">
-                    <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
+                    <button className="logo-botao" onClick={aoVoltar} aria-label="Ir para o início">
+                        <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
+                    </button>
                     <h1 className="titulo-navbar">AchouUNIFOR</h1>
                 </div>
 

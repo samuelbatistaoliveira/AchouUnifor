@@ -10,7 +10,7 @@ const API = 'http://localhost:3000';
 const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];
 const TAMANHO_MAX = 5 * 1024 * 1024;
 
-const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', data: '', horario: '' };
+const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', status: '', data: '', horario: '' };
 
 function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
   const [form, setForm] = useState(VAZIO);
@@ -51,9 +51,9 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
     e.preventDefault();
     setErro('');
 
-    const { nome, descricao, bloco, referencia, categoria, data, horario } = form;
-    if (!nome.trim() || !categoria || !bloco || !data || !horario) {
-      setErro('Preencha nome, categoria, bloco, data e horário.');
+    const { nome, descricao, bloco, referencia, categoria, status, data, horario } = form;
+    if (!nome.trim() || !categoria || !status || !bloco || !data || !horario) {
+      setErro('Preencha nome, categoria, status, bloco, data e horário.');
       return;
     }
 
@@ -70,6 +70,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
           categoria,
           data_horario: `${data}T${horario}`,
           local_encontrado: referencia.trim() ? `${bloco} - ${referencia.trim()}` : bloco,
+          status,
         }),
       });
       const item = await resposta.json();
@@ -153,13 +154,24 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
               </div>
 
               <div className="gi-coluna">
-                <label className="gi-campo">
-                  Categoria
-                  <select value={form.categoria} onChange={mudar('categoria')}>
-                    <option value="">Selecione</option>
-                    {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
-                  </select>
-                </label>
+                <div className="gi-linha">
+                  <label className="gi-campo">
+                    Categoria
+                    <select value={form.categoria} onChange={mudar('categoria')}>
+                      <option value="">Selecione</option>
+                      {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
+                    </select>
+                  </label>
+                  <label className="gi-campo">
+                    Status
+                    {/* só itens "perdido" aparecem na tela inicial dos alunos */}
+                    <select value={form.status} onChange={mudar('status')}>
+                      <option value="">Selecione</option>
+                      <option value="perdido">Perdido</option>
+                      <option value="achado">Achado</option>
+                    </select>
+                  </label>
+                </div>
 
                 <div className="gi-linha">
                   <label className="gi-campo">

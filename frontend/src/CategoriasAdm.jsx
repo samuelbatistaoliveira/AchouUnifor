@@ -1,24 +1,6 @@
 import { useState } from 'react';
 import useCategorias from './useCategorias';
-
-const API = 'http://localhost:3000';
-
-// Faz a chamada autenticada e devolve a mensagem de erro do backend, ou '' se deu certo
-async function enviar(caminho, metodo, corpo) {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  try {
-    const resposta = await fetch(`${API}${caminho}`, {
-      method: metodo,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: corpo && JSON.stringify(corpo),
-    });
-    if (resposta.ok) return '';
-    const dados = await resposta.json().catch(() => ({}));
-    return dados.mensagem || 'Não foi possível salvar.';
-  } catch {
-    return 'Não foi possível conectar ao servidor.';
-  }
-}
+import { enviar } from './api';
 
 function CategoriasAdm() {
   const { categorias, erro: erroLista, recarregar } = useCategorias();

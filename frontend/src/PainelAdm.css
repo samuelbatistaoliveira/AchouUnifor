@@ -275,6 +275,68 @@
   font-weight: 600;
 }
 
+/* seção Usuários */
+.pu-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border: 1px solid #ccd3e0;
+  border-radius: 999px;
+  background: white;
+  color: #6b7280;
+}
+
+.pu-busca input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font: inherit;
+}
+
+.pu-busca:focus-within {
+  border-color: #2f80ed;
+}
+
+.pu-tipo {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.pu-tipo.aluno {
+  background: #cfe4ff;
+  color: #1a4d8f;
+}
+
+.pu-tipo.administrador {
+  background: #3d6b7d;
+  color: white;
+}
+
+.pu-edicao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.pu-edicao input,
+.pu-edicao select {
+  padding: 8px 10px;
+  border: 1px solid #ccd3e0;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.pu-email {
+  color: #6b7280;
+}
+
 @media (max-width: 760px) {
   .pc-layout {
     grid-template-columns: 1fr;

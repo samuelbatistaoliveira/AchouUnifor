@@ -3,6 +3,7 @@ import { ArrowLeft, ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import useImagensItens from './useImagensItens';
 import CategoriasAdm from './CategoriasAdm';
+import UsuariosAdm from './UsuariosAdm';
 import './PainelAdm.css';
 
 const API = 'http://localhost:3000';
@@ -76,6 +77,8 @@ function PainelAdm({ aoNavegar, aoAbrirPerfil }) {
         <main className="pa-conteudo">
           {secao === 'Categorias' ? (
             <CategoriasAdm />
+          ) : secao === 'Usuários' ? (
+            <UsuariosAdm />
           ) : secao !== 'Itens' ? (
             <>
               <h1 className="pa-titulo">{secao}</h1>

@@ -1,0 +1,148 @@
+.container-notificacoes {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+}
+
+.container-notificacoes h1 {
+  font-size: 2.2rem;
+  font-weight: 500;
+  margin-bottom: 32px;
+}
+
+.lista-notificacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Estilo Base do Cartão */
+.cartao-notificacao {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  border: 1.5px solid #60a5fa; /* Borda azul para itens não lidos */
+  border-radius: 4px;
+  background-color: #ffffff;
+  gap: 24px;
+}
+
+/* Estilo para Cartão Lido */
+.cartao-notificacao.lida {
+  border-color: #93c5fd; /* Borda azul mais clara */
+}
+
+/* Bolinhas */
+.notificacao-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ponto-status {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.ponto-azul {
+  background-color: #3b82f6;
+}
+
+.ponto-cinza {
+  background-color: #71717a;
+}
+
+/* Conteúdo de Texto */
+.notificacao-conteudo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notificacao-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notificacao-cabecalho strong {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.notificacao-tempo {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-right: 16px; /* Empurra um pouco para separar do botão */
+}
+
+.notificacao-conteudo p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* Botões */
+.notificacao-acao {
+  flex-shrink: 0;
+}
+
+.btn-primario, .btn-secundario {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primario {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.btn-primario:hover {
+  background-color: #2563eb;
+}
+
+.btn-secundario {
+  background-color: white;
+  color: #3b82f6;
+  border: 1.5px solid #3b82f6;
+}
+
+.btn-secundario:hover {
+  background-color: #eff6ff;
+}
+
+/* Responsividade para telemóveis */
+@media (max-width: 640px) {
+  .cartao-notificacao {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .notificacao-cabecalho {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .notificacao-tempo {
+    margin-right: 0;
+  }
+  
+  .notificacao-acao {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}

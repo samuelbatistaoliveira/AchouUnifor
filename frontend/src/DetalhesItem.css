@@ -1,0 +1,244 @@
+/* --- CONTAINER GERAL --- */
+.ecra-detalhes-geral {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+}
+
+/* --- NAV BAR --- */
+/* --- NAV BAR --- */
+.navbar-detalhes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0c3483;
+  color: white;
+  padding: 16px 48px;
+}
+
+.navbar-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-navbar {
+  height: 36px;
+}
+
+.titulo-navbar {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.navbar-direita {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.navbar-direita a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.05rem;
+  transition: opacity 0.2s;
+}
+
+.navbar-direita a:hover {
+  opacity: 0.8;
+}
+
+.navbar-direita a.ativo-nav {
+  font-weight: 600;
+}
+
+.icone-usuario {
+  color: white;
+  cursor: pointer;
+  border: 2px solid white;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+/* --- CONTEÚDO --- */
+.container-detalhes {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+.botao-voltar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  transition: background-color 0.2s;
+}
+
+.botao-voltar:hover {
+  background-color: #1e40af;
+}
+
+.conteudo-detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+  gap: 48px;
+  align-items: start;
+}
+
+/* --- COLUNA ESQUERDA (IMAGENS) --- */
+.coluna-imagens {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.imagem-principal {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* Proporção fixa */
+  max-height: 450px;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagem-exibida {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Encaixa a imagem sem cortar e sem a deformar */
+}
+
+.miniaturas {
+  display: flex;
+  gap: 12px;
+}
+
+.miniatura {
+  width: 64px;
+  height: 64px;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.miniatura.ativa {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* --- COLUNA DIREITA (INFORMAÇÕES) --- */
+.coluna-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.coluna-info h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #0f172a;
+}
+
+.especificacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 1.05rem;
+  margin-bottom: 24px;
+}
+
+.linha-especificacao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rotulo {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.valor {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.mt-forte {
+  margin-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 12px;
+}
+
+/* --- AVISO DE SEGURANÇA --- */
+.aviso-seguranca {
+  background-color: #fef3c7; /* Fundo amarelo suave */
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.tarjeta-aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e; /* Tom de aviso escuro */
+  margin-bottom: 8px;
+}
+
+.tarjeta-aviso strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.icone-trava-aviso {
+  flex-shrink: 0;
+}
+
+.texto-seguranca {
+  margin: 0;
+  color: #451a03;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* --- RESPONSIVIDADE (SE O ECRÃ FOR PEQUENO) --- */
+@media (max-width: 768px) {
+  .conteudo-detalhes {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .navbar-detalhes {
+    padding: 12px 24px;
+  }
+}

@@ -18,3 +18,14 @@ export async function enviar(caminho, metodo, corpo) {
     return 'Não foi possível conectar ao servidor.';
   }
 }
+
+// Tipo do usuário lido do token ('administrador' | 'aluno'), ou null se não houver token legível.
+// Só decide qual tela mostrar: quem protege os dados é o backend (verificarAdmin).
+export function tipoUsuario() {
+  try {
+    const payload = tokenSalvo().split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(payload)).tipo_usuario ?? null;
+  } catch {
+    return null;
+  }
+}

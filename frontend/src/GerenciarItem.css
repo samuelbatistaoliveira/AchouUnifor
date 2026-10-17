@@ -1,0 +1,174 @@
+.gi-conteudo {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.gi-titulo {
+  margin: 0 0 20px;
+  color: #1f2937;
+  font-size: 2.2rem;
+}
+
+.gi-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 48px;
+}
+
+.gi-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gi-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.gi-campo,
+.gi-rotulo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.gi-campo input,
+.gi-campo select,
+.gi-campo textarea {
+  padding: 10px;
+  border: 1px solid #ccd3e0;
+  border-radius: 8px;
+  background: white;
+  color: #1f2937;
+  font: inherit;
+  font-weight: 400;
+}
+
+.gi-campo textarea {
+  resize: vertical;
+}
+
+/* área de fotos */
+.gi-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 110px;
+  border: 2px dashed #4da3ff;
+  border-radius: 8px;
+  background: white;
+  color: #093f97;
+  cursor: pointer;
+}
+
+.gi-upload small {
+  color: #6b7280;
+}
+
+.gi-upload.arrastando,
+.gi-upload:focus-within {
+  background: #eaf4ff;
+}
+
+/* escondido mas focável pelo teclado */
+.gi-arquivo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.gi-previas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gi-previa {
+  position: relative;
+}
+
+.gi-previa img {
+  display: block;
+  width: 96px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.gi-previa button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  padding: 3px;
+  border: none;
+  border-radius: 50%;
+  background: #dc2626;
+  color: white;
+  cursor: pointer;
+}
+
+/* botões */
+.gi-acoes {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.gi-acoes p {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.gi-registrar,
+.gi-cancelar {
+  min-width: 180px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gi-registrar {
+  border: none;
+  background: #2f80ed;
+  color: white;
+}
+
+.gi-registrar:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.gi-cancelar {
+  border: 2px solid #2f80ed;
+  background: white;
+  color: #2f80ed;
+}
+
+.gi-erro {
+  color: #dc2626;
+}
+
+.gi-sucesso {
+  color: #15803d;
+}
+
+@media (max-width: 760px) {
+  .gi-form {
+    grid-template-columns: 1fr;
+  }
+}

@@ -385,17 +385,60 @@
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: bold;
-  text-transform: capitalize;
 }
 
-.pd-status.pendente {
-  background: #fdecc8;
-  color: #92400e;
+/* mesmas cores de "Minhas denúncias" do aluno */
+.pd-status.perdido {
+  background: #fcd5d5;
+  color: #a32020;
 }
 
-.pd-status.resolvida {
+.pd-status.encontrado {
+  background: #cfe4ff;
+  color: #1a4d8f;
+}
+
+.pd-status.devolvido {
   background: #d3f2da;
   color: #1e6b32;
+}
+
+/* troca de status: o atual fica marcado */
+.pd-mudar {
+  display: flex;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid #2f80ed;
+  border-radius: 8px;
+}
+
+.pd-mudar button {
+  padding: 8px 14px;
+  border: none;
+  border-left: 1px solid #b9d3f5;
+  background: white;
+  color: #2f80ed;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pd-mudar button:first-child {
+  border-left: none;
+}
+
+.pd-mudar button:hover:not(:disabled) {
+  background: #eef5ff;
+}
+
+.pd-mudar button.ativo {
+  background: #2f80ed;
+  color: white;
+  cursor: default;
+}
+
+.pd-mudar button:disabled:not(.ativo) {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 760px) {

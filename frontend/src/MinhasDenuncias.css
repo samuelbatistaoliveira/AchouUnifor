@@ -1,0 +1,368 @@
+/* cabeçalho: voltar + título + nova denúncia */
+.md-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.md-cabecalho h1 {
+  flex: 1;
+  margin: 0;
+  color: #1f2937;
+  font-size: 2rem;
+}
+
+.md-voltar {
+  display: flex;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.md-voltar:hover {
+  background: #e6eaf2;
+}
+
+.md-nova {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2f80ed;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.md-nova:hover {
+  background: #1f6fd9;
+}
+
+/* filtros por status */
+.md-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.md-filtros button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border: 1.5px solid #093f97;
+  border-radius: 8px;
+  background: white;
+  color: #093f97;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.md-filtros button:hover {
+  background: #eef3fc;
+}
+
+.md-filtros button.ativo {
+  background: #093f97;
+  color: white;
+}
+
+.md-contagem {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e3ebf8;
+  color: #093f97;
+  font-size: 0.8rem;
+}
+
+.md-filtros button.ativo .md-contagem {
+  background: rgba(255, 255, 255, 0.22);
+  color: white;
+}
+
+/* lista: uma linha por denúncia */
+.md-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.md-denuncia {
+  overflow: hidden;
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.md-denuncia.aberta {
+  border-color: #b9d3f5;
+}
+
+.md-linha {
+  display: grid;
+  grid-template-columns: 1fr 170px;
+  align-items: center;
+  gap: 12px;
+  padding-right: 14px;
+}
+
+.md-resumo {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 2fr) minmax(0, 1.4fr) 112px 56px 18px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: #4b5563;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.md-resumo:hover .md-nome {
+  color: #2f80ed;
+}
+
+.md-foto {
+  display: block;
+  width: 56px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.md-sem-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6eaf2;
+  color: #8a94a8;
+}
+
+.md-nome {
+  overflow: hidden;
+  color: #1f2937;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-categoria {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-status {
+  padding: 4px 0;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.md-status.perdido {
+  background: #fcd5d5;
+  color: #a32020;
+}
+
+.md-status.encontrado {
+  background: #cfe4ff;
+  color: #1a4d8f;
+}
+
+.md-status.devolvido {
+  background: #d3f2da;
+  color: #1e6b32;
+}
+
+.md-data {
+  color: #374151;
+  font-weight: 600;
+}
+
+.md-seta {
+  color: #8a94a8;
+  transition: transform 0.2s;
+}
+
+.md-denuncia.aberta .md-seta {
+  transform: rotate(180deg);
+}
+
+.md-remover {
+  padding: 9px 12px;
+  border: 1.5px solid #e57373;
+  border-radius: 8px;
+  background: white;
+  color: #c62828;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.md-remover:hover {
+  background: #fdecec;
+}
+
+.md-remover:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* detalhes ao abrir */
+.md-detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 18px 18px 84px;
+  color: #374151;
+}
+
+.md-aviso {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.md-aviso.perdido {
+  background: #fff4f4;
+  color: #8f2424;
+}
+
+.md-aviso.encontrado {
+  background: #eaf3ff;
+  color: #174a8b;
+  font-weight: 600;
+}
+
+.md-aviso.devolvido {
+  background: #eefaf1;
+  color: #1e6b32;
+}
+
+.md-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 0;
+}
+
+.md-info dt {
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.md-info dd {
+  margin: 2px 0 0;
+  color: #1f2937;
+}
+
+.md-descricao {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.md-fotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.md-fotos img {
+  display: block;
+  width: 84px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* estados vazios */
+.md-vazio {
+  color: #6b7280;
+}
+
+.md-vazio-cartao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  border: 1px dashed #ccd3e0;
+  border-radius: 12px;
+  background: white;
+}
+
+.md-vazio-cartao p {
+  margin: 0;
+}
+
+/* telas estreitas: foto à esquerda, textos empilhados, remover embaixo */
+@media (max-width: 720px) {
+  .md-cabecalho {
+    flex-wrap: wrap;
+  }
+
+  .md-cabecalho h1 {
+    font-size: 1.6rem;
+  }
+
+  .md-linha {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-right: 0;
+  }
+
+  .md-resumo {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'foto nome seta'
+      'foto categoria seta'
+      'foto status seta';
+    row-gap: 4px;
+  }
+
+  .md-foto { grid-area: foto; }
+  .md-nome { grid-area: nome; }
+  .md-categoria { grid-area: categoria; }
+  .md-seta { grid-area: seta; }
+
+  .md-status {
+    grid-area: status;
+    justify-self: start;
+    padding: 3px 12px;
+  }
+
+  .md-data {
+    display: none;
+  }
+
+  .md-remover {
+    margin: 0 14px 12px;
+  }
+
+  .md-remover-vazio {
+    display: none;
+  }
+
+  .md-detalhe {
+    padding-left: 18px;
+  }
+}

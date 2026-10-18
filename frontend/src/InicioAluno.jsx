@@ -69,7 +69,7 @@ function InicioAluno({ aoSair }) {
     return (
       <div className="inicio">
         {topbar}
-        <MinhasDenuncias aoVoltar={() => navegar('perfil')} />
+        <MinhasDenuncias aoVoltar={() => navegar('perfil')} aoNovaDenuncia={() => navegar('denunciar')} />
       </div>
     );
   }

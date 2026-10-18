@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import { buscar, enviar } from './api';
+import { STATUS_DENUNCIA } from './constantes';
 
 // "2026-09-12T10:00:00.000Z" -> "12/09"
 const diaMes = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -86,7 +87,7 @@ function DenunciasAdm() {
                   <td colSpan={6}>
                     <div className="pd-detalhe">
                       <div>
-                        <span className={`pd-status ${d.status}`}>{d.status}</span>
+                        <span className={`pd-status ${d.status}`}>{STATUS_DENUNCIA[d.status] ?? d.status}</span>
                         <p className="pd-motivo">{d.descricao || 'Sem descrição.'}</p>
                         <p className="pd-info"><strong>Perdido em:</strong> {dataHora(d.data_perda)}</p>
                         <p className="pd-info"><strong>Local:</strong> {d.local_perda}</p>
@@ -100,15 +101,20 @@ function DenunciasAdm() {
                           </div>
                         )}
                       </div>
-                      {d.status === 'pendente' ? (
-                        <button className="pa-devolver" disabled={ocupado} onClick={() => mudarStatus(d, 'resolvida')}>
-                          Marcar como resolvida
-                        </button>
-                      ) : (
-                        <button className="pa-editar" disabled={ocupado} onClick={() => mudarStatus(d, 'pendente')}>
-                          Reabrir
-                        </button>
-                      )}
+                      {/* o aluno vê esse status em "Minhas denúncias" */}
+                      <div className="pd-mudar" role="group" aria-label="Status da denúncia">
+                        {Object.entries(STATUS_DENUNCIA).map(([valor, rotulo]) => (
+                          <button
+                            key={valor}
+                            className={d.status === valor ? 'ativo' : undefined}
+                            aria-pressed={d.status === valor}
+                            disabled={ocupado || d.status === valor}
+                            onClick={() => mudarStatus(d, valor)}
+                          >
+                            {rotulo}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </td>
                 </tr>

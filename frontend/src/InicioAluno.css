@@ -14,37 +14,3 @@
 .aluno-ver:hover {
   background: #b5d4fb;
 }
-
-/* minhas denúncias */
-.aluno-titulo {
-  margin: 8px 0 20px;
-  color: #1f2937;
-  font-size: 2rem;
-}
-
-.aluno-status {
-  align-self: flex-start;
-  padding: 3px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: bold;
-}
-
-.aluno-status.pendente {
-  background: #fdecc8;
-  color: #92400e;
-}
-
-.aluno-status.resolvida {
-  background: #d3f2da;
-  color: #1e6b32;
-}
-
-/* descrição longa fica em 3 linhas no card */
-.aluno-descricao {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  white-space: pre-wrap;
-}

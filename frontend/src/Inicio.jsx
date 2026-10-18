@@ -146,6 +146,10 @@ function Inicio({ aoAbrirPerfil, aoNavegar, aoEditarItem }) {
         item={itemSelecionado}
         aoVoltar={() => setItemSelecionado(null)}
         aoEditar={() => aoEditarItem(itemSelecionado)}
+        aoStatusAlterado={(alterado) => {
+          setItemSelecionado(alterado);
+          setItens((atuais) => atuais.map((i) => (i.id_item === alterado.id_item ? alterado : i)));
+        }}
         topbar={topbar}
       />
     );

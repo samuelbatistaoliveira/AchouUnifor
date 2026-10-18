@@ -1,20 +1,35 @@
 import { useState } from 'react';
 import { Mail, ArrowLeft, KeyRound, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-// Use './App.css' se não tiver renomeado o seu arquivo de estilos principal
 import './Login.css'; 
+
+const DOMINIO = '@edu.unifor.br'; // mesma regra do login e do cadastro (authController)
 
 function EsqueceuSenha({ aoVoltar }) {
   const [email, setEmail] = useState('');
   const [enviado, setEnviado] = useState(false);
+  const [erro, setErro] = useState('');
 
   const handleEnviar = (e) => {
     e.preventDefault();
-    if (email) {
-      // Aqui entrará a lógica do backend depois (Supabase)
-      setEnviado(true);
+    const limpo = email.trim().toLowerCase();
+
+    if (!limpo.endsWith(DOMINIO)) {
+      setErro(`Use seu e-mail institucional (${DOMINIO}).`);
+      return;
     }
+
+    setErro('');
+    setEmail(limpo);
+    // shortcut: ainda não envia nada. Quando o envio do link existir no backend,
+    // chamar aqui (ex.: POST /auth/esqueci-senha com { email }) antes de mostrar a confirmação.
+    setEnviado(true);
   };
+
+  function usarOutroEmail() {
+    setEnviado(false);
+    setEmail('');
+  }
 
   return (
     <motion.div 
@@ -44,14 +59,18 @@ function EsqueceuSenha({ aoVoltar }) {
                 <div className="input-com-icone">
                   <Mail size={18} className="icone-input" />
                   <input 
-                    type="email" 
-                    placeholder="Ex.: aluno@unifor.br" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
+                    type="email"
+                    placeholder="nome@edu.unifor.br"
+                    autoComplete="email"
+                    aria-invalid={!!erro}
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setErro(''); }}
                     required
                   />
                 </div>
               </div>
+
+              {erro && <p className="mensagem-erro" role="alert">{erro}</p>}
 
               <div className="botoes-acao" style={{ marginTop: '24px' }}>
                 <button type="submit" className="botao-entrar">
@@ -70,13 +89,20 @@ function EsqueceuSenha({ aoVoltar }) {
               style={{ textAlign: 'center', padding: '20px 0' }}
             >
               <CheckCircle size={50} color="#10b981" style={{ margin: '0 auto 16px auto' }} />
-              <h3 style={{ color: '#10b981', marginBottom: '8px' }}>E-mail enviado!</h3>
+              <h3 style={{ color: '#10b981', marginBottom: '8px' }}>Verifique seu e-mail</h3>
+              {/* não diz se a conta existe, para ninguém descobrir quais e-mails estão cadastrados */}
               <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px' }}>
-                Verifique a caixa de entrada do endereço <strong>{email}</strong> para redefinir a sua senha.
+                Se existir uma conta com <strong>{email}</strong>, você vai receber um link para criar uma nova senha.
+                Confira também a caixa de spam.
               </p>
-              <button type="button" className="botao-criar-conta" onClick={aoVoltar}>
-                Voltar para o login
-              </button>
+              <div className="botoes-acao">
+                <button type="button" className="botao-entrar" onClick={aoVoltar}>
+                  Voltar para o login
+                </button>
+                <button type="button" className="botao-criar-conta" onClick={usarOutroEmail}>
+                  Usar outro e-mail
+                </button>
+              </div>
             </motion.div>
           )}
 

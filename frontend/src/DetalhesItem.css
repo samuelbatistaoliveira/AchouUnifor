@@ -153,9 +153,85 @@
   white-space: pre-wrap;
 }
 
-.detalhe-editar {
+/* editar + alterar status, empilhados e centralizados como no desenho */
+.detalhe-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 260px;
   align-self: center;
   margin-top: 24px;
+}
+
+.detalhe-acoes > * {
+  width: 100%;
+}
+
+.detalhe-status-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.detalhe-status-campo select {
+  padding: 10px;
+  border: 1.5px solid #94a3b8;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.detalhe-dica {
+  margin-top: -6px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.detalhe-alterar-status {
+  padding: 11px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #2f80ed;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-alterar-status:hover:not(:disabled) {
+  background: #1f6fd9;
+}
+
+.detalhe-alterar-status:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.detalhe-ok,
+.detalhe-erro {
+  margin: 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.detalhe-ok {
+  color: #16a34a;
+}
+
+.detalhe-erro {
+  color: #dc2626;
+}
+
+.detalhe-editar {
+  align-self: center;
   padding: 10px 28px;
   border: 2px solid #2f80ed;
   border-radius: 8px;

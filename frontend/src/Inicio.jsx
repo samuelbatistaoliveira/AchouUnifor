@@ -7,7 +7,6 @@ import { BLOCOS } from './constantes';
 import useCategorias from './useCategorias';
 import useImagensItens from './useImagensItens';
 import DetalhesItem from './DetalhesItem';
-import Notificacoes from './Notificacoes';
 import { API, tokenSalvo } from './api';
 
 import './Inicio.css';
@@ -33,7 +32,6 @@ function formatarDataHora(iso) {
 function Inicio({ aoAbrirPerfil, aoNavegar, aoEditarItem }) {
   // Estados de navegação
   const [itemSelecionado, setItemSelecionado] = useState(null);
-  const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
 
   // Estados dos itens
   const [itens, setItens] = useState([]);
@@ -138,18 +136,8 @@ function Inicio({ aoAbrirPerfil, aoNavegar, aoEditarItem }) {
       ativo="inicio"
       aoNavegar={(t) => { setItemSelecionado(null); aoNavegar(t); }}
       aoAbrirPerfil={aoAbrirPerfil}
-      aoAbrirNotificacoes={() => { setItemSelecionado(null); setMostrarNotificacoes(true); }}
     />
   );
-
-  // Tela de notificações
-  if (mostrarNotificacoes) {
-    return (
-      <Notificacoes
-        aoVoltar={() => setMostrarNotificacoes(false)}
-      />
-    );
-  }
 
   // Tela de detalhes do item
   if (itemSelecionado) {

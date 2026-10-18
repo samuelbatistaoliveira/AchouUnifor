@@ -1,148 +1,212 @@
-.container-notificacoes {
+/* Notificações do admin: histórico de envios */
+.nt-conteudo {
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 24px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #1e293b;
+  padding: 28px 24px;
 }
 
-.container-notificacoes h1 {
-  font-size: 2.2rem;
-  font-weight: 500;
-  margin-bottom: 32px;
+.nt-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.lista-notificacoes {
+.nt-cabecalho h1 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 2rem;
+}
+
+.nt-nova {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2f80ed;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nt-nova:hover {
+  background: #1f6fd9;
+}
+
+.nt-texto {
+  color: #4b5563;
+}
+
+.nt-subtitulo {
+  margin: 0 0 12px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nt-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  margin: 24px auto 0;
+  color: #1f2937;
+  text-align: center;
+}
+
+.nt-vazio h2 {
+  margin: 8px 0 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.nt-vazio .nt-texto {
+  margin: 0 0 8px;
+}
+
+.nt-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nt-cartao {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid #e3e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.nt-icone {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 50%;
+  background: #e3ebf8;
+  color: #093f97;
+}
+
+.nt-corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.nt-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.nt-topo strong {
+  color: #1f2937;
+  font-size: 1.05rem;
+}
+
+.nt-topo time {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.nt-mensagem {
+  margin: 6px 0 10px;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.nt-rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.nt-para {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fdecc8;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.nt-para.todos {
+  background: #cfe4ff;
+  color: #1a4d8f;
+}
+
+/* Nova notificação */
+.nt-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 640px;
 }
 
-/* Estilo Base do Cartão */
-.cartao-notificacao {
+.nt-destino {
   display: flex;
-  align-items: center;
-  padding: 20px 24px;
-  border: 1.5px solid #60a5fa; /* Borda azul para itens não lidos */
-  border-radius: 4px;
-  background-color: #ffffff;
-  gap: 24px;
-}
-
-/* Estilo para Cartão Lido */
-.cartao-notificacao.lida {
-  border-color: #93c5fd; /* Borda azul mais clara */
-}
-
-/* Bolinhas */
-.notificacao-icone {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.ponto-status {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-}
-
-.ponto-azul {
-  background-color: #3b82f6;
-}
-
-.ponto-cinza {
-  background-color: #71717a;
-}
-
-/* Conteúdo de Texto */
-.notificacao-conteudo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.notificacao-cabecalho {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.notificacao-cabecalho strong {
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.notificacao-tempo {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-right: 16px; /* Empurra um pouco para separar do botão */
-}
-
-.notificacao-conteudo p {
+  flex-wrap: wrap;
+  gap: 10px;
   margin: 0;
-  font-size: 0.95rem;
-  color: #475569;
-}
-
-/* Botões */
-.notificacao-acao {
-  flex-shrink: 0;
-}
-
-.btn-primario, .btn-secundario {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primario {
-  background-color: #3b82f6;
-  color: white;
+  padding: 0;
   border: none;
 }
 
-.btn-primario:hover {
-  background-color: #2563eb;
+.nt-destino legend {
+  margin-bottom: 6px;
 }
 
-.btn-secundario {
-  background-color: white;
-  color: #3b82f6;
-  border: 1.5px solid #3b82f6;
+.nt-destino label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1.5px solid #ccd3e0;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.btn-secundario:hover {
-  background-color: #eff6ff;
+.nt-destino label.ativo {
+  border-color: #2f80ed;
+  background: #eef5ff;
+  color: #093f97;
 }
 
-/* Responsividade para telemóveis */
-@media (max-width: 640px) {
-  .cartao-notificacao {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  
-  .notificacao-cabecalho {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
+.nt-destino input {
+  accent-color: #2f80ed;
+}
 
-  .notificacao-tempo {
-    margin-right: 0;
-  }
-  
-  .notificacao-acao {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-  }
+.nt-contador {
+  align-self: flex-end;
+  font-weight: 400;
+}
+
+.nt-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }

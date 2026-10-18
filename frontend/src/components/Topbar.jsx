@@ -10,7 +10,7 @@ const MENU = [
 ];
 
 // Barra superior das telas de quem está logado; `ativo` é a tela atual
-function Topbar({ ativo, aoNavegar, aoAbrirPerfil, aoAbrirNotificacoes, menu = MENU }) {
+function Topbar({ ativo, aoNavegar, aoAbrirPerfil, menu = MENU }) {
   function clicarLogo() {
     aoNavegar('inicio');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -28,8 +28,7 @@ function Topbar({ ativo, aoNavegar, aoAbrirPerfil, aoAbrirNotificacoes, menu = M
             <button
               key={tela}
               className={tela === ativo ? 'ativo' : undefined}
-              // notificações não é uma tela do App: só abre onde a tela atual oferece
-              onClick={tela === 'notificacoes' ? aoAbrirNotificacoes : () => aoNavegar(tela)}
+              onClick={() => aoNavegar(tela)}
             >
               {rotulo}
             </button>

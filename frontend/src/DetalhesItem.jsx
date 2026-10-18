@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Lock, User, Bell, HelpCircle, Info, Search } from 'lucide-react';
 import './DetalhesItem.css';
 import logoUnifor from './assets/logo-achouunifor.png'; // Garanta que o caminho do logótipo está correto
+import { tokenSalvo } from './api';
 
 function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
     const [imagens, setImagens] = useState([]);
@@ -11,7 +12,7 @@ function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
         async function carregarGaleria() {
             if (!item?.id_item) return;
 
-            const token = localStorage.getItem('token');
+            const token = tokenSalvo(); // login sem "lembrar" fica no sessionStorage
             try {
                 const resposta = await fetch(
                     `http://localhost:3000/imagens/item/${item.id_item}`,
@@ -67,7 +68,7 @@ function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
                         href="#"
                         onClick={(e) => {
                             e.preventDefault();
-                            aoAbrirNotificacoes();
+                            aoAbrirNotificacoes?.(); // o aluno ainda não tem notificações
                         }}
                     >
                         Notificações

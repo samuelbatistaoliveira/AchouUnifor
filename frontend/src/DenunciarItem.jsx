@@ -6,9 +6,9 @@ import './GerenciarItem.css';
 const MOTIVO_MAX = 500; // mesmo limite do backend
 
 // Formulário do aluno: escolhe um item perdido e escreve o motivo; vai para Denúncias do admin
-function DenunciarItem({ idInicial = '' }) {
+function DenunciarItem() {
   const [itens, setItens] = useState([]);
-  const [idItem, setIdItem] = useState(String(idInicial));
+  const [idItem, setIdItem] = useState('');
   const [motivo, setMotivo] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [enviada, setEnviada] = useState(false);

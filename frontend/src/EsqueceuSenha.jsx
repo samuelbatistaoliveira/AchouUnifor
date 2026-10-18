@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Mail, ArrowLeft, KeyRound, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import './Login.css'; 
+import './Login.css';
+import { API } from './api';
 
 const DOMINIO = '@edu.unifor.br'; // mesma regra do login e do cadastro (authController)
 
@@ -9,8 +10,10 @@ function EsqueceuSenha({ aoVoltar }) {
   const [email, setEmail] = useState('');
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
-  const handleEnviar = (e) => {
+  // o backend confere se o e-mail tem conta ativa (e é onde o envio do link vai entrar)
+  const handleEnviar = async (e) => {
     e.preventDefault();
     const limpo = email.trim().toLowerCase();
 
@@ -20,10 +23,27 @@ function EsqueceuSenha({ aoVoltar }) {
     }
 
     setErro('');
-    setEmail(limpo);
-    // shortcut: ainda não envia nada. Quando o envio do link existir no backend,
-    // chamar aqui (ex.: POST /auth/esqueci-senha com { email }) antes de mostrar a confirmação.
-    setEnviado(true);
+    setCarregando(true);
+    try {
+      const resposta = await fetch(`${API}/auth/esqueci-senha`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: limpo }),
+      });
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok) {
+        setErro(dados.mensagem || 'Não foi possível enviar o link. Tente novamente.');
+        return;
+      }
+
+      setEmail(limpo);
+      setEnviado(true);
+    } catch {
+      setErro('Não foi possível conectar ao servidor. Tente novamente.');
+    } finally {
+      setCarregando(false);
+    }
   };
 
   function usarOutroEmail() {
@@ -73,8 +93,8 @@ function EsqueceuSenha({ aoVoltar }) {
               {erro && <p className="mensagem-erro" role="alert">{erro}</p>}
 
               <div className="botoes-acao" style={{ marginTop: '24px' }}>
-                <button type="submit" className="botao-entrar">
-                  Enviar link de recuperação
+                <button type="submit" className="botao-entrar" disabled={carregando}>
+                  {carregando ? 'Verificando...' : 'Enviar link de recuperação'}
                 </button>
                 <button type="button" className="botao-criar-conta" onClick={aoVoltar}>
                   <ArrowLeft size={18} style={{ marginRight: '8px' }} /> Voltar para o login
@@ -89,10 +109,9 @@ function EsqueceuSenha({ aoVoltar }) {
               style={{ textAlign: 'center', padding: '20px 0' }}
             >
               <CheckCircle size={50} color="#10b981" style={{ margin: '0 auto 16px auto' }} />
-              <h3 style={{ color: '#10b981', marginBottom: '8px' }}>Verifique seu e-mail</h3>
-              {/* não diz se a conta existe, para ninguém descobrir quais e-mails estão cadastrados */}
+              <h3 style={{ color: '#10b981', marginBottom: '8px' }}>Link enviado!</h3>
               <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px' }}>
-                Se existir uma conta com <strong>{email}</strong>, você vai receber um link para criar uma nova senha.
+                Enviamos para <strong>{email}</strong> um link para criar uma nova senha.
                 Confira também a caixa de spam.
               </p>
               <div className="botoes-acao">

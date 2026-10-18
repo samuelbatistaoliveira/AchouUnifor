@@ -48,4 +48,38 @@ async function atualizarStatusDenuncia(req, res) {
   }
 }
 
-module.exports = { listarDenuncias, atualizarStatusDenuncia };
+const MOTIVO_MAX = 500;
+
+// Aluno denuncia um item que ele consegue ver (só os perdidos)
+async function criarDenuncia(req, res) {
+  try {
+    const { id_item } = req.body;
+    const motivo = typeof req.body.motivo === 'string' ? req.body.motivo.trim() : '';
+
+    if (!Number.isInteger(Number(id_item)) || !motivo) {
+      return res.status(400).json({ mensagem: 'Escolha o item e escreva o motivo.' });
+    }
+    if (motivo.length > MOTIVO_MAX) {
+      return res.status(400).json({ mensagem: `O motivo pode ter no máximo ${MOTIVO_MAX} caracteres.` });
+    }
+
+    const resultado = await pool.query(
+      `INSERT INTO denuncias (id_item, id_usuario, motivo)
+       SELECT id_item, $2, $3 FROM itens WHERE id_item = $1 AND status = 'perdido'
+       RETURNING id_denuncia`,
+      [Number(id_item), req.usuario.id_usuario, motivo]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensagem: 'Item não encontrado.' });
+    }
+
+    res.status(201).json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao criar denúncia:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+module.exports = { listarDenuncias, atualizarStatusDenuncia, criarDenuncia };

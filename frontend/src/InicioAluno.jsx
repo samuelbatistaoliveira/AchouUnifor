@@ -1,22 +1,35 @@
-import { useEffect, useState } from 'react';
-import { ImageOff } from 'lucide-react';
-import logoUnifor from './assets/logo-achouunifor.png';
+import { useEffect, useRef, useState } from 'react';
+import { ImageOff, X } from 'lucide-react';
+import Topbar from './components/Topbar';
+import Perfil from './Perfil';
+import DenunciarItem from './DenunciarItem';
 import useImagensItens from './useImagensItens';
 import useCategorias from './useCategorias';
 import { buscar } from './api';
 import './Inicio.css';
 import './InicioAluno.css';
 
+// notificações ainda não tem tela (o Topbar ignora o clique)
+const MENU_ALUNO = [
+  ['inicio', 'Início'],
+  ['denunciar', 'Denunciar'],
+  ['notificacoes', 'Notificações'],
+];
+
 // "2026-12-25T12:03:01.000Z" -> "25/12/2026"
 const formatarData = (iso) => new Date(iso).toLocaleDateString('pt-BR');
 
-// Tela inicial do aluno: só itens perdidos e só o básico (o backend não manda local nem descrição)
+// Área do aluno: só itens perdidos e só o básico (o backend não manda local nem horário)
 function InicioAluno({ aoSair }) {
+  const [tela, setTela] = useState('inicio');
   const [itens, setItens] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [data, setData] = useState('');
   const [erro, setErro] = useState('');
+  const [itemAberto, setItemAberto] = useState(null);
+  const [itemDenunciado, setItemDenunciado] = useState('');
+  const dialogo = useRef(null);
   const imagens = useImagensItens(itens);
   const { categorias } = useCategorias();
 
@@ -27,6 +40,32 @@ function InicioAluno({ aoSair }) {
       .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
   }, [busca, categoria]);
 
+  // <dialog> nativo: Esc fecha e o foco fica preso nele
+  useEffect(() => {
+    if (itemAberto) dialogo.current?.showModal();
+  }, [itemAberto]);
+
+  function navegar(destino, idItem = '') {
+    setItemAberto(null);
+    setItemDenunciado(idItem);
+    setTela(destino);
+  }
+
+  if (tela === 'perfil') {
+    return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('denunciar')} />;
+  }
+
+  const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
+
+  if (tela === 'denunciar') {
+    return (
+      <div className="inicio">
+        {topbar}
+        <DenunciarItem key={itemDenunciado} idInicial={itemDenunciado} />
+      </div>
+    );
+  }
+
   // o backend não filtra por data: comparamos só o dia
   const itensVisiveis = data
     ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
@@ -34,18 +73,13 @@ function InicioAluno({ aoSair }) {
 
   return (
     <div className="inicio">
-      <header className="inicio-topbar">
-        <button className="logo-botao" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Ir para o início">
-          <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
-        </button>
-        <button className="aluno-sair" onClick={aoSair}>Sair</button>
-      </header>
+      {topbar}
 
       <main className="inicio-conteudo">
         <div className="inicio-filtros">
           <input
             type="search"
-            placeholder="Buscar item..."
+            placeholder="Buscar item (ex.: garrafa, mochila, chave)"
             aria-label="Buscar item"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -69,14 +103,37 @@ function InicioAluno({ aoSair }) {
               )}
               <div className="inicio-card-corpo">
                 <h3>{item.nome_objeto}</h3>
-                <p>{item.categoria}</p>
-                <p>{formatarData(item.data_horario)}</p>
+                <p>{item.categoria} · {formatarData(item.data_horario)}</p>
+                <button className="aluno-ver" onClick={() => setItemAberto(item)}>Ver Item</button>
               </div>
             </article>
           ))}
           {itensVisiveis.length === 0 && !erro && <p>Nenhum item perdido encontrado.</p>}
         </div>
       </main>
+
+      <dialog ref={dialogo} className="aluno-detalhe" onClose={() => setItemAberto(null)} aria-labelledby="aluno-detalhe-nome">
+        {itemAberto && (
+          <>
+            <button className="aluno-fechar" onClick={() => dialogo.current.close()} aria-label="Fechar">
+              <X size={20} />
+            </button>
+            {imagens[itemAberto.id_item] ? (
+              <img className="inicio-foto" src={imagens[itemAberto.id_item]} alt={itemAberto.nome_objeto} />
+            ) : (
+              <div className="inicio-foto inicio-sem-foto"><ImageOff size={40} /></div>
+            )}
+            <div className="aluno-detalhe-corpo">
+              <h2 id="aluno-detalhe-nome">{itemAberto.nome_objeto}</h2>
+              <p className="aluno-detalhe-info">{itemAberto.categoria} · {formatarData(itemAberto.data_horario)}</p>
+              <p>{itemAberto.descricao || 'Sem descrição.'}</p>
+              <button className="aluno-denunciar" onClick={() => navegar('denunciar', itemAberto.id_item)}>
+                Denunciar
+              </button>
+            </div>
+          </>
+        )}
+      </dialog>
     </div>
   );
 }

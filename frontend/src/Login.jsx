@@ -17,7 +17,8 @@ function Login({ aoEntrar }) {
 
   async function handleLogin(e) {
     e.preventDefault();
-    console.log("handleLogin foi chamado");
+    setErro('');
+    setCarregando(true);
 
     try {
       const resposta = await fetch("http://localhost:3000/auth/login", {
@@ -34,7 +35,7 @@ function Login({ aoEntrar }) {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        alert(dados.mensagem);
+        setErro(dados.mensagem || "E-mail ou senha inválidos.");
         return;
       }
 
@@ -44,7 +45,9 @@ function Login({ aoEntrar }) {
 
     } catch (erro) {
       console.error("Erro ao realizar login:", erro);
-      alert("Não foi possível conectar ao servidor.");
+      setErro("Não foi possível conectar ao servidor. Tente novamente.");
+    } finally {
+        setCarregando(false);
     }
   }
 
@@ -175,6 +178,23 @@ function Login({ aoEntrar }) {
                     </div>
                   </div>
 
+                  {erro && (
+                  <div
+                    role="alert"
+                    style={{
+                    color: "#b91c1c",
+                    backgroundColor: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    padding: "10px 12px",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    marginBottom: "12px"
+                    }}
+                    >
+                    {erro}
+                </div>
+                )}
+
                   <div className="linha-acoes">
                     <label className="checkbox-container">
                       <input type="checkbox" checked={lembrar} onChange={() => setLembrar(!lembrar)} />
@@ -194,9 +214,14 @@ function Login({ aoEntrar }) {
 
                   {/* BOTÕES ATUALIZADOS */}
                   <div className="botoes-acao">
-                    <button type="submit" className="botao-entrar">
-                      Entrar <ArrowRight size={18} />
-                    </button>
+                    <button
+                    type="submit"
+                    className="botao-entrar"
+                    disabled={carregando}
+                    >
+                    {carregando ? "Entrando..." : "Entrar"}
+                    {!carregando && <ArrowRight size={18} />}
+                  </button>
                     <button
                       type="button"
                       className="botao-criar-conta"

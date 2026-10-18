@@ -12,8 +12,28 @@ const TAMANHO_MAX = 5 * 1024 * 1024;
 
 const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', status: '', data: '', horario: '' };
 
-function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
-  const [form, setForm] = useState(VAZIO);
+// item salvo -> campos do formulário; o local é gravado como "Bloco X - referência"
+function formDoItem(item) {
+  const local = item.local_encontrado ?? '';
+  const bloco = BLOCOS.find((b) => local === b || local.startsWith(`${b} - `)) ?? '';
+  const quando = new Date(item.data_horario);
+  return {
+    ...VAZIO,
+    nome: item.nome_objeto ?? '',
+    descricao: item.descricao ?? '',
+    bloco,
+    referencia: bloco ? local.slice(bloco.length + 3) : local,
+    categoria: item.categoria ?? '',
+    status: item.status,
+    data: quando.toLocaleDateString('en-CA'),
+    horario: quando.toTimeString().slice(0, 5),
+  };
+}
+
+// `item` presente = editar esse item; sem ele = registrar um novo
+function GerenciarItem({ aoNavegar, aoAbrirPerfil, item: itemEditado }) {
+  const editando = !!itemEditado;
+  const [form, setForm] = useState(() => (editando ? formDoItem(itemEditado) : VAZIO));
   const [fotos, setFotos] = useState([]); // { arquivo, url }
   const [arrastando, setArrastando] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -61,8 +81,8 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
     setEnviando(true);
 
     try {
-      const resposta = await fetch(`${API}/itens`, {
-        method: 'POST',
+      const resposta = await fetch(editando ? `${API}/itens/${itemEditado.id_item}` : `${API}/itens`, {
+        method: editando ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           nome_objeto: nome,
@@ -70,13 +90,13 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
           categoria,
           data_horario: `${data}T${horario}`,
           local_encontrado: referencia.trim() ? `${bloco} - ${referencia.trim()}` : bloco,
-          status,
+          status, // o PUT ignora: o status não muda por aqui
         }),
       });
       const item = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(item.mensagem || 'Não foi possível registrar o item.');
+        setErro(item.mensagem || (editando ? 'Não foi possível salvar as alterações.' : 'Não foi possível registrar o item.'));
         return;
       }
 
@@ -94,7 +114,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
       );
       const falhas = envios.filter((ok) => !ok).length;
 
-      limpar();
+      if (!editando) limpar();
       setRegistrado({ nome: item.nome_objeto, falhas });
     } catch {
       setErro('Não foi possível conectar ao servidor.');
@@ -113,8 +133,12 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
             <h1 className="gi-titulo">Gerenciar item</h1>
             <section className="gi-aviso" role="status">
               <CircleCheck size={44} className="gi-aviso-icone" aria-hidden="true" />
-              <p><strong>Item registrado com sucesso!</strong></p>
-              <p>"{registrado.nome}" já está disponível na lista de Achados e Perdidos.</p>
+              <p><strong>{editando ? 'Item atualizado com sucesso!' : 'Item registrado com sucesso!'}</strong></p>
+              <p>
+                {editando
+                  ? `As informações de "${registrado.nome}" foram salvas.`
+                  : `"${registrado.nome}" já está disponível na lista de Achados e Perdidos.`}
+              </p>
               {registrado.falhas > 0 && (
                 <p className="gi-erro">{registrado.falhas} foto(s) não foram enviadas.</p>
               )}
@@ -124,7 +148,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
           </>
         ) : (
           <>
-            <h1 className="gi-titulo">Registrar item</h1>
+            <h1 className="gi-titulo">{editando ? 'Editar item' : 'Registrar item'}</h1>
 
             <form className="gi-form" onSubmit={registrar}>
               <div className="gi-coluna">
@@ -162,15 +186,18 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
                       {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
                     </select>
                   </label>
-                  <label className="gi-campo">
-                    Status
-                    {/* só itens "perdido" aparecem na tela inicial dos alunos */}
-                    <select value={form.status} onChange={mudar('status')}>
-                      <option value="">Selecione</option>
-                      <option value="perdido">Perdido</option>
-                      <option value="achado">Achado</option>
-                    </select>
-                  </label>
+                  {/* na edição o status não muda (fica para a tela de status) */}
+                  {!editando && (
+                    <label className="gi-campo">
+                      Status
+                      {/* só itens "perdido" aparecem na tela inicial dos alunos */}
+                      <select value={form.status} onChange={mudar('status')}>
+                        <option value="">Selecione</option>
+                        <option value="perdido">Perdido</option>
+                        <option value="achado">Achado</option>
+                      </select>
+                    </label>
+                  )}
                 </div>
 
                 <div className="gi-linha">
@@ -184,7 +211,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
                   </label>
                 </div>
 
-                <span className="gi-rotulo">Fotos do item</span>
+                <span className="gi-rotulo">{editando ? 'Adicionar mais fotos' : 'Fotos do item'}</span>
                 <label
                   className={`gi-upload${arrastando ? ' arrastando' : ''}`}
                   onDragOver={(e) => { e.preventDefault(); setArrastando(true); }}
@@ -219,7 +246,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil }) {
               <div className="gi-acoes">
                 {erro && <p className="gi-erro" role="alert">{erro}</p>}
                 <button type="submit" className="gi-registrar" disabled={enviando}>
-                  {enviando ? 'Registrando...' : 'Registrar Item'}
+                  {enviando ? 'Salvando...' : editando ? 'Salvar alterações' : 'Registrar Item'}
                 </button>
                 <button type="button" className="gi-cancelar" onClick={() => aoNavegar('inicio')}>
                   Cancelar

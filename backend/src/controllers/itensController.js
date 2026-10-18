@@ -78,18 +78,22 @@ async function listarPerdidos(req, res) {
 
 const STATUS_NOVO_ITEM = ['achado', 'perdido'];
 
+// Campos comuns de registrar e editar; devolve a mensagem de erro ou ''
+function validarItem({ nome_objeto, categoria, data_horario, local_encontrado }) {
+  if (!nome_objeto?.trim() || !categoria || !data_horario || !local_encontrado?.trim()) {
+    return 'Preencha nome, categoria, data, horário e local.';
+  }
+  if (Number.isNaN(Date.parse(data_horario))) return 'Data ou horário inválido.';
+  return '';
+}
+
 async function criarItem(req, res) {
   try {
     const { nome_objeto, descricao, categoria, data_horario, local_encontrado } = req.body;
     const status = req.body.status ?? 'achado';
 
-    if (!nome_objeto?.trim() || !categoria || !data_horario || !local_encontrado?.trim()) {
-      return res.status(400).json({ mensagem: 'Preencha nome, categoria, data, horário e local.' });
-    }
-
-    if (Number.isNaN(Date.parse(data_horario))) {
-      return res.status(400).json({ mensagem: 'Data ou horário inválido.' });
-    }
+    const invalido = validarItem(req.body);
+    if (invalido) return res.status(400).json({ mensagem: invalido });
 
     if (!STATUS_NOVO_ITEM.includes(status)) {
       return res.status(400).json({ mensagem: 'Status inválido.' });
@@ -112,6 +116,38 @@ async function criarItem(req, res) {
 
   } catch (erro) {
     console.error('Erro ao criar item:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+// Edita as informações do item; o status muda só pela rota de status
+async function editarItem(req, res) {
+  try {
+    const { nome_objeto, descricao, categoria, data_horario, local_encontrado } = req.body;
+
+    const invalido = validarItem(req.body);
+    if (invalido) return res.status(400).json({ mensagem: invalido });
+
+    const resultado = await pool.query(
+      `UPDATE itens
+       SET nome_objeto = $1, descricao = $2, data_horario = $3, local_encontrado = $4, id_categoria = categorias.id_categoria
+       FROM categorias
+       WHERE itens.id_item = $6 AND categorias.nome = $5 AND categorias.status = 'ativo'
+       RETURNING itens.*`,
+      [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.params.id_item]
+    );
+
+    if (resultado.rows.length === 0) {
+      const existe = await pool.query('SELECT 1 FROM itens WHERE id_item = $1', [req.params.id_item]);
+      return existe.rows.length === 0
+        ? res.status(404).json({ mensagem: 'Item não encontrado.' })
+        : res.status(400).json({ mensagem: 'Categoria não encontrada.' });
+    }
+
+    res.json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao editar item:', erro);
     res.status(500).json({ mensagem: 'Erro interno do servidor.' });
   }
 }
@@ -143,4 +179,4 @@ async function atualizarStatus(req, res) {
   }
 }
 
-module.exports = { getItens, listarPerdidos, criarItem, atualizarStatus };
+module.exports = { getItens, listarPerdidos, criarItem, editarItem, atualizarStatus };

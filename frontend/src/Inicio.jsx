@@ -30,7 +30,7 @@ function formatarDataHora(iso) {
   });
 }
 
-function Inicio({ aoAbrirPerfil, aoNavegar }) {
+function Inicio({ aoAbrirPerfil, aoNavegar, aoEditarItem }) {
   // Estados de navegação
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
@@ -157,6 +157,7 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
       <DetalhesItem
         item={itemSelecionado}
         aoVoltar={() => setItemSelecionado(null)}
+        aoEditar={() => aoEditarItem(itemSelecionado)}
         topbar={topbar}
       />
     );

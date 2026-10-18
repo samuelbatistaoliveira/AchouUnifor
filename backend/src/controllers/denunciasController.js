@@ -1,7 +1,8 @@
 const pool = require('../config/database');
 const supabase = require('../config/supabase');
 
-const STATUS_VALIDOS = ['pendente', 'resolvida'];
+// perdido (ao criar) -> encontrado (o admin achou) -> devolvido (o aluno retirou)
+const STATUS_VALIDOS = ['perdido', 'encontrado', 'devolvido'];
 // campo: [limite de caracteres, nome mostrado na mensagem]
 const LIMITES = { nome_objeto: [100, 'O nome'], descricao: [1000, 'A descrição'], local_perda: [255, 'O local'] };
 
@@ -100,8 +101,8 @@ async function criarDenuncia(req, res) {
     }
 
     const resultado = await pool.query(
-      `INSERT INTO denuncias (id_usuario, nome_objeto, descricao, local_perda, data_perda, id_categoria)
-       SELECT $1, $2, $3, $4, $5, id_categoria
+      `INSERT INTO denuncias (id_usuario, nome_objeto, descricao, local_perda, data_perda, id_categoria, status)
+       SELECT $1, $2, $3, $4, $5, id_categoria, 'perdido'
        FROM categorias
        WHERE nome = $6 AND status = 'ativo'
        RETURNING id_denuncia, nome_objeto`,
@@ -128,6 +129,10 @@ async function atualizarStatusDenuncia(req, res) {
       return res.status(400).json({ mensagem: 'Status inválido.' });
     }
 
+    if (!Number.isInteger(Number(req.params.id_denuncia))) {
+      return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
+    }
+
     const resultado = await pool.query(
       'UPDATE denuncias SET status = $1 WHERE id_denuncia = $2 RETURNING id_denuncia, status',
       [status, req.params.id_denuncia]
@@ -145,4 +150,51 @@ async function atualizarStatusDenuncia(req, res) {
   }
 }
 
-module.exports = { listarDenuncias, listarMinhasDenuncias, criarDenuncia, atualizarStatusDenuncia };
+// Aluno remove a própria denúncia enquanto o objeto ainda está perdido (depois disso ela vira histórico)
+async function removerDenuncia(req, res) {
+  try {
+    const id_denuncia = Number(req.params.id_denuncia);
+    if (!Number.isInteger(id_denuncia)) {
+      return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
+    }
+
+    const { rows: [denuncia] } = await pool.query(
+      'SELECT status FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2',
+      [id_denuncia, req.usuario.id_usuario]
+    );
+
+    if (!denuncia) {
+      return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
+    }
+    if (denuncia.status !== 'perdido') {
+      return res.status(409).json({ mensagem: 'Só é possível remover denúncias de objetos ainda perdidos.' });
+    }
+
+    // as linhas de imagens_denuncias saem junto (ON DELETE CASCADE); os arquivos, logo depois
+    const { rows: fotos } = await pool.query('SELECT caminho FROM imagens_denuncias WHERE id_denuncia = $1', [id_denuncia]);
+    const removida = await pool.query(
+      "DELETE FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2 AND status = 'perdido'",
+      [id_denuncia, req.usuario.id_usuario]
+    );
+
+    if (removida.rowCount === 0) {
+      return res.status(409).json({ mensagem: 'A denúncia mudou de status. Atualize a página.' });
+    }
+
+    if (fotos.length > 0) {
+      // a denúncia já saiu: arquivo que sobrar no Storage só vai para o log
+      await supabase.storage
+        .from('itens')
+        .remove(fotos.map((f) => f.caminho))
+        .then(({ error }) => error && console.error('Fotos da denúncia ficaram no Storage:', error), console.error);
+    }
+
+    res.status(204).end();
+
+  } catch (erro) {
+    console.error('Erro ao remover denúncia:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+module.exports = { listarDenuncias, listarMinhasDenuncias, criarDenuncia, atualizarStatusDenuncia, removerDenuncia };

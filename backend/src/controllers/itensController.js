@@ -51,7 +51,7 @@ async function listarPerdidos(req, res) {
     const { busca, categoria } = req.query;
     const valores = [];
     let query = `
-      SELECT itens.id_item, itens.nome_objeto, itens.data_horario, categorias.nome AS categoria
+      SELECT itens.id_item, itens.nome_objeto, itens.descricao, itens.data_horario, categorias.nome AS categoria
       FROM itens
       JOIN categorias ON itens.id_categoria = categorias.id_categoria
       WHERE itens.status = 'perdido'

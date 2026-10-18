@@ -10,7 +10,7 @@ const MENU = [
 ];
 
 // Barra superior das telas de quem está logado; `ativo` é a tela atual
-function Topbar({ ativo, aoNavegar, aoAbrirPerfil }) {
+function Topbar({ ativo, aoNavegar, aoAbrirPerfil, menu = MENU }) {
   function clicarLogo() {
     if (ativo === 'inicio') window.scrollTo({ top: 0, behavior: 'smooth' });
     else aoNavegar('inicio');
@@ -24,7 +24,7 @@ function Topbar({ ativo, aoNavegar, aoAbrirPerfil }) {
 
       <div className="inicio-direita">
         <nav className="inicio-menu">
-          {MENU.map(([tela, rotulo]) => (
+          {menu.map(([tela, rotulo]) => (
             <button
               key={tela}
               className={tela === ativo ? 'ativo' : undefined}

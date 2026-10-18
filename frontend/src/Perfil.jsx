@@ -161,9 +161,11 @@ function Perfil({ aoSair, aoVoltar, aoAbrirDenuncias }) {
         </section>
 
         {/* ações */}
-        <button className="perfil-denuncias" onClick={aoAbrirDenuncias}>
-          <FileText size={18} /> Denúncias
-        </button>
+        {aoAbrirDenuncias && (
+          <button className="perfil-denuncias" onClick={aoAbrirDenuncias}>
+            <FileText size={18} /> Minhas denúncias
+          </button>
+        )}
         <button className="perfil-sair" onClick={aoSair}>
           <LogOut size={18} /> Sair
         </button>

@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { CircleCheck, X } from 'lucide-react';
+import { useState } from 'react';
+import { CircleCheck } from 'lucide-react';
 import Topbar from './components/Topbar';
+import CampoFotos, { enviarFotos } from './components/CampoFotos';
 import { BLOCOS } from './constantes';
 import useCategorias from './useCategorias';
 import './GerenciarItem.css';
 
 const API = 'http://localhost:3000';
-// mesmos limites do backend (config/upload.js)
-const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];
-const TAMANHO_MAX = 5 * 1024 * 1024;
 
 const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', status: '', data: '', horario: '' };
 
@@ -35,31 +33,12 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil, item: itemEditado }) {
   const editando = !!itemEditado;
   const [form, setForm] = useState(() => (editando ? formDoItem(itemEditado) : VAZIO));
   const [fotos, setFotos] = useState([]); // { arquivo, url }
-  const [arrastando, setArrastando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [registrado, setRegistrado] = useState(null); // { nome, falhas } depois de salvar
   const { categorias } = useCategorias();
 
-  // libera as pré-visualizações ao sair da tela
-  const fotosRef = useRef(fotos);
-  fotosRef.current = fotos;
-  useEffect(() => () => fotosRef.current.forEach((f) => URL.revokeObjectURL(f.url)), []);
-
   const mudar = (campo) => (e) => setForm({ ...form, [campo]: e.target.value });
-
-  function adicionarFotos(lista) {
-    const arquivos = [...lista];
-    const invalidos = arquivos.filter((a) => !TIPOS_FOTO.includes(a.type) || a.size > TAMANHO_MAX);
-    setErro(invalidos.length ? 'Envie apenas imagens JPG, PNG ou WEBP de até 5 MB.' : '');
-    const validos = arquivos.filter((a) => !invalidos.includes(a));
-    setFotos((atuais) => [...atuais, ...validos.map((arquivo) => ({ arquivo, url: URL.createObjectURL(arquivo) }))]);
-  }
-
-  function removerFoto(url) {
-    URL.revokeObjectURL(url);
-    setFotos((atuais) => atuais.filter((f) => f.url !== url));
-  }
 
   function limpar() {
     fotos.forEach((f) => URL.revokeObjectURL(f.url));
@@ -101,18 +80,7 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil, item: itemEditado }) {
       }
 
       // o item já existe: uma foto que falhar não desfaz o registro
-      const envios = await Promise.all(
-        fotos.map(({ arquivo }) => {
-          const corpo = new FormData();
-          corpo.append('imagem', arquivo);
-          return fetch(`${API}/imagens/${item.id_item}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            body: corpo,
-          }).then((r) => r.ok, () => false);
-        })
-      );
-      const falhas = envios.filter((ok) => !ok).length;
+      const falhas = await enviarFotos(`/imagens/${item.id_item}`, fotos);
 
       if (!editando) limpar();
       setRegistrado({ nome: item.nome_objeto, falhas });
@@ -211,36 +179,12 @@ function GerenciarItem({ aoNavegar, aoAbrirPerfil, item: itemEditado }) {
                   </label>
                 </div>
 
-                <span className="gi-rotulo">{editando ? 'Adicionar mais fotos' : 'Fotos do item'}</span>
-                <label
-                  className={`gi-upload${arrastando ? ' arrastando' : ''}`}
-                  onDragOver={(e) => { e.preventDefault(); setArrastando(true); }}
-                  onDragLeave={() => setArrastando(false)}
-                  onDrop={(e) => { e.preventDefault(); setArrastando(false); adicionarFotos(e.dataTransfer.files); }}
-                >
-                  <input
-                    className="gi-arquivo"
-                    type="file"
-                    accept={TIPOS_FOTO.join(',')}
-                    multiple
-                    onChange={(e) => { adicionarFotos(e.target.files); e.target.value = ''; }}
-                  />
-                  <strong>+ Adicionar fotos</strong>
-                  <small>Arraste ou clique para enviar</small>
-                </label>
-
-                {fotos.length > 0 && (
-                  <div className="gi-previas">
-                    {fotos.map((f) => (
-                      <div key={f.url} className="gi-previa">
-                        <img src={f.url} alt={f.arquivo.name} />
-                        <button type="button" onClick={() => removerFoto(f.url)} aria-label={`Remover ${f.arquivo.name}`}>
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <CampoFotos
+                  rotulo={editando ? 'Adicionar mais fotos' : 'Fotos do item'}
+                  fotos={fotos}
+                  aoMudar={setFotos}
+                  aoErro={setErro}
+                />
               </div>
 
               <div className="gi-acoes">

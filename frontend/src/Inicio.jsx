@@ -42,6 +42,15 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
   const imagens = useImagensItens(itens);
   const { categorias } = useCategorias();
 
+  const topbar = (
+    <Topbar
+      ativo="inicio"
+      aoNavegar={(t) => { setItemSelecionado(null); aoNavegar(t); }}
+      aoAbrirPerfil={aoAbrirPerfil}
+      aoAbrirNotificacoes={() => { setItemSelecionado(null); setMostrarNotificacoes(true); }}
+    />
+  );
+
   // 1. Se o estado de notificações for verdadeiro, mostra a tela de notificações
   if (mostrarNotificacoes) {
     return <Notificacoes aoVoltar={() => setMostrarNotificacoes(false)} />;
@@ -50,20 +59,13 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
   // 2. Se houver um item selecionado, exibe a tela de detalhes com a função de notificações ativada
   if (itemSelecionado) {
     return (
-      <DetalhesItem
-        item={itemSelecionado}
-        aoVoltar={() => setItemSelecionado(null)}
-        aoAbrirNotificacoes={() => {
-          setItemSelecionado(null); // Fecha a tela de detalhes
-          setMostrarNotificacoes(true); // Abre a tela de notificações
-        }}
-      />
+      <DetalhesItem item={itemSelecionado} aoVoltar={() => setItemSelecionado(null)} topbar={topbar} />
     );
   }
 
   return (
     <div className="inicio">
-      <Topbar ativo="inicio" aoNavegar={aoNavegar} aoAbrirPerfil={aoAbrirPerfil} />
+      {topbar}
 
       <main className="inicio-conteudo">
         <div className="inicio-filtros">

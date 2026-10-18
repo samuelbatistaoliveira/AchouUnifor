@@ -5,6 +5,8 @@ import Perfil from './Perfil.jsx';
 import GerenciarItem from './GerenciarItem.jsx';
 import PainelAdm from './PainelAdm.jsx';
 import InicioAluno from './InicioAluno.jsx';
+import Notificacoes from './Notificacoes.jsx';
+import CriarNotificacao from './CriarNotificacao.jsx';
 import { tipoUsuario } from './api';
 
 function App() {
@@ -32,6 +34,8 @@ function App() {
   if (tela === 'painel') return <PainelAdm aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
   // keys diferentes: sair da edição para "Gerenciar Item" começa um formulário vazio
   if (tela === 'editar') return <GerenciarItem key="editar" item={itemEditado} aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
+  if (tela === 'notificacoes') return <Notificacoes aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
+  if (tela === 'nova-notificacao') return <CriarNotificacao aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
   if (tela === 'gerenciar') return <GerenciarItem key="novo" aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
   return <Inicio aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
 }

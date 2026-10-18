@@ -3,16 +3,24 @@ import { Bell, CircleCheck, ImageOff } from 'lucide-react';
 import { buscar } from './api';
 import './InicioAluno.css';
 
-// Notificações do aluno: cada denúncia que o admin marcou como "encontrado" é um aviso de correspondência.
-// shortcut: sem tabela de notificações (não há "lida" nem a hora do aviso); criar uma se precisar disso
+// "2026-10-18T15:30:00.000Z" -> "18/10/2026 15:30"
+const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+// Notificações do aluno: primeiro as denúncias que o admin marcou como "encontrado" (correspondência),
+// depois as mensagens que o admin enviou (para todos ou só para ele).
+// shortcut: não há "lida/não lida"; guardar isso por aluno se precisar de contador no menu
 function NotificacoesAluno({ aoVerDenuncias }) {
   const [encontradas, setEncontradas] = useState([]);
+  const [mensagens, setMensagens] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    buscar('/denuncias/minhas')
-      .then((dados) => setEncontradas(dados.filter((d) => d.status === 'encontrado')))
+    Promise.all([buscar('/denuncias/minhas'), buscar('/notificacoes/minhas')])
+      .then(([denuncias, notificacoes]) => {
+        setEncontradas(denuncias.filter((d) => d.status === 'encontrado'));
+        setMensagens(notificacoes);
+      })
       .catch((e) => setErro(e.message || 'Não foi possível carregar as notificações.'))
       .finally(() => setCarregando(false));
   }, []);
@@ -24,7 +32,7 @@ function NotificacoesAluno({ aoVerDenuncias }) {
       {erro && <p className="inicio-erro" role="alert">{erro}</p>}
       {carregando && <p className="na-texto" role="status">Carregando notificações...</p>}
 
-      {!carregando && !erro && encontradas.length === 0 && (
+      {!carregando && !erro && encontradas.length === 0 && mensagens.length === 0 && (
         <section className="na-vazio">
           <Bell size={64} strokeWidth={1.6} aria-hidden="true" />
           <h2>Nenhuma notificação por aqui</h2>
@@ -45,6 +53,20 @@ function NotificacoesAluno({ aoVerDenuncias }) {
               <p>"{d.nome_objeto}" está no setor de segurança da UNIFOR. Retire presencialmente.</p>
             </div>
             <button className="na-ver" onClick={aoVerDenuncias}>Ver denúncia</button>
+          </li>
+        ))}
+
+        {mensagens.map((n) => (
+          <li key={`n${n.id_notificacao}`} className="na-aviso na-mensagem">
+            <span className="na-sino"><Bell size={20} aria-hidden="true" /></span>
+            <div className="na-conteudo">
+              <div className="na-topo">
+                <strong>{n.titulo}</strong>
+                {n.para_mim && <span className="na-para-voce">Para você</span>}
+                <time dateTime={n.data_criacao}>{dataHora(n.data_criacao)}</time>
+              </div>
+              <p>{n.mensagem}</p>
+            </div>
           </li>
         ))}
       </ul>

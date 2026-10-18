@@ -114,6 +114,54 @@
   background: #1f6fd9;
 }
 
+/* mensagem do admin */
+.na-mensagem {
+  align-items: flex-start;
+  border-color: #e3e8f0;
+  border-left-color: #8a94a8;
+}
+
+.na-sino {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 50%;
+  background: #e3ebf8;
+  color: #093f97;
+}
+
+.na-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.na-topo strong {
+  color: #1f2937;
+}
+
+.na-topo time {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.na-para-voce {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #fdecc8;
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.na-mensagem .na-conteudo p {
+  white-space: pre-wrap;
+}
+
 @media (max-width: 600px) {
   .na-aviso {
     flex-wrap: wrap;

@@ -1,76 +1,78 @@
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Bell, Plus, User, Users } from 'lucide-react';
+import Topbar from './components/Topbar';
+import { buscar } from './api';
+import './Inicio.css';
 import './Notificacoes.css';
 
-function Notificacoes({ aoVoltar }) {
-  // Dados simulando o que virá do backend no futuro
-  const notificacoes = [
-    {
-      id: 1,
-      titulo: 'Possível correspondência',
-      descricao: 'Um item achado parece com o seu registro "Garrafa térmica".',
-      tempo: 'Há 5 minutos',
-      lida: false
-    },
-    {
-      id: 2,
-      titulo: 'Item encontrado',
-      descricao: 'Status da sua denúncia "Garrafa Térmica" Atualizado.',
-      tempo: 'Há 2 Horas',
-      lida: true
-    },
-    {
-      id: 3,
-      titulo: 'Novo Item Cadastrado',
-      descricao: '"Carregador USB - C Branco" foi registrado.',
-      tempo: 'ontem',
-      lida: true
-    },
-    {
-      id: 4,
-      titulo: 'Novo Item Cadastrado',
-      descricao: '"Caderno Azul" foi registrado.',
-      tempo: 'ontem',
-      lida: true
-    }
-  ];
+// "2026-10-18T15:30:00.000Z" -> "18/10/2026 15:30"
+const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+// Admin: notificações já enviadas aos alunos + atalho para enviar uma nova
+function Notificacoes({ aoNavegar, aoAbrirPerfil }) {
+  const [enviadas, setEnviadas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    buscar('/notificacoes')
+      .then(setEnviadas)
+      .catch((e) => setErro(e.message || 'Não foi possível carregar as notificações.'))
+      .finally(() => setCarregando(false));
+  }, []);
+
+  const novaNotificacao = (
+    <button className="nt-nova" onClick={() => aoNavegar('nova-notificacao')}>
+      <Plus size={18} /> Nova notificação
+    </button>
+  );
 
   return (
-    <div className="container-notificacoes">
-        <button className="botao-voltar" onClick={aoVoltar} style={{ marginBottom: '32px' }}>
-        <ArrowLeft size={18} />
-        Voltar
-      </button>
-      <h1>Notificações</h1>
-      
-      <div className="lista-notificacoes">
-        {notificacoes.map((notif) => (
-          <div key={notif.id} className={`cartao-notificacao ${notif.lida ? 'lida' : 'nao-lida'}`}>
-            
-            {/* Bolinha de Status */}
-            <div className="notificacao-icone">
-              <div className={`ponto-status ${notif.lida ? 'ponto-cinza' : 'ponto-azul'}`}></div>
-            </div>
+    <div className="inicio">
+      <Topbar ativo="notificacoes" aoNavegar={aoNavegar} aoAbrirPerfil={aoAbrirPerfil} />
 
-            {/* Textos */}
-            <div className="notificacao-conteudo">
-              <div className="notificacao-cabecalho">
-                <strong>{notif.titulo}</strong>
-                <span className="notificacao-tempo">{notif.tempo}</span>
+      <main className="nt-conteudo">
+        <div className="nt-cabecalho">
+          <h1>Notificações</h1>
+          {novaNotificacao}
+        </div>
+
+        {erro && <p className="inicio-erro" role="alert">{erro}</p>}
+        {carregando && <p className="nt-texto" role="status">Carregando notificações...</p>}
+
+        {!carregando && !erro && enviadas.length === 0 && (
+          <section className="nt-vazio">
+            <Bell size={64} strokeWidth={1.6} aria-hidden="true" />
+            <h2>Nenhuma notificação enviada</h2>
+            <p className="nt-texto">Avise todos os alunos ou um aluno específico sobre algo do Achados e Perdidos.</p>
+            {novaNotificacao}
+          </section>
+        )}
+
+        {enviadas.length > 0 && <h2 className="nt-subtitulo">Enviadas</h2>}
+        <ul className="nt-lista">
+          {enviadas.map((n) => (
+            <li key={n.id_notificacao} className="nt-cartao">
+              <span className="nt-icone"><Bell size={20} aria-hidden="true" /></span>
+              <div className="nt-corpo">
+                <div className="nt-topo">
+                  <strong>{n.titulo}</strong>
+                  <time dateTime={n.data_criacao}>{dataHora(n.data_criacao)}</time>
+                </div>
+                <p className="nt-mensagem">{n.mensagem}</p>
+                <div className="nt-rodape">
+                  {n.id_destinatario ? (
+                    <span className="nt-para"><User size={14} aria-hidden="true" /> {n.destinatario}</span>
+                  ) : (
+                    <span className="nt-para todos"><Users size={14} aria-hidden="true" /> Todos os alunos</span>
+                  )}
+                  <span>enviada por {n.autor}</span>
+                </div>
               </div>
-              <p>{notif.descricao}</p>
-            </div>
-
-            {/* Botão */}
-            <div className="notificacao-acao">
-              <button className={notif.lida ? 'btn-secundario' : 'btn-primario'}>
-                Ver item
-              </button>
-            </div>
-
-          </div>
-        ))}
-      </div>
+            </li>
+          ))}
+        </ul>
+      </main>
     </div>
   );
 }

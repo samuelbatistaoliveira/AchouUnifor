@@ -51,15 +51,7 @@ function InicioAluno({ aoSair }) {
     return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('minhas-denuncias')} />;
   }
 
-  const topbar = (
-    <Topbar
-      ativo={tela}
-      menu={MENU_ALUNO}
-      aoNavegar={navegar}
-      aoAbrirPerfil={() => navegar('perfil')}
-      aoAbrirNotificacoes={() => navegar('notificacoes')}
-    />
-  );
+  const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
 
   // mesma tela de detalhes do admin; ela não mostra o local
   if (itemAberto) return <DetalhesItem item={itemAberto} aoVoltar={() => setItemAberto(null)} topbar={topbar} />;

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import Perfil from './Perfil';
-import DenunciarItem from './DenunciarItem';
+import DenunciarPerda from './DenunciarPerda';
+import MinhasDenuncias from './MinhasDenuncias';
 import DetalhesItem from './DetalhesItem';
 import useImagensItens from './useImagensItens';
 import useCategorias from './useCategorias';
@@ -23,6 +24,7 @@ const formatarData = (iso) => new Date(iso).toLocaleDateString('pt-BR');
 // Área do aluno: só itens perdidos e só o básico (o backend não manda local nem horário)
 function InicioAluno({ aoSair }) {
   const [tela, setTela] = useState('inicio');
+  const [visita, setVisita] = useState(0); // cada clique no menu abre a tela do zero (ex.: formulário vazio)
   const [itens, setItens] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -41,11 +43,12 @@ function InicioAluno({ aoSair }) {
 
   function navegar(destino) {
     setItemAberto(null);
+    setVisita((v) => v + 1);
     setTela(destino);
   }
 
   if (tela === 'perfil') {
-    return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('denunciar')} />;
+    return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('minhas-denuncias')} />;
   }
 
   const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
@@ -57,7 +60,16 @@ function InicioAluno({ aoSair }) {
     return (
       <div className="inicio">
         {topbar}
-        <DenunciarItem />
+        <DenunciarPerda key={visita} aoNavegar={navegar} />
+      </div>
+    );
+  }
+
+  if (tela === 'minhas-denuncias') {
+    return (
+      <div className="inicio">
+        {topbar}
+        <MinhasDenuncias aoVoltar={() => navegar('perfil')} />
       </div>
     );
   }

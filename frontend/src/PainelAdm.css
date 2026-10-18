@@ -359,6 +359,26 @@
   white-space: pre-wrap;
 }
 
+.pd-info {
+  margin: 6px 0 0;
+  color: #4b5563;
+}
+
+.pd-fotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pd-fotos img {
+  display: block;
+  width: 72px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .pd-status {
   display: inline-block;
   padding: 3px 12px;

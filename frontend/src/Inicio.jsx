@@ -8,6 +8,7 @@ import useCategorias from './useCategorias';
 import useImagensItens from './useImagensItens';
 import DetalhesItem from './DetalhesItem';
 import Notificacoes from './Notificacoes';
+import { API, tokenSalvo } from './api';
 
 import './Inicio.css';
 
@@ -67,9 +68,11 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
         });
 
         const resposta = await fetch(
-          `http://localhost:3000/itens?${params}`,
+          `${API}/itens?${params}`,
           {
-            signal: controller.signal
+            signal: controller.signal,
+            // a lista completa (com o local) é só para admin
+            headers: { Authorization: `Bearer ${tokenSalvo()}` }
           }
         );
 
@@ -129,6 +132,16 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
       })
     : itens;
 
+  // Mesmo Topbar na lista e no detalhe; navegar fecha o detalhe aberto
+  const topbar = (
+    <Topbar
+      ativo="inicio"
+      aoNavegar={(t) => { setItemSelecionado(null); aoNavegar(t); }}
+      aoAbrirPerfil={aoAbrirPerfil}
+      aoAbrirNotificacoes={() => { setItemSelecionado(null); setMostrarNotificacoes(true); }}
+    />
+  );
+
   // Tela de notificações
   if (mostrarNotificacoes) {
     return (
@@ -144,21 +157,14 @@ function Inicio({ aoAbrirPerfil, aoNavegar }) {
       <DetalhesItem
         item={itemSelecionado}
         aoVoltar={() => setItemSelecionado(null)}
-        aoAbrirNotificacoes={() => {
-          setItemSelecionado(null);
-          setMostrarNotificacoes(true);
-        }}
+        topbar={topbar}
       />
     );
   }
 
   return (
     <div className="inicio">
-      <Topbar
-        ativo="inicio"
-        aoNavegar={aoNavegar}
-        aoAbrirPerfil={aoAbrirPerfil}
-      />
+      {topbar}
 
       <main className="inicio-conteudo">
         {/* Filtros */}

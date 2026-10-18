@@ -14,7 +14,7 @@ const SECOES = ['Itens', 'Usuários', 'Categorias', 'Devoluções', 'Relatórios
 // "2026-09-12T10:00:00.000Z" -> "12/09"
 const diaMes = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
-function PainelAdm({ aoNavegar, aoAbrirPerfil }) {
+function PainelAdm({ aoNavegar, aoAbrirPerfil, aoEditarItem }) {
   const [secao, setSecao] = useState('Itens');
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState('');
@@ -124,8 +124,7 @@ function PainelAdm({ aoNavegar, aoAbrirPerfil }) {
                       <td>{diaMes(item.data_horario)}</td>
                       <td>
                         <div className="pa-acoes">
-                          {/* shortcut: edição ainda não existe, o botão fica desativado até a tela de editar */}
-                          <button className="pa-editar" disabled title="Em breve">Editar</button>
+                          <button className="pa-editar" onClick={() => aoEditarItem(item)}>Editar</button>
                           <button
                             className="pa-devolver"
                             onClick={() => devolver(item)}

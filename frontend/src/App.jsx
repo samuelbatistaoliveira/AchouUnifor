@@ -11,6 +11,12 @@ function App() {
   const temToken = () => !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
   const [logado, setLogado] = useState(temToken);
   const [tela, setTela] = useState('inicio');
+  const [itemEditado, setItemEditado] = useState(null);
+
+  function editarItem(item) {
+    setItemEditado(item);
+    setTela('editar');
+  }
 
   function sair() {
     localStorage.removeItem('token');
@@ -23,9 +29,11 @@ function App() {
   // login é o mesmo para todos; as telas abaixo são só de administrador
   if (tipoUsuario() !== 'administrador') return <InicioAluno aoSair={sair} />;
   if (tela === 'perfil') return <Perfil aoVoltar={() => setTela('inicio')} aoSair={sair} />;
-  if (tela === 'painel') return <PainelAdm aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  if (tela === 'gerenciar') return <GerenciarItem aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  return <Inicio aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
+  if (tela === 'painel') return <PainelAdm aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
+  // keys diferentes: sair da edição para "Gerenciar Item" começa um formulário vazio
+  if (tela === 'editar') return <GerenciarItem key="editar" item={itemEditado} aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
+  if (tela === 'gerenciar') return <GerenciarItem key="novo" aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
+  return <Inicio aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
 }
 
 export default App;

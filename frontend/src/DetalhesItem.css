@@ -142,6 +142,34 @@
   padding-top: 12px;
 }
 
+/* --- ADMIN: descrição e botão de editar --- */
+.detalhe-descricao {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.detalhe-descricao .valor {
+  white-space: pre-wrap;
+}
+
+.detalhe-editar {
+  align-self: center;
+  margin-top: 24px;
+  padding: 10px 28px;
+  border: 2px solid #2f80ed;
+  border-radius: 8px;
+  background: white;
+  color: #2f80ed;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-editar:hover {
+  background: #eef5ff;
+}
+
 /* --- AVISO DE SEGURANÇA --- */
 .aviso-seguranca {
   background-color: #fef3c7; /* Fundo amarelo suave */

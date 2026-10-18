@@ -4,7 +4,9 @@ import './DetalhesItem.css';
 import { tokenSalvo } from './api';
 
 // `topbar`: a barra de cima de quem abriu o detalhe, para os botões funcionarem aqui também
-function DetalhesItem({ item, aoVoltar, topbar }) {
+// `aoEditar`: só o admin passa; com ele aparecem status, local, descrição e o botão de editar
+function DetalhesItem({ item, aoVoltar, topbar, aoEditar }) {
+    const admin = !!aoEditar;
     const [imagens, setImagens] = useState([]);
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
 
@@ -96,6 +98,7 @@ function DetalhesItem({ item, aoVoltar, topbar }) {
                     {/* Coluna Direita: Informações do Item */}
                     <div className="coluna-info">
                         <h1>{item?.nome_objeto || 'Sem nome'}</h1>
+                        {admin && <span className={`inicio-status ${item.status}`}>{item.status}</span>}
 
                         <div className="especificacoes">
                             <div className="linha-especificacao">
@@ -114,8 +117,23 @@ function DetalhesItem({ item, aoVoltar, topbar }) {
                                 <span className="rotulo">Data e horário:</span>
                                 <span className="valor">{dataFormatada}</span>
                             </div>
+                            {admin && (
+                                <>
+                                    <div className="linha-especificacao">
+                                        <span className="rotulo">Local encontrado:</span>
+                                        <span className="valor">{item.local_encontrado || 'Não informado'}</span>
+                                    </div>
+                                    <div className="linha-especificacao detalhe-descricao">
+                                        <span className="rotulo">Descrição:</span>
+                                        <span className="valor">{item.descricao || 'Sem descrição.'}</span>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
+                        {admin ? (
+                            <button className="detalhe-editar" onClick={aoEditar}>Editar Informações</button>
+                        ) : (
                         <div className="aviso-seguranca">
                             <div className="tarjeta-aviso">
                                 <Lock size={20} className="icone-trava-aviso" />
@@ -125,6 +143,7 @@ function DetalhesItem({ item, aoVoltar, topbar }) {
                                 Por questões de segurança, informações detalhadas sobre o objeto, como o local onde foi encontrado e outros detalhes, estão disponíveis apenas no setor de segurança da UNIFOR.
                             </p>
                         </div>
+                        )}
                     </div>
 
                 </main>

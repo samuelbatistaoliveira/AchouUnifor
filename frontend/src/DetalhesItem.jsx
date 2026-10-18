@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Lock, User, Bell, HelpCircle, Info, Search } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 import './DetalhesItem.css';
-import logoUnifor from './assets/logo-achouunifor.png'; // Garanta que o caminho do logótipo está correto
 import { tokenSalvo } from './api';
 
-function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
+// `topbar`: a barra de cima de quem abriu o detalhe, para os botões funcionarem aqui também
+function DetalhesItem({ item, aoVoltar, topbar }) {
     const [imagens, setImagens] = useState([]);
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
 
@@ -50,33 +50,7 @@ function DetalhesItem({ item, aoVoltar, aoAbrirNotificacoes }) {
 
     return (
         <div className="ecra-detalhes-geral">
-            {/* Barra de Navegação Superior (Para contextualizar como o wireframe) */}
-            <header className="navbar-detalhes">
-                <div className="navbar-esquerda">
-                    <button className="logo-botao" onClick={aoVoltar} aria-label="Ir para o início">
-                        <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
-                    </button>
-                    <h1 className="titulo-navbar">AchouUNIFOR</h1>
-                </div>
-
-                <div className="navbar-direita">
-                    <a href="#" className="ativo-nav">Início</a>
-                    <a href="#">Denunciar</a>
-
-                    {/* O botão Notificações a funcionar corretamente */}
-                    <a
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            aoAbrirNotificacoes?.(); // o aluno ainda não tem notificações
-                        }}
-                    >
-                        Notificações
-                    </a>
-
-                    <User size={32} className="icone-usuario" />
-                </div>
-            </header>
+            {topbar}
 
             {/* Conteúdo Principal de Detalhes */}
             <div className="container-detalhes">

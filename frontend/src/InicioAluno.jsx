@@ -10,7 +10,7 @@ import { buscar } from './api';
 import './Inicio.css';
 import './InicioAluno.css';
 
-// notificações ainda não tem tela (o Topbar ignora o clique)
+// notificações ainda não tem tela para o aluno (sem aoAbrirNotificacoes o clique não faz nada)
 const MENU_ALUNO = [
   ['inicio', 'Início'],
   ['denunciar', 'Denunciar'],
@@ -48,10 +48,10 @@ function InicioAluno({ aoSair }) {
     return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('denunciar')} />;
   }
 
-  // mesma tela de detalhes do admin; ela não mostra o local
-  if (itemAberto) return <DetalhesItem item={itemAberto} aoVoltar={() => setItemAberto(null)} />;
-
   const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
+
+  // mesma tela de detalhes do admin; ela não mostra o local
+  if (itemAberto) return <DetalhesItem item={itemAberto} aoVoltar={() => setItemAberto(null)} topbar={topbar} />;
 
   if (tela === 'denunciar') {
     return (

@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
-import { API, enviar, tokenSalvo } from './api';
+import { buscar, enviar } from './api';
 import useImagensItens from './useImagensItens';
 
 // "2026-09-12T10:00:00.000Z" -> "12/09"
@@ -15,10 +15,8 @@ function DenunciasAdm() {
 
   const carregar = useCallback(
     () =>
-      fetch(`${API}/denuncias`, { headers: { Authorization: `Bearer ${tokenSalvo()}` } })
-        .then(async (r) => {
-          const dados = await r.json();
-          if (!r.ok) throw new Error(dados.mensagem);
+      buscar('/denuncias')
+        .then((dados) => {
           setDenuncias(dados);
         })
         .catch((e) => setErro(e.message || 'Não foi possível carregar as denúncias.')),

@@ -7,59 +7,6 @@
   color: #1e293b;
 }
 
-/* --- NAV BAR --- */
-/* --- NAV BAR --- */
-.navbar-detalhes {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #0c3483;
-  color: white;
-  padding: 16px 48px;
-}
-
-.navbar-esquerda {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.titulo-navbar {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: white;
-}
-
-.navbar-direita {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-
-.navbar-direita a {
-  color: white;
-  text-decoration: none;
-  font-size: 1.05rem;
-  transition: opacity 0.2s;
-}
-
-.navbar-direita a:hover {
-  opacity: 0.8;
-}
-
-.navbar-direita a.ativo-nav {
-  font-weight: 600;
-}
-
-.icone-usuario {
-  color: white;
-  cursor: pointer;
-  border: 2px solid white;
-  border-radius: 50%;
-  padding: 4px;
-}
-
 /* --- CONTEÚDO --- */
 .container-detalhes {
   max-width: 1100px;

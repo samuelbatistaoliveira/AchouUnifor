@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import useImagensItens from './useImagensItens';
+import { buscar } from './api';
 import CategoriasAdm from './CategoriasAdm';
 import UsuariosAdm from './UsuariosAdm';
 import DenunciasAdm from './DenunciasAdm';
@@ -21,14 +22,13 @@ function PainelAdm({ aoNavegar, aoAbrirPerfil }) {
   const imagens = useImagensItens(itens);
 
   useEffect(() => {
-    fetch(`${API}/itens`)
-      .then((r) => r.json())
+    buscar('/itens')
       .then((dados) => {
         // mais recentes primeiro
         setItens([...dados].sort((a, b) => new Date(b.data_horario) - new Date(a.data_horario)));
         setErro('');
       })
-      .catch(() => setErro('Não foi possível carregar os itens.'));
+      .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
   }, []);
 
   async function devolver(item) {

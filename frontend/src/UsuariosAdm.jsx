@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
-import { API, enviar, tokenSalvo } from './api';
+import { buscar, enviar } from './api';
 
 const TIPOS = { aluno: 'Aluno', administrador: 'Admin' };
 
@@ -20,10 +20,8 @@ function UsuariosAdm() {
 
   const carregar = useCallback(
     () =>
-      fetch(`${API}/usuarios`, { headers: { Authorization: `Bearer ${tokenSalvo()}` } })
-        .then(async (r) => {
-          const dados = await r.json();
-          if (!r.ok) throw new Error(dados.mensagem);
+      buscar('/usuarios')
+        .then((dados) => {
           setUsuarios(dados);
         })
         .catch((e) => setErro(e.message || 'Não foi possível carregar os usuários.')),

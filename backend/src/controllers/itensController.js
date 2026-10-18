@@ -45,9 +45,43 @@ async function getItens(req, res) {
   }
 }
 
+// Visão do aluno: só itens perdidos e só o básico (sem local, descrição nem quem registrou)
+async function listarPerdidos(req, res) {
+  try {
+    const { busca, categoria } = req.query;
+    const valores = [];
+    let query = `
+      SELECT itens.id_item, itens.nome_objeto, itens.data_horario, categorias.nome AS categoria
+      FROM itens
+      JOIN categorias ON itens.id_categoria = categorias.id_categoria
+      WHERE itens.status = 'perdido'
+    `;
+
+    if (busca) {
+      valores.push(`%${busca}%`);
+      query += ` AND itens.nome_objeto ILIKE $${valores.length}`;
+    }
+
+    if (categoria) {
+      valores.push(categoria);
+      query += ` AND categorias.nome = $${valores.length}`;
+    }
+
+    const resultado = await pool.query(query + ' ORDER BY itens.data_horario DESC', valores);
+    res.json(resultado.rows);
+
+  } catch (erro) {
+    console.error('Erro ao buscar itens perdidos:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+const STATUS_NOVO_ITEM = ['achado', 'perdido'];
+
 async function criarItem(req, res) {
   try {
     const { nome_objeto, descricao, categoria, data_horario, local_encontrado } = req.body;
+    const status = req.body.status ?? 'achado';
 
     if (!nome_objeto?.trim() || !categoria || !data_horario || !local_encontrado?.trim()) {
       return res.status(400).json({ mensagem: 'Preencha nome, categoria, data, horário e local.' });
@@ -57,13 +91,17 @@ async function criarItem(req, res) {
       return res.status(400).json({ mensagem: 'Data ou horário inválido.' });
     }
 
+    if (!STATUS_NOVO_ITEM.includes(status)) {
+      return res.status(400).json({ mensagem: 'Status inválido.' });
+    }
+
     const resultado = await pool.query(
-      `INSERT INTO itens (nome_objeto, descricao, data_horario, local_encontrado, id_categoria, id_usuario)
-       SELECT $1, $2, $3, $4, id_categoria, $6
+      `INSERT INTO itens (nome_objeto, descricao, data_horario, local_encontrado, id_categoria, id_usuario, status)
+       SELECT $1, $2, $3, $4, id_categoria, $6, $7
        FROM categorias
        WHERE nome = $5 AND status = 'ativo'
        RETURNING *`,
-      [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.usuario.id_usuario]
+      [nome_objeto.trim(), descricao?.trim() || null, data_horario, local_encontrado.trim(), categoria, req.usuario.id_usuario, status]
     );
 
     if (resultado.rows.length === 0) {
@@ -105,4 +143,4 @@ async function atualizarStatus(req, res) {
   }
 }
 
-module.exports = { getItens, criarItem, atualizarStatus };
+module.exports = { getItens, listarPerdidos, criarItem, atualizarStatus };

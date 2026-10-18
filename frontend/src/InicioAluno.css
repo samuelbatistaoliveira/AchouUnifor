@@ -1,0 +1,33 @@
+/* botão "Ver Item" do card */
+.aluno-ver {
+  align-self: flex-start;
+  padding: 5px 16px;
+  border: none;
+  border-radius: 999px;
+  background: #cfe4ff;
+  color: #1a4d8f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aluno-ver:hover {
+  background: #b5d4fb;
+}
+
+/* formulário de denúncia */
+.aluno-denuncia {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.aluno-denuncia small {
+  align-self: flex-end;
+  font-weight: 400;
+}
+
+.aluno-denuncia .gi-registrar {
+  align-self: flex-start;
+}

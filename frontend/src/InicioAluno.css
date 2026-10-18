@@ -15,67 +15,6 @@
   background: #b5d4fb;
 }
 
-/* detalhe do item */
-.aluno-detalhe {
-  width: min(520px, calc(100vw - 32px));
-  padding: 0;
-  border: none;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.aluno-detalhe::backdrop {
-  background: rgba(15, 23, 42, 0.55);
-}
-
-.aluno-fechar {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  padding: 6px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1f2937;
-  cursor: pointer;
-}
-
-.aluno-detalhe-corpo {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 18px 20px 20px;
-  color: #374151;
-}
-
-.aluno-detalhe-corpo h2 {
-  margin: 0;
-  color: #1f2937;
-}
-
-.aluno-detalhe-corpo p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.aluno-detalhe-info {
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-.aluno-denunciar {
-  align-self: flex-end;
-  margin-top: 8px;
-  padding: 10px 22px;
-  border: 2px solid #2f80ed;
-  border-radius: 8px;
-  background: white;
-  color: #2f80ed;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 /* formulário de denúncia */
 .aluno-denuncia {
   display: flex;

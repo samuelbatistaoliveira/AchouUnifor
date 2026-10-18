@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { ImageOff, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ImageOff } from 'lucide-react';
 import Topbar from './components/Topbar';
 import Perfil from './Perfil';
 import DenunciarItem from './DenunciarItem';
+import DetalhesItem from './DetalhesItem';
 import useImagensItens from './useImagensItens';
 import useCategorias from './useCategorias';
 import { buscar } from './api';
@@ -28,8 +29,6 @@ function InicioAluno({ aoSair }) {
   const [data, setData] = useState('');
   const [erro, setErro] = useState('');
   const [itemAberto, setItemAberto] = useState(null);
-  const [itemDenunciado, setItemDenunciado] = useState('');
-  const dialogo = useRef(null);
   const imagens = useImagensItens(itens);
   const { categorias } = useCategorias();
 
@@ -40,14 +39,8 @@ function InicioAluno({ aoSair }) {
       .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
   }, [busca, categoria]);
 
-  // <dialog> nativo: Esc fecha e o foco fica preso nele
-  useEffect(() => {
-    if (itemAberto) dialogo.current?.showModal();
-  }, [itemAberto]);
-
-  function navegar(destino, idItem = '') {
+  function navegar(destino) {
     setItemAberto(null);
-    setItemDenunciado(idItem);
     setTela(destino);
   }
 
@@ -55,13 +48,16 @@ function InicioAluno({ aoSair }) {
     return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('denunciar')} />;
   }
 
+  // mesma tela de detalhes do admin; ela não mostra o local
+  if (itemAberto) return <DetalhesItem item={itemAberto} aoVoltar={() => setItemAberto(null)} />;
+
   const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
 
   if (tela === 'denunciar') {
     return (
       <div className="inicio">
         {topbar}
-        <DenunciarItem key={itemDenunciado} idInicial={itemDenunciado} />
+        <DenunciarItem />
       </div>
     );
   }
@@ -112,28 +108,6 @@ function InicioAluno({ aoSair }) {
         </div>
       </main>
 
-      <dialog ref={dialogo} className="aluno-detalhe" onClose={() => setItemAberto(null)} aria-labelledby="aluno-detalhe-nome">
-        {itemAberto && (
-          <>
-            <button className="aluno-fechar" onClick={() => dialogo.current.close()} aria-label="Fechar">
-              <X size={20} />
-            </button>
-            {imagens[itemAberto.id_item] ? (
-              <img className="inicio-foto" src={imagens[itemAberto.id_item]} alt={itemAberto.nome_objeto} />
-            ) : (
-              <div className="inicio-foto inicio-sem-foto"><ImageOff size={40} /></div>
-            )}
-            <div className="aluno-detalhe-corpo">
-              <h2 id="aluno-detalhe-nome">{itemAberto.nome_objeto}</h2>
-              <p className="aluno-detalhe-info">{itemAberto.categoria} · {formatarData(itemAberto.data_horario)}</p>
-              <p>{itemAberto.descricao || 'Sem descrição.'}</p>
-              <button className="aluno-denunciar" onClick={() => navegar('denunciar', itemAberto.id_item)}>
-                Denunciar
-              </button>
-            </div>
-          </>
-        )}
-      </dialog>
     </div>
   );
 }

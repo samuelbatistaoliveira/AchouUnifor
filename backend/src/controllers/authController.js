@@ -134,7 +134,57 @@ async function cadastro(req, res) {
     }
 }
 
+// Esqueci a senha: confere se o e-mail tem conta ativa antes de mandar o link.
+// Aviso: responder "não encontrado" deixa qualquer um testar quais e-mails existem (escolha do projeto).
+async function esqueciSenha(req, res) {
+    try {
+        const email = String(req.body.email || "").trim().toLowerCase()
+
+        if (!email) {
+            return res.status(400).json({
+                mensagem: "Informe seu e-mail institucional."
+            })
+        }
+
+        if (!email.endsWith("@edu.unifor.br")) {
+            return res.status(400).json({
+                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
+            })
+        }
+
+        const resultado = await pool.query(
+            "SELECT status FROM usuarios WHERE LOWER(email_institucional) = $1",
+            [email]
+        )
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                mensagem: "Não encontramos uma conta com esse e-mail."
+            })
+        }
+
+        if (resultado.rows[0].status !== "ativo") {
+            return res.status(403).json({
+                mensagem: "Esta conta está desativada. Procure a administração."
+            })
+        }
+
+        // shortcut: ainda não envia o e-mail; gerar o link de redefinição e enviá-lo aqui
+        return res.status(200).json({
+            mensagem: "Link de recuperação enviado."
+        })
+
+    } catch (erro) {
+        console.error("Erro ao recuperar senha:", erro)
+
+        return res.status(500).json({
+            mensagem: "Erro interno do servidor."
+        })
+    }
+}
+
 module.exports = {
     login,
-    cadastro
+    cadastro,
+    esqueciSenha
 }

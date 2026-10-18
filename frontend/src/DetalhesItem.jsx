@@ -1,14 +1,30 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Lock } from 'lucide-react';
 import './DetalhesItem.css';
-import { tokenSalvo } from './api';
+import { enviar, tokenSalvo } from './api';
+
+const STATUS_ITEM = { achado: 'Achado', perdido: 'Perdido', devolvido: 'Devolvido' };
 
 // `topbar`: a barra de cima de quem abriu o detalhe, para os botões funcionarem aqui também
-// `aoEditar`: só o admin passa; com ele aparecem status, local, descrição e o botão de editar
-function DetalhesItem({ item, aoVoltar, topbar, aoEditar }) {
+// `aoEditar`: só o admin passa; com ele aparecem status, local, descrição, editar e alterar status
+// `aoStatusAlterado(item)`: avisa quem abriu o detalhe, para a lista ficar com o status novo
+function DetalhesItem({ item, aoVoltar, topbar, aoEditar, aoStatusAlterado }) {
     const admin = !!aoEditar;
     const [imagens, setImagens] = useState([]);
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
+    const [novoStatus, setNovoStatus] = useState(item?.status ?? '');
+    const [alterando, setAlterando] = useState(false);
+    const [avisoStatus, setAvisoStatus] = useState({ texto: '', erro: false });
+
+    async function alterarStatus() {
+        setAlterando(true);
+        setAvisoStatus({ texto: '', erro: false });
+        const falha = await enviar(`/itens/${item.id_item}/status`, 'PATCH', { status: novoStatus });
+        setAlterando(false);
+        if (falha) return setAvisoStatus({ texto: falha, erro: true });
+        setAvisoStatus({ texto: `Status alterado para ${STATUS_ITEM[novoStatus]}.`, erro: false });
+        aoStatusAlterado?.({ ...item, status: novoStatus });
+    }
 
     useEffect(() => {
         async function carregarGaleria() {
@@ -98,7 +114,7 @@ function DetalhesItem({ item, aoVoltar, topbar, aoEditar }) {
                     {/* Coluna Direita: Informações do Item */}
                     <div className="coluna-info">
                         <h1>{item?.nome_objeto || 'Sem nome'}</h1>
-                        {admin && <span className={`inicio-status ${item.status}`}>{item.status}</span>}
+                        {admin && <span className={`inicio-status ${item.status}`}>{STATUS_ITEM[item.status] ?? item.status}</span>}
 
                         <div className="especificacoes">
                             <div className="linha-especificacao">
@@ -132,7 +148,32 @@ function DetalhesItem({ item, aoVoltar, topbar, aoEditar }) {
                         </div>
 
                         {admin ? (
-                            <button className="detalhe-editar" onClick={aoEditar}>Editar Informações</button>
+                            <div className="detalhe-acoes">
+                                <button className="detalhe-editar" onClick={aoEditar}>Editar Informações</button>
+
+                                <label className="detalhe-status-campo">
+                                    Status do item
+                                    <select value={novoStatus} onChange={(e) => { setNovoStatus(e.target.value); setAvisoStatus({ texto: '', erro: false }); }}>
+                                        {Object.entries(STATUS_ITEM).map(([valor, rotulo]) => (
+                                            <option key={valor} value={valor}>{rotulo}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <small className="detalhe-dica">Só itens "Perdido" aparecem para os alunos.</small>
+
+                                <button
+                                    className="detalhe-alterar-status"
+                                    onClick={alterarStatus}
+                                    disabled={alterando || novoStatus === item.status}
+                                >
+                                    {alterando ? 'Alterando...' : 'Alterar Status'}
+                                </button>
+                                {avisoStatus.texto && (
+                                    <p className={avisoStatus.erro ? 'detalhe-erro' : 'detalhe-ok'} role={avisoStatus.erro ? 'alert' : 'status'}>
+                                        {avisoStatus.texto}
+                                    </p>
+                                )}
+                            </div>
                         ) : (
                         <div className="aviso-seguranca">
                             <div className="tarjeta-aviso">

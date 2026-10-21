@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { ChevronDown, ChevronLeft, ImageOff, Plus } from 'lucide-react';
 import { buscar, enviar } from '../../services/api';
 import { STATUS_DENUNCIA } from '../../utils/constantes';
+import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
 import '../../styles/Inicio.css';
 import '../../styles/MinhasDenuncias.css';
 
@@ -23,12 +25,16 @@ const AVISOS = {
 const diaMes = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-// Denúncias de perda que o próprio aluno fez (aberta pelo Perfil)
-function MinhasDenuncias({ aoVoltar, aoNovaDenuncia }) {
+// Denúncias de perda que o próprio aluno fez (aberta pelo Perfil); o filtro fica na URL: ?status=perdido
+function MinhasDenuncias() {
+  const navigate = useNavigate();
+  const aoVoltar = () => navigate('/perfil');
+  const aoNovaDenuncia = () => navigate('/denunciar');
+  const [lerFiltro, mudarFiltro] = useFiltrosDaUrl();
+  const filtro = FILTROS.some(([valor]) => valor === lerFiltro('status')) ? lerFiltro('status') : 'todas';
   const [denuncias, setDenuncias] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
-  const [filtro, setFiltro] = useState('todas');
   const [aberta, setAberta] = useState(null); // id_denuncia com os detalhes à mostra
   const [removendo, setRemovendo] = useState(null);
 
@@ -70,7 +76,7 @@ function MinhasDenuncias({ aoVoltar, aoNovaDenuncia }) {
             key={valor}
             className={filtro === valor ? 'ativo' : undefined}
             aria-pressed={filtro === valor}
-            onClick={() => setFiltro(valor)}
+            onClick={() => mudarFiltro('status', valor === 'todas' ? '' : valor)}
           >
             {rotulo} <span className="md-contagem">{doFiltro(valor).length}</span>
           </button>

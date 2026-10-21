@@ -1,43 +1,104 @@
-import { useState } from 'react';
-import Login from './pages/auth/Login.jsx';
-import Inicio from './pages/admin/Inicio.jsx';
-import Perfil from './pages/comum/Perfil.jsx';
-import GerenciarItem from './pages/admin/GerenciarItem.jsx';
-import PainelAdm from './pages/admin/PainelAdm.jsx';
-import InicioAluno from './pages/aluno/InicioAluno.jsx';
-import Notificacoes from './pages/admin/Notificacoes.jsx';
-import CriarNotificacao from './pages/admin/CriarNotificacao.jsx';
-import { tipoUsuario } from './services/api';
+import { Fragment, useEffect, useState } from 'react';
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router';
+import Topbar from './components/Topbar';
+import Login from './pages/auth/Login';
+import Cadastro from './pages/auth/Cadastro';
+import EsqueceuSenha from './pages/auth/EsqueceuSenha';
+import Inicio from './pages/admin/Inicio';
+import GerenciarItem from './pages/admin/GerenciarItem';
+import Notificacoes from './pages/admin/Notificacoes';
+import CriarNotificacao from './pages/admin/CriarNotificacao';
+import PainelAdm from './pages/admin/PainelAdm';
+import InicioAluno from './pages/aluno/InicioAluno';
+import DenunciarPerda from './pages/aluno/DenunciarPerda';
+import NotificacoesAluno from './pages/aluno/NotificacoesAluno';
+import MinhasDenuncias from './pages/aluno/MinhasDenuncias';
+import DetalhesItem from './pages/comum/DetalhesItem';
+import Perfil from './pages/comum/Perfil';
+import { tipoUsuario, tokenSalvo } from './services/api';
+
+// Telas com a barra de cima
+function ComTopbar() {
+  return (
+    <div className="inicio">
+      <Topbar />
+      <Outlet />
+    </div>
+  );
+}
+
+// Clicar no menu da tela em que já se está abre ela do zero (ex.: formulário vazio)
+function NovaACadaVisita({ children }) {
+  const { key } = useLocation();
+  return <Fragment key={key}>{children}</Fragment>;
+}
 
 function App() {
-  const temToken = () => !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
-  const [logado, setLogado] = useState(temToken);
-  const [tela, setTela] = useState('inicio');
-  const [itemEditado, setItemEditado] = useState(null);
+  const [logado, setLogado] = useState(() => !!tokenSalvo());
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  function editarItem(item) {
-    setItemEditado(item);
-    setTela('editar');
+  // cada tela nova começa do topo
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  function entrar() {
+    setLogado(true);
+    // volta para a tela que a pessoa tentou abrir antes de fazer login
+    navigate(location.state?.de ?? '/', { replace: true });
   }
 
   function sair() {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
-    setTela('inicio');
     setLogado(false);
+    navigate('/login', { replace: true });
   }
 
-  if (!logado) return <Login aoEntrar={() => setLogado(true)} />;
-  // login é o mesmo para todos; as telas abaixo são só de administrador
-  if (tipoUsuario() !== 'administrador') return <InicioAluno aoSair={sair} />;
-  if (tela === 'perfil') return <Perfil aoVoltar={() => setTela('inicio')} aoSair={sair} />;
-  if (tela === 'painel') return <PainelAdm aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
-  // keys diferentes: sair da edição para "Gerenciar Item" começa um formulário vazio
-  if (tela === 'editar') return <GerenciarItem key="editar" item={itemEditado} aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  if (tela === 'notificacoes') return <Notificacoes aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  if (tela === 'nova-notificacao') return <CriarNotificacao aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  if (tela === 'gerenciar') return <GerenciarItem key="novo" aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} />;
-  return <Inicio aoNavegar={setTela} aoAbrirPerfil={() => setTela('perfil')} aoEditarItem={editarItem} />;
+  if (!logado) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login aoEntrar={entrar} />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/esqueci-senha" element={<EsqueceuSenha />} />
+        <Route path="*" element={<Navigate to="/login" replace state={{ de: location }} />} />
+      </Routes>
+    );
+  }
+
+  // o login é o mesmo para todos; o tipo do usuário decide quais rotas existem
+  if (tipoUsuario() === 'administrador') {
+    return (
+      <Routes>
+        <Route element={<ComTopbar />}>
+          <Route index element={<Inicio />} />
+          <Route path="gerenciar/:id?" element={<NovaACadaVisita><GerenciarItem /></NovaACadaVisita>} />
+          <Route path="notificacoes" element={<Notificacoes />} />
+          <Route path="notificacoes/nova" element={<CriarNotificacao />} />
+          <Route path="painel" element={<Navigate to="/painel/itens" replace />} />
+          <Route path="painel/:secao" element={<PainelAdm />} />
+        </Route>
+        <Route path="itens/:id" element={<DetalhesItem />} />
+        <Route path="perfil" element={<Perfil aoSair={sair} />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route element={<ComTopbar />}>
+        <Route index element={<InicioAluno />} />
+        <Route path="denunciar" element={<NovaACadaVisita><DenunciarPerda /></NovaACadaVisita>} />
+        <Route path="notificacoes" element={<NotificacoesAluno />} />
+        <Route path="minhas-denuncias" element={<MinhasDenuncias />} />
+      </Route>
+      <Route path="itens/:id" element={<DetalhesItem />} />
+      <Route path="perfil" element={<Perfil aoSair={sair} />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 export default App;

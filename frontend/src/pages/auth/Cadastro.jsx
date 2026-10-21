@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Search, User, Lock, Mail, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '../../styles/Login.css';
 
-function Cadastro({ aoVoltar }) {
+function Cadastro() {
+  const navigate = useNavigate();
+  const aoVoltar = () => navigate('/login');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');

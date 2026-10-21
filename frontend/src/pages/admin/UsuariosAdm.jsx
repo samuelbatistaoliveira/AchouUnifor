@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { buscar, enviar } from '../../services/api';
+import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
 
 const TIPOS = { aluno: 'Aluno', administrador: 'Admin' };
 
@@ -13,7 +14,8 @@ function formatarTelefone(t) {
 
 function UsuariosAdm() {
   const [usuarios, setUsuarios] = useState([]);
-  const [busca, setBusca] = useState('');
+  const [filtro, mudarFiltro] = useFiltrosDaUrl(); // /painel/usuarios?busca=...
+  const busca = filtro('busca');
   const [editando, setEditando] = useState(null); // { id_usuario, nome, telefone, tipo_usuario }
   const [ocupado, setOcupado] = useState(false);
   const [erro, setErro] = useState('');
@@ -71,7 +73,7 @@ function UsuariosAdm() {
           placeholder="Buscar por nome ou e-mail"
           aria-label="Buscar usuário"
           value={busca}
-          onChange={(e) => setBusca(e.target.value)}
+          onChange={(e) => mudarFiltro('busca', e.target.value)}
         />
       </label>
 

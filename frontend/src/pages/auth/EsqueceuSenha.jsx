@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Mail, ArrowLeft, KeyRound, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '../../styles/Login.css';
@@ -6,7 +7,9 @@ import { API } from '../../services/api';
 
 const DOMINIO = '@edu.unifor.br'; // mesma regra do login e do cadastro (authController)
 
-function EsqueceuSenha({ aoVoltar }) {
+function EsqueceuSenha() {
+  const navigate = useNavigate();
+  const aoVoltar = () => navigate('/login');
   const [email, setEmail] = useState('');
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState('');

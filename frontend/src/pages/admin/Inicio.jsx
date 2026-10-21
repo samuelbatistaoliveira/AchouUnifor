@@ -5,7 +5,6 @@ import { ImageOff } from 'lucide-react';
 import { BLOCOS } from '../../utils/constantes';
 import useCategorias from '../../hooks/useCategorias';
 import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
-import useImagensItens from '../../hooks/useImagensItens';
 import { API, tokenSalvo } from '../../services/api';
 
 import '../../styles/Inicio.css';
@@ -44,9 +43,8 @@ function Inicio() {
   const data = filtro('data');
   const status = filtro('status');
 
-  // Busca categorias e imagens
+  // Busca categorias
   const { categorias } = useCategorias();
-  const imagens = useImagensItens(itens);
 
   // Busca os itens reais no backend
   useEffect(() => {
@@ -224,10 +222,10 @@ function Inicio() {
               onClick={() => navigate(`/itens/${item.id_item}`)}
               style={{ cursor: 'pointer' }}
             >
-              {imagens[item.id_item] ? (
+              {item.imagem_url || item.foto ? (
                 <img
                   className="inicio-foto"
-                  src={imagens[item.id_item]}
+                  src={item.imagem_url || item.foto}
                   alt={item.nome_objeto}
                 />
               ) : (

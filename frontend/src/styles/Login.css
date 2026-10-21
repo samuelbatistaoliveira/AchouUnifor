@@ -6,11 +6,17 @@
   font-family: 'Inter', -apple-system, sans-serif; /* Recomendado usar Inter ou similar */
 }
 
-/* Configuração do Container Geral */
+/* Login, cadastro e esqueci a senha ocupam exatamente a janela: a página não rola */
+html:has(.container-geral) {
+  overflow: hidden;
+}
+
 .container-geral {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* --- Barra de Navegação (Header) --- */
@@ -21,10 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
+  flex-shrink: 0;
 }
 
 .navbar-esquerda {
@@ -83,13 +86,18 @@
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
-  padding-top: 80px; /* Espaço para a navbar fixa */
+  min-height: 0;
+}
+
+/* margin auto centraliza na vertical sem cortar o topo se faltar espaço */
+.conteudo-principal > * {
+  margin-block: auto;
 }
 
 .flex-layout {
   display: flex;
   width: 100%;
-  padding: 60px;
+  padding: 24px 60px;
 }
 
 /* --- Coluna da Esquerda (Texto) --- */
@@ -194,7 +202,7 @@
 
 .cartao-login {
   background-color: white;
-  padding: 40px;
+  padding: 28px 36px;
   border-radius: 12px;
   width: 100%;
   max-width: 500px;
@@ -206,7 +214,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .icone-sacola-grande {
@@ -236,7 +244,7 @@
 .divisor-h {
   height: 1px;
   background-color: #eee;
-  margin: 25px 0;
+  margin: 18px 0;
 }
 
 .instrucao-login {
@@ -244,13 +252,13 @@
   color: #444;
   line-height: 1.5;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 18px;
 }
 
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .grupo-input label {
@@ -388,7 +396,6 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 10px;
   width: 100%;
 }
 
@@ -399,7 +406,7 @@
 .divisor-ou {
   text-align: center;
   position: relative;
-  margin: 30px 0;
+  margin: 18px 0;
 }
 
 .divisor-ou span {
@@ -425,7 +432,7 @@
 .info-alerta {
   background-color: #e8f0fe;
   color: #0b3d91;
-  padding: 20px;
+  padding: 14px 16px;
   border-radius: 8px;
   display: flex;
   gap: 15px;
@@ -447,8 +454,8 @@
 .botoes-acao {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .botao-criar-conta {
@@ -469,4 +476,75 @@
 
 .botao-criar-conta:hover {
   background-color: rgba(0, 86, 179, 0.05);
+}
+
+/* --- Sem rolagem: em telas mais baixas some o que é secundário --- */
+@media (max-height: 860px) {
+  .divisor-ou,
+  .info-alerta {
+    display: none;
+  }
+
+  .secao-texto p {
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-height: 700px) {
+  .flex-layout {
+    padding-block: 12px;
+  }
+
+  .instrucao-login,
+  .logo-cartao svg,
+  .logo-cartao p {
+    display: none;
+  }
+
+  .divisor-h {
+    margin: 12px 0;
+  }
+
+  .secao-texto h3 {
+    margin-bottom: 16px;
+  }
+}
+
+/* janela baixa demais para caber o formulário: aí rolar é melhor que cortar o botão */
+@media (max-height: 540px) {
+  html:has(.container-geral) {
+    overflow: auto;
+  }
+
+  .container-geral {
+    height: auto;
+    min-height: 100dvh;
+  }
+}
+
+/* telas estreitas (celular): só o cartão */
+@media (max-width: 900px) {
+  .secao-texto {
+    display: none;
+  }
+
+  .flex-layout {
+    padding-inline: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 4px 16px;
+  }
+
+  .navbar-esquerda span,
+  .navbar-esquerda .divisor-v,
+  .navbar-esquerda .icone-sacola {
+    display: none;
+  }
+
+  .cartao-login {
+    padding: 24px 20px;
+  }
 }

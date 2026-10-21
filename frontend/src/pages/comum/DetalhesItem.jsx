@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Lock } from 'lucide-react';
-import './DetalhesItem.css';
-import { enviar, tokenSalvo } from './api';
+import '../../styles/DetalhesItem.css';
+import { enviar, tokenSalvo } from '../../services/api';
 
 const STATUS_ITEM = { achado: 'Achado', perdido: 'Perdido', devolvido: 'Devolvido' };
 

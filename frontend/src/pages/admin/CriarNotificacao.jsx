@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
-import Topbar from './components/Topbar';
-import { buscar, enviar } from './api';
-import './Inicio.css';
-import './GerenciarItem.css';
-import './Notificacoes.css';
+import Topbar from '../../components/Topbar';
+import { buscar, enviar } from '../../services/api';
+import '../../styles/Inicio.css';
+import '../../styles/GerenciarItem.css';
+import '../../styles/Notificacoes.css';
 
 // mesmos limites do backend (notificacoesController)
 const TITULO_MAX = 100;

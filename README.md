@@ -29,6 +29,31 @@ Entre os recursos planejados para a plataforma estão:
 
 > O conjunto de funcionalidades poderá sofrer alterações durante o desenvolvimento, conforme os requisitos definidos para o sistema.
 
+## 📁 Estrutura de pastas
+
+```
+backend/
+  sql/                 scripts do banco
+  src/
+    config/            banco, Supabase e upload
+    controllers/       lógica de cada rota
+    routes/            rotas do Express
+    seguranca/         verificarToken e verificarAdmin
+    server.js
+frontend/src/
+  pages/
+    auth/              login, cadastro, esqueci a senha
+    admin/             telas do administrador
+    aluno/             telas do aluno
+    comum/             telas usadas pelos dois (perfil, detalhes do item)
+  components/          pedaços reaproveitados (Topbar, CampoFotos)
+  hooks/               useCategorias, useImagensItens
+  services/api.js      chamadas ao backend
+  utils/constantes.js  listas fixas (blocos, status)
+  styles/              arquivos .css
+  assets/              imagens
+```
+
 ## 👨‍💻 Equipe
 
 * Fernando Antonio de Albuquerque Rocha Neto

@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
-import Topbar from './components/Topbar';
-import Perfil from './Perfil';
+import Topbar from '../../components/Topbar';
+import Perfil from '../comum/Perfil';
 import DenunciarPerda from './DenunciarPerda';
 import MinhasDenuncias from './MinhasDenuncias';
 import NotificacoesAluno from './NotificacoesAluno';
-import DetalhesItem from './DetalhesItem';
-import useImagensItens from './useImagensItens';
-import useCategorias from './useCategorias';
-import { buscar } from './api';
-import './Inicio.css';
-import './InicioAluno.css';
+import DetalhesItem from '../comum/DetalhesItem';
+import useImagensItens from '../../hooks/useImagensItens';
+import useCategorias from '../../hooks/useCategorias';
+import { buscar } from '../../services/api';
+import '../../styles/Inicio.css';
+import '../../styles/InicioAluno.css';
 
 const MENU_ALUNO = [
   ['inicio', 'Início'],

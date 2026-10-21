@@ -2,14 +2,14 @@
 import { useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 
-import Topbar from './components/Topbar';
-import { BLOCOS } from './constantes';
-import useCategorias from './useCategorias';
-import useImagensItens from './useImagensItens';
-import DetalhesItem from './DetalhesItem';
-import { API, tokenSalvo } from './api';
+import Topbar from '../../components/Topbar';
+import { BLOCOS } from '../../utils/constantes';
+import useCategorias from '../../hooks/useCategorias';
+import useImagensItens from '../../hooks/useImagensItens';
+import DetalhesItem from '../comum/DetalhesItem';
+import { API, tokenSalvo } from '../../services/api';
 
-import './Inicio.css';
+import '../../styles/Inicio.css';
 
 const STATUS = ['achado', 'perdido', 'devolvido'];
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { HelpCircle, Info, Search, FileText, Bell, User, Lock, Eye, EyeOff, ExternalLink, ArrowRight, Mail } from 'lucide-react';
-import './Login.css';
-import logoUnifor from './assets/logo-achouunifor.png';
+import '../../styles/Login.css';
+import logoUnifor from '../../assets/logo-achouunifor.png';
 import Cadastro from './Cadastro';
 import EsqueceuSenha from './EsqueceuSenha';
 import { motion } from 'framer-motion';

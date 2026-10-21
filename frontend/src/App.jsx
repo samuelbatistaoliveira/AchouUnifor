@@ -4,6 +4,7 @@ import Topbar from './components/Topbar';
 import Login from './pages/auth/Login';
 import Cadastro from './pages/auth/Cadastro';
 import EsqueceuSenha from './pages/auth/EsqueceuSenha';
+import RedefinirSenha from './pages/auth/RedefinirSenha';
 import Inicio from './pages/admin/Inicio';
 import GerenciarItem from './pages/admin/GerenciarItem';
 import Notificacoes from './pages/admin/Notificacoes';
@@ -62,6 +63,7 @@ function App() {
         <Route path="/login" element={<Login aoEntrar={entrar} />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/esqueci-senha" element={<EsqueceuSenha />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="*" element={<Navigate to="/login" replace state={{ de: location }} />} />
       </Routes>
     );
@@ -81,6 +83,7 @@ function App() {
         </Route>
         <Route path="itens/:id" element={<DetalhesItem />} />
         <Route path="perfil" element={<Perfil aoSair={sair} />} />
+        <Route path="redefinir-senha" element={<RedefinirSenha />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
@@ -96,6 +99,7 @@ function App() {
       </Route>
       <Route path="itens/:id" element={<DetalhesItem />} />
       <Route path="perfil" element={<Perfil aoSair={sair} />} />
+      <Route path="redefinir-senha" element={<RedefinirSenha />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

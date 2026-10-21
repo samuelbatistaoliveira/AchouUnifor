@@ -14,8 +14,10 @@ function EsqueceuSenha() {
   const [enviado, setEnviado] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [linkDev, setLinkDev] = useState('');
 
-  // o backend confere se o e-mail tem conta ativa (e é onde o envio do link vai entrar)
+  // o backend confere se o e-mail tem conta ativa e envia o link de recuperação
   const handleEnviar = async (e) => {
     e.preventDefault();
     const limpo = email.trim().toLowerCase();
@@ -41,6 +43,8 @@ function EsqueceuSenha() {
       }
 
       setEmail(limpo);
+      if (dados.previewUrl) setPreviewUrl(dados.previewUrl);
+      if (dados.linkDev) setLinkDev(dados.linkDev);
       setEnviado(true);
     } catch {
       setErro('Não foi possível conectar ao servidor. Tente novamente.');
@@ -52,6 +56,8 @@ function EsqueceuSenha() {
   function usarOutroEmail() {
     setEnviado(false);
     setEmail('');
+    setPreviewUrl('');
+    setLinkDev('');
   }
 
   return (
@@ -117,6 +123,25 @@ function EsqueceuSenha() {
                 Enviamos para <strong>{email}</strong> um link para criar uma nova senha.
                 Confira também a caixa de spam.
               </p>
+
+              {previewUrl && (
+                <div style={{ marginBottom: '20px', padding: '10px 14px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#1e40af', fontWeight: 600 }}>Ambiente de Testes:</span>
+                  <a href={previewUrl} target="_blank" rel="noreferrer" style={{ display: 'block', color: '#0284c7', marginTop: '4px', textDecoration: 'underline' }}>
+                    Visualizar e-mail de teste no Ethereal ↗
+                  </a>
+                </div>
+              )}
+
+              {linkDev && !previewUrl && (
+                <div style={{ marginBottom: '20px', padding: '10px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#475569', fontWeight: 600 }}>Link gerado:</span>
+                  <a href={linkDev} style={{ display: 'block', color: '#0284c7', marginTop: '4px', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                    Ir diretamente para a redefinição de senha ↗
+                  </a>
+                </div>
+              )}
+
               <div className="botoes-acao">
                 <button type="button" className="botao-entrar" onClick={aoVoltar}>
                   Voltar para o login

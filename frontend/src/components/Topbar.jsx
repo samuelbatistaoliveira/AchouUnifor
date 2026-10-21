@@ -1,42 +1,60 @@
 import { User } from 'lucide-react';
+import { Link, useLocation } from 'react-router';
 import logoUnifor from '../assets/logo-achouunifor.png';
+import { tipoUsuario } from '../services/api';
 import '../styles/Inicio.css';
 
-const MENU = [
-  ['inicio', 'Início'],
-  ['gerenciar', 'Gerenciar Item'],
-  ['notificacoes', 'Notificações'],
-  ['painel', 'Painel Adm.'],
+const MENU_ADMIN = [
+  ['/', 'Início'],
+  ['/gerenciar', 'Gerenciar Item'],
+  ['/notificacoes', 'Notificações'],
+  ['/painel', 'Painel Adm.'],
 ];
 
-// Barra superior das telas de quem está logado; `ativo` é a tela atual
-function Topbar({ ativo, aoNavegar, aoAbrirPerfil, menu = MENU }) {
-  function clicarLogo() {
-    aoNavegar('inicio');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+const MENU_ALUNO = [
+  ['/', 'Início'],
+  ['/denunciar', 'Denunciar'],
+  ['/notificacoes', 'Notificações'],
+];
+
+// Barra superior das telas de quem está logado; o menu depende do tipo de usuário
+function Topbar() {
+  const { pathname } = useLocation();
+  const menu = tipoUsuario() === 'administrador' ? MENU_ADMIN : MENU_ALUNO;
+
+  // "Início" também fica marcado no detalhe de um item (/itens/5); os outros valem para as subrotas
+  const ativo = (para) =>
+    para === '/'
+      ? pathname === '/' || pathname.startsWith('/itens/')
+      : pathname === para || pathname.startsWith(`${para}/`);
 
   return (
     <header className="inicio-topbar">
-      <button className="logo-botao" onClick={clicarLogo} aria-label="Ir para o início">
+      <Link
+        to="/"
+        className="logo-botao"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Ir para o início"
+      >
         <img className="inicio-logo" src={logoUnifor} alt="AchouUNIFOR" />
-      </button>
+      </Link>
 
       <div className="inicio-direita">
         <nav className="inicio-menu">
-          {menu.map(([tela, rotulo]) => (
-            <button
-              key={tela}
-              className={tela === ativo ? 'ativo' : undefined}
-              onClick={() => aoNavegar(tela)}
+          {menu.map(([para, rotulo]) => (
+            <Link
+              key={para}
+              to={para}
+              className={ativo(para) ? 'ativo' : undefined}
+              aria-current={ativo(para) ? 'page' : undefined}
             >
               {rotulo}
-            </button>
+            </Link>
           ))}
         </nav>
-        <button className="inicio-perfil" onClick={aoAbrirPerfil} aria-label="Perfil">
+        <Link to="/perfil" className="inicio-perfil" aria-label="Perfil">
           <User size={22} />
-        </button>
+        </Link>
       </div>
     </header>
   );

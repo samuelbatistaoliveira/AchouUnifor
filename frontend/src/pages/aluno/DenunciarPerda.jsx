@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { CircleCheck } from 'lucide-react';
 import CampoFotos, { enviarFotos } from '../../components/CampoFotos';
 import { BLOCOS } from '../../utils/constantes';
@@ -10,7 +11,8 @@ const MAX_FOTOS = 5; // mesmo limite do backend
 const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', data: '', horario: '' };
 
 // O aluno conta o que perdeu; a denúncia vai só para o admin (tela Denúncias) e para "Minhas denúncias"
-function DenunciarPerda({ aoNavegar }) {
+function DenunciarPerda() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(VAZIO);
   const [fotos, setFotos] = useState([]); // { arquivo, url }
   const [enviando, setEnviando] = useState(false);
@@ -71,8 +73,8 @@ function DenunciarPerda({ aoNavegar }) {
           <p><strong>Denúncia enviada!</strong></p>
           <p>A administração vai analisar a perda de "{enviada.nome}".</p>
           {enviada.falhas > 0 && <p className="gi-erro">{enviada.falhas} foto(s) não foram enviadas.</p>}
-          <button className="gi-registrar" onClick={() => aoNavegar('minhas-denuncias')}>Ver minhas denúncias</button>
-          <button className="gi-registrar" onClick={() => aoNavegar('inicio')}>Voltar ao Início</button>
+          <button className="gi-registrar" onClick={() => navigate('/minhas-denuncias')}>Ver minhas denúncias</button>
+          <button className="gi-registrar" onClick={() => navigate('/')}>Voltar ao Início</button>
         </section>
       ) : (
         <form className="gi-form" onSubmit={denunciar}>
@@ -142,7 +144,7 @@ function DenunciarPerda({ aoNavegar }) {
             <button type="submit" className="gi-registrar" disabled={enviando}>
               {enviando ? 'Enviando...' : 'Realizar Denúncia'}
             </button>
-            <button type="button" className="gi-cancelar" onClick={() => aoNavegar('inicio')}>
+            <button type="button" className="gi-cancelar" onClick={() => navigate('/')}>
               Cancelar
             </button>
           </div>

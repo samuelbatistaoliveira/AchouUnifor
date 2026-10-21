@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, ImageOff } from 'lucide-react';
-import Topbar from '../../components/Topbar';
 import useImagensItens from '../../hooks/useImagensItens';
 import { buscar } from '../../services/api';
 import CategoriasAdm from './CategoriasAdm';
@@ -9,13 +9,22 @@ import DenunciasAdm from './DenunciasAdm';
 import '../../styles/PainelAdm.css';
 
 const API = 'http://localhost:3000';
-const SECOES = ['Itens', 'Usuários', 'Categorias', 'Devoluções', 'Relatórios', 'Denúncias'];
+// cada seção tem rota própria: /painel/itens, /painel/usuarios...
+const SECOES = {
+  itens: 'Itens',
+  usuarios: 'Usuários',
+  categorias: 'Categorias',
+  devolucoes: 'Devoluções',
+  relatorios: 'Relatórios',
+  denuncias: 'Denúncias',
+};
 
 // "2026-09-12T10:00:00.000Z" -> "12/09"
 const diaMes = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
-function PainelAdm({ aoNavegar, aoAbrirPerfil, aoEditarItem }) {
-  const [secao, setSecao] = useState('Itens');
+function PainelAdm() {
+  const { secao } = useParams();
+  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState('');
   const [devolvendo, setDevolvendo] = useState(null);
@@ -56,93 +65,96 @@ function PainelAdm({ aoNavegar, aoAbrirPerfil, aoEditarItem }) {
     }
   }
 
+  if (!SECOES[secao]) return <Navigate to="/painel/itens" replace />;
+
   return (
-    <div className="inicio">
-      <Topbar ativo="painel" aoNavegar={aoNavegar} aoAbrirPerfil={aoAbrirPerfil} />
+    <div className="pa-layout">
+      <aside className="pa-lateral">
+        <h2>Painel Administrativo</h2>
+        <nav className="pa-secoes">
+          {Object.entries(SECOES).map(([chave, rotulo]) => (
+            <Link
+              key={chave}
+              to={`/painel/${chave}`}
+              className={chave === secao ? 'ativo' : undefined}
+              aria-current={chave === secao ? 'page' : undefined}
+            >
+              {rotulo}
+            </Link>
+          ))}
+        </nav>
+        <Link to="/" className="pa-voltar">
+          <ArrowLeft size={16} /> Voltar ao início
+        </Link>
+      </aside>
 
-      <div className="pa-layout">
-        <aside className="pa-lateral">
-          <h2>Painel Administrativo</h2>
-          <nav className="pa-secoes">
-            {SECOES.map((s) => (
-              <button key={s} className={s === secao ? 'ativo' : undefined} onClick={() => setSecao(s)}>
-                {s}
-              </button>
-            ))}
-          </nav>
-          <button className="pa-voltar" onClick={() => aoNavegar('inicio')}>
-            <ArrowLeft size={16} /> Voltar ao início
-          </button>
-        </aside>
+      <main className="pa-conteudo">
+        {secao === 'categorias' ? (
+          <CategoriasAdm />
+        ) : secao === 'usuarios' ? (
+          <UsuariosAdm />
+        ) : secao === 'denuncias' ? (
+          <DenunciasAdm />
+        ) : secao !== 'itens' ? (
+          <>
+            <h1 className="pa-titulo">{SECOES[secao]}</h1>
+            <p className="pa-vazio">Esta seção ainda está em construção.</p>
+          </>
+        ) : (
+          <>
+            <div className="pa-cabecalho">
+              <h1 className="pa-titulo">Gerenciar item</h1>
+              <button className="pa-novo" onClick={() => navigate('/gerenciar')}>+ Novo Item</button>
+            </div>
 
-        <main className="pa-conteudo">
-          {secao === 'Categorias' ? (
-            <CategoriasAdm />
-          ) : secao === 'Usuários' ? (
-            <UsuariosAdm />
-          ) : secao === 'Denúncias' ? (
-            <DenunciasAdm />
-          ) : secao !== 'Itens' ? (
-            <>
-              <h1 className="pa-titulo">{secao}</h1>
-              <p className="pa-vazio">Esta seção ainda está em construção.</p>
-            </>
-          ) : (
-            <>
-              <div className="pa-cabecalho">
-                <h1 className="pa-titulo">Gerenciar item</h1>
-                <button className="pa-novo" onClick={() => aoNavegar('gerenciar')}>+ Novo Item</button>
-              </div>
+            {erro && <p className="pa-erro" role="alert">{erro}</p>}
 
-              {erro && <p className="pa-erro" role="alert">{erro}</p>}
-
-              <table className="pa-tabela">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Categoria</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                    <th>Ações</th>
+            <table className="pa-tabela">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Categoria</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {itens.map((item) => (
+                  <tr key={item.id_item}>
+                    <td>
+                      <div className="pa-item">
+                        {imagens[item.id_item] ? (
+                          <img src={imagens[item.id_item]} alt="" />
+                        ) : (
+                          <span className="pa-sem-foto"><ImageOff size={18} /></span>
+                        )}
+                        <strong>{item.nome_objeto}</strong>
+                      </div>
+                    </td>
+                    <td>{item.categoria}</td>
+                    <td><span className={`inicio-status ${item.status}`}>{item.status}</span></td>
+                    <td>{diaMes(item.data_horario)}</td>
+                    <td>
+                      <div className="pa-acoes">
+                        <button className="pa-editar" onClick={() => navigate(`/gerenciar/${item.id_item}`)}>Editar</button>
+                        <button
+                          className="pa-devolver"
+                          onClick={() => devolver(item)}
+                          disabled={item.status === 'devolvido' || devolvendo === item.id_item}
+                        >
+                          {devolvendo === item.id_item ? '...' : 'Devolver'}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {itens.map((item) => (
-                    <tr key={item.id_item}>
-                      <td>
-                        <div className="pa-item">
-                          {imagens[item.id_item] ? (
-                            <img src={imagens[item.id_item]} alt="" />
-                          ) : (
-                            <span className="pa-sem-foto"><ImageOff size={18} /></span>
-                          )}
-                          <strong>{item.nome_objeto}</strong>
-                        </div>
-                      </td>
-                      <td>{item.categoria}</td>
-                      <td><span className={`inicio-status ${item.status}`}>{item.status}</span></td>
-                      <td>{diaMes(item.data_horario)}</td>
-                      <td>
-                        <div className="pa-acoes">
-                          <button className="pa-editar" onClick={() => aoEditarItem(item)}>Editar</button>
-                          <button
-                            className="pa-devolver"
-                            onClick={() => devolver(item)}
-                            disabled={item.status === 'devolvido' || devolvendo === item.id_item}
-                          >
-                            {devolvendo === item.id_item ? '...' : 'Devolver'}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {itens.length === 0 && !erro && <p className="pa-vazio">Nenhum item cadastrado.</p>}
-            </>
-          )}
-        </main>
-      </div>
+                ))}
+              </tbody>
+            </table>
+            {itens.length === 0 && !erro && <p className="pa-vazio">Nenhum item cadastrado.</p>}
+          </>
+        )}
+      </main>
     </div>
   );
 }

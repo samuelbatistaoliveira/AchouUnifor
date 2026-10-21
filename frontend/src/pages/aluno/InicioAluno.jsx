@@ -1,36 +1,26 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { ImageOff } from 'lucide-react';
-import Topbar from '../../components/Topbar';
-import Perfil from '../comum/Perfil';
-import DenunciarPerda from './DenunciarPerda';
-import MinhasDenuncias from './MinhasDenuncias';
-import NotificacoesAluno from './NotificacoesAluno';
-import DetalhesItem from '../comum/DetalhesItem';
 import useImagensItens from '../../hooks/useImagensItens';
 import useCategorias from '../../hooks/useCategorias';
+import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
 import { buscar } from '../../services/api';
 import '../../styles/Inicio.css';
 import '../../styles/InicioAluno.css';
 
-const MENU_ALUNO = [
-  ['inicio', 'Início'],
-  ['denunciar', 'Denunciar'],
-  ['notificacoes', 'Notificações'],
-];
-
 // "2026-12-25T12:03:01.000Z" -> "25/12/2026"
 const formatarData = (iso) => new Date(iso).toLocaleDateString('pt-BR');
 
-// Área do aluno: só itens perdidos e só o básico (o backend não manda local nem horário)
-function InicioAluno({ aoSair }) {
-  const [tela, setTela] = useState('inicio');
-  const [visita, setVisita] = useState(0); // cada clique no menu abre a tela do zero (ex.: formulário vazio)
+// Início do aluno: só itens perdidos e só o básico (o backend não manda local nem horário).
+// Filtros ficam na URL: /?busca=&categoria=&data=
+function InicioAluno() {
+  const navigate = useNavigate();
+  const [filtro, mudarFiltro] = useFiltrosDaUrl();
+  const busca = filtro('busca');
+  const categoria = filtro('categoria');
+  const data = filtro('data');
   const [itens, setItens] = useState([]);
-  const [busca, setBusca] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [data, setData] = useState('');
   const [erro, setErro] = useState('');
-  const [itemAberto, setItemAberto] = useState(null);
   const imagens = useImagensItens(itens);
   const { categorias } = useCategorias();
 
@@ -41,95 +31,48 @@ function InicioAluno({ aoSair }) {
       .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
   }, [busca, categoria]);
 
-  function navegar(destino) {
-    setItemAberto(null);
-    setVisita((v) => v + 1);
-    setTela(destino);
-  }
-
-  if (tela === 'perfil') {
-    return <Perfil aoVoltar={() => navegar('inicio')} aoSair={aoSair} aoAbrirDenuncias={() => navegar('minhas-denuncias')} />;
-  }
-
-  const topbar = <Topbar ativo={tela} menu={MENU_ALUNO} aoNavegar={navegar} aoAbrirPerfil={() => navegar('perfil')} />;
-
-  // mesma tela de detalhes do admin; ela não mostra o local
-  if (itemAberto) return <DetalhesItem item={itemAberto} aoVoltar={() => setItemAberto(null)} topbar={topbar} />;
-
-  if (tela === 'denunciar') {
-    return (
-      <div className="inicio">
-        {topbar}
-        <DenunciarPerda key={visita} aoNavegar={navegar} />
-      </div>
-    );
-  }
-
-  if (tela === 'notificacoes') {
-    return (
-      <div className="inicio">
-        {topbar}
-        <NotificacoesAluno aoVerDenuncias={() => navegar('minhas-denuncias')} />
-      </div>
-    );
-  }
-
-  if (tela === 'minhas-denuncias') {
-    return (
-      <div className="inicio">
-        {topbar}
-        <MinhasDenuncias aoVoltar={() => navegar('perfil')} aoNovaDenuncia={() => navegar('denunciar')} />
-      </div>
-    );
-  }
-
   // o backend não filtra por data: comparamos só o dia
   const itensVisiveis = data
     ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
     : itens;
 
   return (
-    <div className="inicio">
-      {topbar}
+    <main className="inicio-conteudo">
+      <div className="inicio-filtros">
+        <input
+          type="search"
+          placeholder="Buscar item (ex.: garrafa, mochila, chave)"
+          aria-label="Buscar item"
+          value={busca}
+          onChange={(e) => mudarFiltro('busca', e.target.value)}
+        />
+        <select aria-label="Categoria" value={categoria} onChange={(e) => mudarFiltro('categoria', e.target.value)}>
+          <option value="">Categoria</option>
+          {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
+        </select>
+        <input type="date" aria-label="Data" value={data} onChange={(e) => mudarFiltro('data', e.target.value)} />
+      </div>
 
-      <main className="inicio-conteudo">
-        <div className="inicio-filtros">
-          <input
-            type="search"
-            placeholder="Buscar item (ex.: garrafa, mochila, chave)"
-            aria-label="Buscar item"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
-          <select aria-label="Categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-            <option value="">Categoria</option>
-            {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
-          </select>
-          <input type="date" aria-label="Data" value={data} onChange={(e) => setData(e.target.value)} />
-        </div>
+      {erro && <p className="inicio-erro">{erro}</p>}
 
-        {erro && <p className="inicio-erro">{erro}</p>}
-
-        <div className="inicio-lista">
-          {itensVisiveis.map((item) => (
-            <article key={item.id_item} className="inicio-card">
-              {imagens[item.id_item] ? (
-                <img className="inicio-foto" src={imagens[item.id_item]} alt={item.nome_objeto} />
-              ) : (
-                <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
-              )}
-              <div className="inicio-card-corpo">
-                <h3>{item.nome_objeto}</h3>
-                <p>{item.categoria} · {formatarData(item.data_horario)}</p>
-                <button className="aluno-ver" onClick={() => setItemAberto(item)}>Ver Item</button>
-              </div>
-            </article>
-          ))}
-          {itensVisiveis.length === 0 && !erro && <p>Nenhum item perdido encontrado.</p>}
-        </div>
-      </main>
-
-    </div>
+      <div className="inicio-lista">
+        {itensVisiveis.map((item) => (
+          <article key={item.id_item} className="inicio-card">
+            {imagens[item.id_item] ? (
+              <img className="inicio-foto" src={imagens[item.id_item]} alt={item.nome_objeto} />
+            ) : (
+              <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
+            )}
+            <div className="inicio-card-corpo">
+              <h3>{item.nome_objeto}</h3>
+              <p>{item.categoria} · {formatarData(item.data_horario)}</p>
+              <button className="aluno-ver" onClick={() => navigate(`/itens/${item.id_item}`)}>Ver Item</button>
+            </div>
+          </article>
+        ))}
+        {itensVisiveis.length === 0 && !erro && <p>Nenhum item perdido encontrado.</p>}
+      </div>
+    </main>
   );
 }
 

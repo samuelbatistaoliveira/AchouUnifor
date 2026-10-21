@@ -76,6 +76,53 @@ async function listarPerdidos(req, res) {
   }
 }
 
+// id da URL (/itens/abc ou /itens/-1 viram 404, não erro do banco)
+const idValido = (valor) => /^\d+$/.test(valor);
+
+// Um item pelo id, com tudo (admin): abre /itens/:id e /gerenciar/:id no frontend
+async function buscarItem(req, res) {
+  try {
+    if (!idValido(req.params.id_item)) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+
+    const resultado = await pool.query(
+      `SELECT itens.*, categorias.nome AS categoria
+       FROM itens
+       JOIN categorias ON itens.id_categoria = categorias.id_categoria
+       WHERE itens.id_item = $1`,
+      [req.params.id_item]
+    );
+
+    if (resultado.rows.length === 0) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+    res.json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao buscar item:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
+// Um item perdido pelo id, só com o básico (aluno): mesmos campos de listarPerdidos
+async function buscarPerdido(req, res) {
+  try {
+    if (!idValido(req.params.id_item)) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+
+    const resultado = await pool.query(
+      `SELECT itens.id_item, itens.nome_objeto, itens.data_horario, categorias.nome AS categoria
+       FROM itens
+       JOIN categorias ON itens.id_categoria = categorias.id_categoria
+       WHERE itens.status = 'perdido' AND itens.id_item = $1`,
+      [req.params.id_item]
+    );
+
+    if (resultado.rows.length === 0) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+    res.json(resultado.rows[0]);
+
+  } catch (erro) {
+    console.error('Erro ao buscar item perdido:', erro);
+    res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+}
+
 const STATUS_NOVO_ITEM = ['achado', 'perdido'];
 
 // Campos comuns de registrar e editar; devolve a mensagem de erro ou ''
@@ -179,4 +226,4 @@ async function atualizarStatus(req, res) {
   }
 }
 
-module.exports = { getItens, listarPerdidos, criarItem, editarItem, atualizarStatus };
+module.exports = { getItens, listarPerdidos, buscarItem, buscarPerdido, criarItem, editarItem, atualizarStatus };

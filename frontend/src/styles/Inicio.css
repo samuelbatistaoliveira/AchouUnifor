@@ -31,7 +31,8 @@
   gap: 4px;
 }
 
-.inicio-menu button {
+.inicio-menu a {
+  text-decoration: none;
   padding: 18px 16px;
   background: none;
   border: none;
@@ -41,11 +42,11 @@
   cursor: pointer;
 }
 
-.inicio-menu button:hover {
+.inicio-menu a:hover {
   color: white;
 }
 
-.inicio-menu button.ativo {
+.inicio-menu a.ativo {
   color: white;
   border-bottom-color: #4da3ff;
 }

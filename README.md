@@ -47,12 +47,31 @@ frontend/src/
     aluno/             telas do aluno
     comum/             telas usadas pelos dois (perfil, detalhes do item)
   components/          pedaços reaproveitados (Topbar, CampoFotos)
-  hooks/               useCategorias, useImagensItens
+  hooks/               useCategorias, useImagensItens, useItem, useFiltrosDaUrl, useVoltar
   services/api.js      chamadas ao backend
   utils/constantes.js  listas fixas (blocos, status)
   styles/              arquivos .css
   assets/              imagens
+  App.jsx              todas as rotas
 ```
+
+## 🧭 Rotas do frontend
+
+Cada tela tem seu endereço, e os filtros ficam na URL (ex.: `/?categoria=Eletrônicos&status=achado`), então dá para atualizar a página, voltar e compartilhar o link.
+
+| Quem | Rota | Tela |
+| --- | --- | --- |
+| Todos | `/login`, `/cadastro`, `/esqueci-senha` | entrada |
+| Todos | `/itens/:id` | detalhes do item |
+| Todos | `/perfil` | perfil |
+| Admin | `/` | início (filtros: `busca`, `categoria`, `bloco`, `data`, `status`) |
+| Admin | `/gerenciar`, `/gerenciar/:id` | registrar / editar item |
+| Admin | `/notificacoes`, `/notificacoes/nova` | notificações enviadas / nova |
+| Admin | `/painel/itens`, `/painel/usuarios?busca=`, `/painel/categorias`, `/painel/denuncias`... | painel administrativo |
+| Aluno | `/` | início (filtros: `busca`, `categoria`, `data`) |
+| Aluno | `/denunciar` | denunciar perda |
+| Aluno | `/notificacoes` | notificações |
+| Aluno | `/minhas-denuncias?status=` | minhas denúncias |
 
 ## 👨‍💻 Equipe
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Bell, CircleCheck, ImageOff } from 'lucide-react';
 import { buscar } from '../../services/api';
 import '../../styles/InicioAluno.css';
@@ -9,7 +10,8 @@ const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'sh
 // Notificações do aluno: primeiro as denúncias que o admin marcou como "encontrado" (correspondência),
 // depois as mensagens que o admin enviou (para todos ou só para ele).
 // shortcut: não há "lida/não lida"; guardar isso por aluno se precisar de contador no menu
-function NotificacoesAluno({ aoVerDenuncias }) {
+function NotificacoesAluno() {
+  const navigate = useNavigate();
   const [encontradas, setEncontradas] = useState([]);
   const [mensagens, setMensagens] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -52,7 +54,7 @@ function NotificacoesAluno({ aoVerDenuncias }) {
               <strong><CircleCheck size={16} aria-hidden="true" /> Seu objeto foi encontrado!</strong>
               <p>"{d.nome_objeto}" está no setor de segurança da UNIFOR. Retire presencialmente.</p>
             </div>
-            <button className="na-ver" onClick={aoVerDenuncias}>Ver denúncia</button>
+            <button className="na-ver" onClick={() => navigate('/minhas-denuncias?status=encontrado')}>Ver denúncia</button>
           </li>
         ))}
 

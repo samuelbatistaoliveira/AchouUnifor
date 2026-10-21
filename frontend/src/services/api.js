@@ -4,7 +4,8 @@ export const tokenSalvo = () => localStorage.getItem('token') || sessionStorage.
 
 // GET autenticado: devolve o JSON ou lança um Error com a mensagem do backend
 export async function buscar(caminho) {
-  const resposta = await fetch(`${API}${caminho}`, { headers: { Authorization: `Bearer ${tokenSalvo()}` } });
+  const resposta = await fetch(`${API}${caminho}`, { headers: { Authorization: `Bearer ${tokenSalvo()}` } })
+    .catch(() => { throw new Error('Não foi possível conectar ao servidor.'); });
   const dados = await resposta.json().catch(() => ({}));
   if (!resposta.ok) throw new Error(dados.mensagem);
   return dados;

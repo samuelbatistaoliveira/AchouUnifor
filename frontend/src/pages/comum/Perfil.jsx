@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { User, ArrowLeft, FileText, LogOut } from 'lucide-react';
+import useVoltar from '../../hooks/useVoltar';
+import { tipoUsuario } from '../../services/api';
 import '../../styles/Perfil.css';
 
 const API = 'http://localhost:3000';
@@ -19,7 +22,10 @@ function lerPreferencias() {
   }
 }
 
-function Perfil({ aoSair, aoVoltar, aoAbrirDenuncias }) {
+function Perfil({ aoSair }) {
+  const navigate = useNavigate();
+  const aoVoltar = useVoltar('/');
+  const aluno = tipoUsuario() !== 'administrador';
   const [usuario, setUsuario] = useState(null);
   const [telefone, setTelefone] = useState('');
   const [mensagem, setMensagem] = useState('');
@@ -161,8 +167,8 @@ function Perfil({ aoSair, aoVoltar, aoAbrirDenuncias }) {
         </section>
 
         {/* ações */}
-        {aoAbrirDenuncias && (
-          <button className="perfil-denuncias" onClick={aoAbrirDenuncias}>
+        {aluno && (
+          <button className="perfil-denuncias" onClick={() => navigate('/minhas-denuncias')}>
             <FileText size={18} /> Minhas denúncias
           </button>
         )}

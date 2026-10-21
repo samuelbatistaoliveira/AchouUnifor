@@ -1,7 +1,21 @@
 const pool = require('../config/database');
 
-const TITULO_MAX = 100;
-const MENSAGEM_MAX = 1000;
+// mesmas regras da tela Nova notificação (CriarNotificacao.jsx)
+const TITULO = { nome: 'o título', min: 3, max: 100 };
+const MENSAGEM = { nome: 'a mensagem', min: 10, max: 1000 };
+const MIN_LETRAS = 3; // barra textos só de números ou símbolos, como "12345" ou "!!!"
+
+// devolve o problema do texto (já sem espaços nas pontas), ou '' se estiver ok
+function validarTexto(texto, { nome, min, max }) {
+  const Nome = nome[0].toUpperCase() + nome.slice(1);
+  if (!texto) return `Preencha ${nome}.`;
+  if (texto.length < min) return `${Nome} precisa ter pelo menos ${min} caracteres.`;
+  if (texto.length > max) return `${Nome} pode ter no máximo ${max} caracteres.`;
+  if ((texto.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) {
+    return `${Nome} não pode ter só números ou símbolos: escreva com palavras.`;
+  }
+  return '';
+}
 
 // Admin: tudo que já foi enviado, com o nome do aluno quando foi para um só; mais recentes primeiro
 async function listarNotificacoes(req, res) {
@@ -47,14 +61,9 @@ async function criarNotificacao(req, res) {
     const mensagem = typeof req.body.mensagem === 'string' ? req.body.mensagem.trim() : '';
     const { id_destinatario } = req.body;
 
-    if (!titulo || !mensagem) {
-      return res.status(400).json({ mensagem: 'Preencha o título e a mensagem.' });
-    }
-    if (titulo.length > TITULO_MAX) {
-      return res.status(400).json({ mensagem: `O título pode ter no máximo ${TITULO_MAX} caracteres.` });
-    }
-    if (mensagem.length > MENSAGEM_MAX) {
-      return res.status(400).json({ mensagem: `A mensagem pode ter no máximo ${MENSAGEM_MAX} caracteres.` });
+    const invalido = validarTexto(titulo, TITULO) || validarTexto(mensagem, MENSAGEM);
+    if (invalido) {
+      return res.status(400).json({ mensagem: invalido });
     }
 
     const paraTodos = id_destinatario === undefined || id_destinatario === null || id_destinatario === '';

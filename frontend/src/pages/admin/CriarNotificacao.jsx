@@ -6,9 +6,24 @@ import '../../styles/Inicio.css';
 import '../../styles/GerenciarItem.css';
 import '../../styles/Notificacoes.css';
 
-// mesmos limites do backend (notificacoesController)
-const TITULO_MAX = 100;
-const MENSAGEM_MAX = 1000;
+// mesmas regras do backend (notificacoesController)
+const TITULO = { nome: 'o título', min: 3, max: 100 };
+const MENSAGEM = { nome: 'a mensagem', min: 10, max: 1000 };
+const MIN_LETRAS = 3; // barra textos só de números ou símbolos, como "12345" ou "!!!"
+
+// devolve o problema do texto, ou '' se estiver ok
+function validarTexto(texto, { nome, min, max }) {
+  const limpo = texto.trim();
+  const Nome = nome[0].toUpperCase() + nome.slice(1);
+  if (!limpo) return `Preencha ${nome}.`;
+  if (limpo.length < min) return `${Nome} precisa ter pelo menos ${min} caracteres.`;
+  if (limpo.length > max) return `${Nome} pode ter no máximo ${max} caracteres.`;
+  if ((limpo.match(/\p{L}/gu) ?? []).length < MIN_LETRAS) {
+    return `${Nome} não pode ter só números ou símbolos: escreva com palavras.`;
+  }
+  return '';
+}
+
 const VAZIO = { para: 'todos', aluno: '', titulo: '', mensagem: '' };
 
 // Admin escreve uma notificação para todos os alunos ou para um aluno; ela aparece em Notificações do aluno
@@ -31,14 +46,15 @@ function CriarNotificacao() {
   async function enviarNotificacao(e) {
     e.preventDefault();
     const { para, aluno, titulo, mensagem } = form;
-    if (!titulo.trim() || !mensagem.trim()) return setErro('Preencha o título e a mensagem.');
+    const invalido = validarTexto(titulo, TITULO) || validarTexto(mensagem, MENSAGEM);
+    if (invalido) return setErro(invalido);
     if (para === 'aluno' && !aluno) return setErro('Escolha o aluno que vai receber.');
 
     setEnviando(true);
     setErro('');
     const falha = await enviar('/notificacoes', 'POST', {
-      titulo,
-      mensagem,
+      titulo: titulo.trim(),
+      mensagem: mensagem.trim(),
       id_destinatario: para === 'aluno' ? Number(aluno) : null,
     });
     setEnviando(false);
@@ -91,22 +107,27 @@ function CriarNotificacao() {
             Título
             <input
               placeholder="Ex: Retirada de itens no sábado"
-              maxLength={TITULO_MAX}
+              maxLength={TITULO.max}
               value={form.titulo}
               onChange={mudar('titulo')}
             />
+            <small className="nt-contador">
+              Mínimo de {TITULO.min} caracteres, com letras · {form.titulo.length}/{TITULO.max}
+            </small>
           </label>
 
           <label className="gi-campo">
             Mensagem
             <textarea
               rows={6}
-              maxLength={MENSAGEM_MAX}
+              maxLength={MENSAGEM.max}
               placeholder="Ex: Neste sábado o setor de segurança funciona das 8h às 12h para retirada de itens."
               value={form.mensagem}
               onChange={mudar('mensagem')}
             />
-            <small className="nt-contador">{form.mensagem.length}/{MENSAGEM_MAX}</small>
+            <small className="nt-contador">
+              Mínimo de {MENSAGEM.min} caracteres, com letras · {form.mensagem.length}/{MENSAGEM.max}
+            </small>
           </label>
 
           {erro && <p className="gi-erro" role="alert">{erro}</p>}

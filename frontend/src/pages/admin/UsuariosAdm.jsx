@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
-import { buscar, enviar } from './api';
+import { buscar, enviar } from '../../services/api';
 
 const TIPOS = { aluno: 'Aluno', administrador: 'Admin' };
 

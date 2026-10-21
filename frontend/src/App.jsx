@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import Login from './Login.jsx';
-import Inicio from './Inicio.jsx';
-import Perfil from './Perfil.jsx';
-import GerenciarItem from './GerenciarItem.jsx';
-import PainelAdm from './PainelAdm.jsx';
-import InicioAluno from './InicioAluno.jsx';
-import Notificacoes from './Notificacoes.jsx';
-import CriarNotificacao from './CriarNotificacao.jsx';
-import { tipoUsuario } from './api';
+import Login from './pages/auth/Login.jsx';
+import Inicio from './pages/admin/Inicio.jsx';
+import Perfil from './pages/comum/Perfil.jsx';
+import GerenciarItem from './pages/admin/GerenciarItem.jsx';
+import PainelAdm from './pages/admin/PainelAdm.jsx';
+import InicioAluno from './pages/aluno/InicioAluno.jsx';
+import Notificacoes from './pages/admin/Notificacoes.jsx';
+import CriarNotificacao from './pages/admin/CriarNotificacao.jsx';
+import { tipoUsuario } from './services/api';
 
 function App() {
   const temToken = () => !!(localStorage.getItem('token') || sessionStorage.getItem('token'));

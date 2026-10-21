@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { CircleCheck } from 'lucide-react';
-import CampoFotos, { enviarFotos } from './components/CampoFotos';
-import { BLOCOS } from './constantes';
-import useCategorias from './useCategorias';
-import { API, tokenSalvo } from './api';
-import './GerenciarItem.css';
+import CampoFotos, { enviarFotos } from '../../components/CampoFotos';
+import { BLOCOS } from '../../utils/constantes';
+import useCategorias from '../../hooks/useCategorias';
+import { API, tokenSalvo } from '../../services/api';
+import '../../styles/GerenciarItem.css';
 
 const MAX_FOTOS = 5; // mesmo limite do backend
 const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', data: '', horario: '' };

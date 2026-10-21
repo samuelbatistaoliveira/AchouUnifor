@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff } from 'lucide-react';
-import Topbar from './components/Topbar';
-import useImagensItens from './useImagensItens';
-import { buscar } from './api';
+import Topbar from '../../components/Topbar';
+import useImagensItens from '../../hooks/useImagensItens';
+import { buscar } from '../../services/api';
 import CategoriasAdm from './CategoriasAdm';
 import UsuariosAdm from './UsuariosAdm';
 import DenunciasAdm from './DenunciasAdm';
-import './PainelAdm.css';
+import '../../styles/PainelAdm.css';
 
 const API = 'http://localhost:3000';
 const SECOES = ['Itens', 'Usuários', 'Categorias', 'Devoluções', 'Relatórios', 'Denúncias'];

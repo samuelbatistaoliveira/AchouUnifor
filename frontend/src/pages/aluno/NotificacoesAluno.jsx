@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, CircleCheck, ImageOff } from 'lucide-react';
-import { buscar } from './api';
-import './InicioAluno.css';
+import { buscar } from '../../services/api';
+import '../../styles/InicioAluno.css';
 
 // "2026-10-18T15:30:00.000Z" -> "18/10/2026 15:30"
 const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });

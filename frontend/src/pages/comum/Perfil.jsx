@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { User, ArrowLeft, FileText, LogOut } from 'lucide-react';
-import './Perfil.css';
+import '../../styles/Perfil.css';
 
 const API = 'http://localhost:3000';
 

@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { ImageOff } from 'lucide-react';
-import { buscar, enviar } from './api';
-import { STATUS_DENUNCIA } from './constantes';
+import { buscar, enviar } from '../../services/api';
+import { STATUS_DENUNCIA } from '../../utils/constantes';
 
 // "2026-09-12T10:00:00.000Z" -> "12/09"
 const diaMes = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import useCategorias from './useCategorias';
-import { enviar } from './api';
+import useCategorias from '../../hooks/useCategorias';
+import { enviar } from '../../services/api';
 
 function CategoriasAdm() {
   const { categorias, erro: erroLista, recarregar } = useCategorias();

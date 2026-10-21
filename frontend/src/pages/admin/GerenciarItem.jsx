@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { CircleCheck } from 'lucide-react';
-import Topbar from './components/Topbar';
-import CampoFotos, { enviarFotos } from './components/CampoFotos';
-import { BLOCOS } from './constantes';
-import useCategorias from './useCategorias';
-import './GerenciarItem.css';
+import Topbar from '../../components/Topbar';
+import CampoFotos, { enviarFotos } from '../../components/CampoFotos';
+import { BLOCOS } from '../../utils/constantes';
+import useCategorias from '../../hooks/useCategorias';
+import '../../styles/GerenciarItem.css';
 
 const API = 'http://localhost:3000';
 

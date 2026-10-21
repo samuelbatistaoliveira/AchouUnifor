@@ -1,6 +1,6 @@
 import { User } from 'lucide-react';
 import logoUnifor from '../assets/logo-achouunifor.png';
-import '../Inicio.css';
+import '../styles/Inicio.css';
 
 const MENU = [
   ['inicio', 'Início'],

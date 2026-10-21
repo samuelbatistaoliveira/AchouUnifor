@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronLeft, ImageOff, Plus } from 'lucide-react';
-import { buscar, enviar } from './api';
-import { STATUS_DENUNCIA } from './constantes';
-import './Inicio.css';
-import './MinhasDenuncias.css';
+import { buscar, enviar } from '../../services/api';
+import { STATUS_DENUNCIA } from '../../utils/constantes';
+import '../../styles/Inicio.css';
+import '../../styles/MinhasDenuncias.css';
 
 const FILTROS = [
   ['todas', 'Todas'],

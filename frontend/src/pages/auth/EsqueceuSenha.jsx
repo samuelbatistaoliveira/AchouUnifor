@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Mail, ArrowLeft, KeyRound, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import './Login.css';
-import { API } from './api';
+import '../../styles/Login.css';
+import { API } from '../../services/api';
 
 const DOMINIO = '@edu.unifor.br'; // mesma regra do login e do cadastro (authController)
 

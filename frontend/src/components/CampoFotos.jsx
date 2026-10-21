@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
-import { API, tokenSalvo } from '../api';
-import '../GerenciarItem.css';
+import { API, tokenSalvo } from '../services/api';
+import '../styles/GerenciarItem.css';
 
 // mesmos limites do backend (config/upload.js)
 const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];

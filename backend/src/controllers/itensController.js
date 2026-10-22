@@ -1,4 +1,45 @@
 const pool = require('../config/database');
+const supabase = require('../config/supabase');
+
+// Busca em lote (batch) a imagem de capa de cada item e gera signed URLs em uma única chamada
+async function anexarFotosCapa(itens) {
+  if (!itens || itens.length === 0) return itens;
+
+  const ids = itens.map((item) => item.id_item);
+
+  // Busca a primeira imagem de cada item (menor id_imagem)
+  const { rows } = await pool.query(
+    `SELECT DISTINCT ON (id_item) id_item, caminho
+     FROM imagens_itens
+     WHERE id_item = ANY($1)
+     ORDER BY id_item, id_imagem ASC`,
+    [ids]
+  );
+
+  const fotos = {};
+  if (rows.length > 0) {
+    const caminhos = rows.map((r) => r.caminho);
+    const { data, error } = await supabase.storage
+      .from('itens')
+      .createSignedUrls(caminhos, 3600);
+
+    if (error) {
+      console.error('Erro ao gerar URLs assinadas das imagens de capa:', error);
+    } else if (Array.isArray(data)) {
+      rows.forEach((r, i) => {
+        if (data[i]?.signedUrl) {
+          fotos[r.id_item] = data[i].signedUrl;
+        }
+      });
+    }
+  }
+
+  return itens.map((item) => ({
+    ...item,
+    imagem_url: fotos[item.id_item] ?? null,
+    foto: fotos[item.id_item] ?? null,
+  }));
+}
 
 async function getItens(req, res) {
   try {
@@ -37,7 +78,8 @@ async function getItens(req, res) {
     }
 
     const resultado = await pool.query(query, valores);
-    res.json(resultado.rows);
+    const itensComCapa = await anexarFotosCapa(resultado.rows);
+    res.json(itensComCapa);
 
   } catch (erro) {
     console.error('Erro ao buscar itens:', erro);
@@ -68,7 +110,8 @@ async function listarPerdidos(req, res) {
     }
 
     const resultado = await pool.query(query + ' ORDER BY itens.data_horario DESC', valores);
-    res.json(resultado.rows);
+    const itensComCapa = await anexarFotosCapa(resultado.rows);
+    res.json(itensComCapa);
 
   } catch (erro) {
     console.error('Erro ao buscar itens perdidos:', erro);
@@ -226,4 +269,14 @@ async function atualizarStatus(req, res) {
   }
 }
 
-module.exports = { getItens, listarPerdidos, buscarItem, buscarPerdido, criarItem, editarItem, atualizarStatus };
+module.exports = {
+  getItens,
+  listarPerdidos,
+  buscarItens: getItens,
+  buscarItensPerdidos: listarPerdidos,
+  buscarItem,
+  buscarPerdido,
+  criarItem,
+  editarItem,
+  atualizarStatus,
+};

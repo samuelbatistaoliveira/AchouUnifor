@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ImageOff } from 'lucide-react';
-import useImagensItens from '../../hooks/useImagensItens';
 import useCategorias from '../../hooks/useCategorias';
 import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
 import { buscar } from '../../services/api';
@@ -21,7 +20,6 @@ function InicioAluno() {
   const data = filtro('data');
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState('');
-  const imagens = useImagensItens(itens);
   const { categorias } = useCategorias();
 
   useEffect(() => {
@@ -58,8 +56,8 @@ function InicioAluno() {
       <div className="inicio-lista">
         {itensVisiveis.map((item) => (
           <article key={item.id_item} className="inicio-card">
-            {imagens[item.id_item] ? (
-              <img className="inicio-foto" src={imagens[item.id_item]} alt={item.nome_objeto} />
+            {item.imagem_url || item.foto ? (
+              <img className="inicio-foto" src={item.imagem_url || item.foto} alt={item.nome_objeto} />
             ) : (
               <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
             )}

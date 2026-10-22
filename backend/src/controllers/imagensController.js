@@ -139,16 +139,19 @@ async function uploadImagemDenuncia(req, res) {
     }
 }
 
+// O aluno só recebe fotos de itens com status "perdido" (os únicos que ele pode ver); o admin recebe todas
 async function listarImagensItem(req, res) {
     try {
         const { id_item } = req.params;
+        const admin = req.usuario.tipo_usuario === 'administrador';
 
         const resultado = await pool.query(
-            `SELECT id_imagem, id_item, caminho
+            `SELECT imagens_itens.id_imagem, imagens_itens.id_item, imagens_itens.caminho
              FROM imagens_itens
-             WHERE id_item = $1
-             ORDER BY id_imagem`,
-            [id_item]
+             JOIN itens ON itens.id_item = imagens_itens.id_item
+             WHERE imagens_itens.id_item = $1 AND ($2 OR itens.status = 'perdido')
+             ORDER BY imagens_itens.id_imagem`,
+            [id_item, admin]
         );
 
         const imagens = await Promise.all(

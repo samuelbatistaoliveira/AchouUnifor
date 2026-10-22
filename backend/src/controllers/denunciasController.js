@@ -40,7 +40,7 @@ async function comFotos(denuncias) {
 async function listarDenuncias(req, res) {
   try {
     const resultado = await pool.query(`
-      SELECT ${CAMPOS}, usuarios.nome AS aluno, usuarios.matricula
+      SELECT ${CAMPOS}, usuarios.nome AS aluno, usuarios.email_institucional AS email
       FROM denuncias
       LEFT JOIN categorias ON categorias.id_categoria = denuncias.id_categoria
       JOIN usuarios ON usuarios.id_usuario = denuncias.id_usuario

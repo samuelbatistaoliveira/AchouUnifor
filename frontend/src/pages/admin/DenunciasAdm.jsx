@@ -47,7 +47,7 @@ function DenunciasAdm() {
             <th>Item</th>
             <th>Categoria</th>
             <th>Aluno</th>
-            <th>Matrícula</th>
+            <th>E-mail</th>
             <th>Data</th>
             <th><span className="pd-oculto">Ações</span></th>
           </tr>
@@ -68,7 +68,7 @@ function DenunciasAdm() {
                 </td>
                 <td>{d.categoria ?? '—'}</td>
                 <td>{d.aluno}</td>
-                <td>{d.matricula ?? '—'}</td>
+                <td>{d.email}</td>
                 <td>{diaMes(d.data_denuncia)}</td>
                 <td>
                   <div className="pa-acoes">

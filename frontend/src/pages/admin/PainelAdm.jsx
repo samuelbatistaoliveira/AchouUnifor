@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, ImageOff } from 'lucide-react';
-import useImagensItens from '../../hooks/useImagensItens';
 import { buscar } from '../../services/api';
 import CategoriasAdm from './CategoriasAdm';
 import UsuariosAdm from './UsuariosAdm';
@@ -28,7 +27,6 @@ function PainelAdm() {
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState('');
   const [devolvendo, setDevolvendo] = useState(null);
-  const imagens = useImagensItens(itens);
 
   useEffect(() => {
     buscar('/itens')
@@ -124,8 +122,8 @@ function PainelAdm() {
                   <tr key={item.id_item}>
                     <td>
                       <div className="pa-item">
-                        {imagens[item.id_item] ? (
-                          <img src={imagens[item.id_item]} alt="" />
+                        {item.imagem_url || item.foto ? (
+                          <img src={item.imagem_url || item.foto} alt="" />
                         ) : (
                           <span className="pa-sem-foto"><ImageOff size={18} /></span>
                         )}

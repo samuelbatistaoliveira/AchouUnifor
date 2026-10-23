@@ -22,12 +22,37 @@ function InicioAluno() {
   const [erro, setErro] = useState('');
   const { categorias } = useCategorias();
 
+  // Debounce de 300ms na busca textual para evitar requisições a cada tecla
+  const [buscaDebounced, setBuscaDebounced] = useState(busca);
+
   useEffect(() => {
-    const params = new URLSearchParams({ busca, categoria });
+    const timer = setTimeout(() => {
+      setBuscaDebounced(busca);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busca]);
+
+  useEffect(() => {
+    let cancelado = false;
+    const params = new URLSearchParams({ busca: buscaDebounced, categoria });
     buscar(`/itens/perdidos?${params}`)
-      .then((dados) => { setItens(dados); setErro(''); })
-      .catch((e) => setErro(e.message || 'Não foi possível carregar os itens.'));
-  }, [busca, categoria]);
+      .then((dados) => {
+        if (!cancelado) {
+          setItens(dados);
+          setErro('');
+        }
+      })
+      .catch((e) => {
+        if (!cancelado) {
+          setErro(e.message || 'Não foi possível carregar os itens.');
+        }
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [buscaDebounced, categoria]);
 
   // o backend não filtra por data: comparamos só o dia
   const itensVisiveis = data

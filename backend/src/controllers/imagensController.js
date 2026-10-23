@@ -34,9 +34,17 @@ async function salvarNoStorage(pasta, arquivo, registrar) {
     }
 }
 
+const idValido = (valor) => /^\d+$/.test(valor);
+
 async function uploadImagem(req, res) {
     try {
         const { id_item } = req.params;
+
+        if (!idValido(id_item)) {
+            return res.status(404).json({
+                mensagem: 'Item não encontrado.'
+            });
+        }
 
         // Verifica se uma imagem foi enviada
         if (!req.file) {
@@ -143,34 +151,53 @@ async function uploadImagemDenuncia(req, res) {
 async function listarImagensItem(req, res) {
     try {
         const { id_item } = req.params;
-        const admin = req.usuario.tipo_usuario === 'administrador';
+
+        if (!idValido(id_item)) {
+            return res.status(404).json({
+                mensagem: 'Item não encontrado.'
+            });
+        }
+
+        const admin = req.usuario && req.usuario.tipo_usuario === 'administrador';
+
+        // Verifica se o item existe e se o usuário tem permissão para vê-lo (alunos só veem itens 'perdido')
+        const itemRes = await pool.query(
+            'SELECT id_item, status FROM itens WHERE id_item = $1',
+            [id_item]
+        );
+
+        if (itemRes.rows.length === 0 || (!admin && itemRes.rows[0].status !== 'perdido')) {
+            return res.status(404).json({
+                mensagem: 'Item não encontrado.'
+            });
+        }
 
         const resultado = await pool.query(
-            `SELECT imagens_itens.id_imagem, imagens_itens.id_item, imagens_itens.caminho
+            `SELECT id_imagem, id_item, caminho
              FROM imagens_itens
-             JOIN itens ON itens.id_item = imagens_itens.id_item
-             WHERE imagens_itens.id_item = $1 AND ($2 OR itens.status = 'perdido')
-             ORDER BY imagens_itens.id_imagem`,
-            [id_item, admin]
+             WHERE id_item = $1
+             ORDER BY id_imagem`,
+            [id_item]
         );
 
-        const imagens = await Promise.all(
-            resultado.rows.map(async (imagem) => {
-                const { data, error } = await supabase.storage
-                    .from('itens')
-                    .createSignedUrl(imagem.caminho, 3600);
+        if (resultado.rows.length === 0) {
+            return res.status(200).json({ imagens: [] });
+        }
 
-                if (error) {
-                    throw error;
-                }
+        const caminhos = resultado.rows.map((img) => img.caminho);
+        const { data, error } = await supabase.storage
+            .from('itens')
+            .createSignedUrls(caminhos, 3600);
 
-                return {
-                    id_imagem: imagem.id_imagem,
-                    id_item: imagem.id_item,
-                    url: data.signedUrl
-                };
-            })
-        );
+        if (error) {
+            throw error;
+        }
+
+        const imagens = resultado.rows.map((imagem, i) => ({
+            id_imagem: imagem.id_imagem,
+            id_item: imagem.id_item,
+            url: data?.[i]?.signedUrl || null
+        }));
 
         return res.status(200).json({ imagens });
 

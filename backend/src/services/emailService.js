@@ -48,8 +48,19 @@ async function obterTransporter() {
     }
 }
 
+function escaparHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 async function enviarEmailRecuperacao({ destinatario, nome, link }) {
-    const primeiroNome = nome ? nome.split(" ")[0] : "Usuário";
+    const primeiroNomeRaw = nome ? nome.split(" ")[0] : "Usuário";
+    const primeiroNome = escaparHtml(primeiroNomeRaw);
     const remetente = process.env.SMTP_FROM || '"AchouUNIFOR" <suporte@achouunifor.com>';
 
     const htmlContent = `
@@ -169,15 +180,11 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
     </html>
     `;
 
-    const textContent = `Olá, ${primeiroNome}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta no AchouUNIFOR.\n\nPara cadastrar uma nova senha, acesse o link:\n${link}\n\nEste link é válido por 1 hora. Se você não solicitou esta alteração, ignore este e-mail.\n\nAchouUNIFOR`;
+    const textContent = `Olá, ${primeiroNomeRaw}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta no AchouUNIFOR.\n\nPara cadastrar uma nova senha, acesse o link:\n${link}\n\nEste link é válido por 1 hora. Se você não solicitou esta alteração, ignore este e-mail.\n\nAchouUNIFOR`;
 
     const transporter = await obterTransporter();
 
-    console.log("\n=======================================================");
-    console.log("📧 [AchouUNIFOR] RECUPERAÇÃO DE SENHA");
-    console.log(`Para: ${destinatario} (${nome || "Usuário"})`);
-    console.log(`Link: ${link}`);
-    console.log("=======================================================\n");
+    console.log(`📧 [AchouUNIFOR] Solicitação de recuperação de senha processada para: ${destinatario}`);
 
     if (transporter) {
         try {
@@ -189,20 +196,14 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
                 html: htmlContent,
             });
 
-            const previewUrl = nodemailer.getTestMessageUrl(info);
-            if (previewUrl) {
-                console.log(`Visualização do e-mail (Ethereal): ${previewUrl}`);
-            }
-
-            return { sucesso: true, messageId: info.messageId, previewUrl };
+            return { sucesso: true, messageId: info.messageId };
         } catch (erroEnvio) {
             console.error("Erro ao enviar e-mail via transporter:", erroEnvio.message);
-            // Mesmo se o envio SMTP falhar, o link foi gerado e registrado no console
-            return { sucesso: false, erro: erroEnvio.message, linkDev: link };
+            return { sucesso: false, erro: erroEnvio.message };
         }
     }
 
-    return { sucesso: true, linkDev: link };
+    return { sucesso: true };
 }
 
 module.exports = {

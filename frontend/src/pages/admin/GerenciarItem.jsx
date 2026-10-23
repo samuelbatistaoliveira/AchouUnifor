@@ -5,9 +5,8 @@ import CampoFotos, { enviarFotos } from '../../components/CampoFotos';
 import { BLOCOS } from '../../utils/constantes';
 import useCategorias from '../../hooks/useCategorias';
 import useItem from '../../hooks/useItem';
+import { API } from '../../services/api';
 import '../../styles/GerenciarItem.css';
-
-const API = 'http://localhost:3000';
 
 const VAZIO = { nome: '', descricao: '', bloco: '', referencia: '', categoria: '', status: '', data: '', horario: '' };
 

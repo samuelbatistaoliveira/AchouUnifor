@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { User, ArrowLeft, FileText, LogOut } from 'lucide-react';
 import useVoltar from '../../hooks/useVoltar';
-import { tipoUsuario } from '../../services/api';
+import { API, tipoUsuario } from '../../services/api';
 import '../../styles/Perfil.css';
-
-const API = 'http://localhost:3000';
 
 // preferências ficam no navegador por enquanto; o banco ainda não tem onde guardá-las
 const PREFERENCIAS = [

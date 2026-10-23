@@ -12,4 +12,8 @@ const pool = new Pool({
     }
 });
 
+pool.on('error', (err) => {
+    console.error('Erro inesperado no pool do Postgres:', err);
+});
+
 module.exports = pool;

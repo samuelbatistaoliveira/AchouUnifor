@@ -46,6 +46,17 @@ function Inicio() {
   // Busca categorias
   const { categorias } = useCategorias();
 
+  // Debounce de 300ms na busca textual para evitar requisições a cada tecla
+  const [buscaDebounced, setBuscaDebounced] = useState(busca);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBuscaDebounced(busca);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busca]);
+
   // Busca os itens reais no backend
   useEffect(() => {
     const controller = new AbortController();
@@ -56,7 +67,7 @@ function Inicio() {
 
       try {
         const params = new URLSearchParams({
-          busca,
+          busca: buscaDebounced,
           categoria,
           bloco,
           status
@@ -108,7 +119,7 @@ function Inicio() {
     return () => {
       controller.abort();
     };
-  }, [busca, categoria, bloco, status]);
+  }, [buscaDebounced, categoria, bloco, status]);
 
   // Filtra os itens por data no frontend
   const itensVisiveis = data

@@ -51,8 +51,14 @@ async function criarCategoria(req, res) {
   }
 }
 
+const idValido = (valor) => /^\d+$/.test(valor);
+
 async function renomearCategoria(req, res) {
   try {
+    if (!idValido(req.params.id_categoria)) {
+      return res.status(404).json({ mensagem: 'Categoria não encontrada.' });
+    }
+
     const nome = req.body.nome?.trim();
 
     if (!nome) {
@@ -84,6 +90,10 @@ async function renomearCategoria(req, res) {
 // Desativa em vez de apagar: os itens continuam apontando para ela
 async function removerCategoria(req, res) {
   try {
+    if (!idValido(req.params.id_categoria)) {
+      return res.status(404).json({ mensagem: 'Categoria não encontrada.' });
+    }
+
     const resultado = await pool.query(
       `UPDATE categorias SET status = 'inativo'
        WHERE id_categoria = $1 AND status = 'ativo'

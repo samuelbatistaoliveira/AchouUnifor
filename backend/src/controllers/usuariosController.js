@@ -73,8 +73,16 @@ async function listarUsuarios(req, res) {
     }
 }
 
+const idValido = (valor) => /^\d+$/.test(valor);
+
 async function editarUsuario(req, res) {
     try {
+        if (!idValido(req.params.id_usuario)) {
+            return res.status(404).json({
+                mensagem: "Usuário não encontrado."
+            });
+        }
+
         const nome = String(req.body.nome || "").trim()
         const telefone = String(req.body.telefone || "").replace(/\D/g, "")
         const { tipo_usuario } = req.body
@@ -133,6 +141,12 @@ async function editarUsuario(req, res) {
 // Desativa em vez de apagar: os itens dele continuam no sistema e o login passa a recusar
 async function removerUsuario(req, res) {
     try {
+        if (!idValido(req.params.id_usuario)) {
+            return res.status(404).json({
+                mensagem: "Usuário não encontrado."
+            });
+        }
+
         const id = Number(req.params.id_usuario)
 
         if (id === req.usuario.id_usuario) {

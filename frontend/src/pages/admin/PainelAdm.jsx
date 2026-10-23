@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { ArrowLeft, ImageOff } from 'lucide-react';
-import { buscar } from '../../services/api';
+import { API, buscar } from '../../services/api';
 import CategoriasAdm from './CategoriasAdm';
 import UsuariosAdm from './UsuariosAdm';
 import DenunciasAdm from './DenunciasAdm';
 import '../../styles/PainelAdm.css';
-
-const API = 'http://localhost:3000';
 // cada seção tem rota própria: /painel/itens, /painel/usuarios...
 const SECOES = {
   itens: 'Itens',

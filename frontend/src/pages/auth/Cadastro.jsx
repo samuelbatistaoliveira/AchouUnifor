@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { Search, User, Lock, Mail, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '../../styles/Login.css';
+import { API } from '../../services/api';
 
 function Cadastro() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ async function realizarCadastro(evento) {
   setCarregando(true);
 
   try {
-    const resposta = await fetch('http://localhost:3000/auth/cadastro', {
+    const resposta = await fetch(`${API}/auth/cadastro`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

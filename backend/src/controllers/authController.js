@@ -33,12 +33,6 @@ async function login(req, res) {
 
         const usuario = resultado.rows[0]
 
-        if (usuario.status !== "ativo") {
-            return res.status(403).json({
-                mensagem: "Usuário inativo."
-            })
-        }
-
         const senhaCorreta = await bcrypt.compare(
             senha,
             usuario.senha_hash
@@ -47,6 +41,12 @@ async function login(req, res) {
         if (!senhaCorreta) {
             return res.status(401).json({
                 mensagem: "E-mail ou senha inválidos."
+            })
+        }
+
+        if (usuario.status !== "ativo") {
+            return res.status(403).json({
+                mensagem: "Usuário inativo."
             })
         }
 
@@ -152,24 +152,20 @@ async function esqueciSenha(req, res) {
             })
         }
 
+        const mensagemGenerica = "Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha."
+
         const resultado = await pool.query(
             "SELECT id_usuario, nome, email_institucional, status, senha_hash FROM usuarios WHERE LOWER(email_institucional) = $1",
             [email]
         )
 
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({
-                mensagem: "Não encontramos uma conta com esse e-mail."
+        if (resultado.rows.length === 0 || resultado.rows[0].status !== "ativo") {
+            return res.status(200).json({
+                mensagem: mensagemGenerica
             })
         }
 
         const usuario = resultado.rows[0]
-
-        if (usuario.status !== "ativo") {
-            return res.status(403).json({
-                mensagem: "Esta conta está desativada. Procure a administração."
-            })
-        }
 
         // Gera token temporário assinado com o hash da senha atual
         // Assim que a senha for alterada, o token anterior é invalidado automaticamente
@@ -186,16 +182,14 @@ async function esqueciSenha(req, res) {
         const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
         const link = `${frontendUrl}/redefinir-senha?token=${encodeURIComponent(token)}`
 
-        const envio = await enviarEmailRecuperacao({
+        await enviarEmailRecuperacao({
             destinatario: usuario.email_institucional,
             nome: usuario.nome,
             link
         })
 
         return res.status(200).json({
-            mensagem: "Link de recuperação enviado com sucesso.",
-            previewUrl: envio.previewUrl,
-            linkDev: envio.linkDev || link
+            mensagem: mensagemGenerica
         })
 
     } catch (erro) {

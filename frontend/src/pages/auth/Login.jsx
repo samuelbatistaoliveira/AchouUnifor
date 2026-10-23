@@ -4,6 +4,7 @@ import { HelpCircle, Info, Search, FileText, Bell, Lock, Eye, EyeOff, ExternalLi
 import '../../styles/Login.css';
 import logoUnifor from '../../assets/logo-achouunifor.png';
 import { motion } from 'framer-motion';
+import { API } from '../../services/api';
 
 function Login({ aoEntrar }) {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ function Login({ aoEntrar }) {
     setCarregando(true);
 
     try {
-      const resposta = await fetch("http://localhost:3000/auth/login", {
+      const resposta = await fetch(`${API}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

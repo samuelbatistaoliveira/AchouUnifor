@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { API } from '../services/api';
 
 // Categorias ativas do banco: [{ id_categoria, nome, total_itens }]; `recarregar` busca de novo
 function useCategorias() {
@@ -7,7 +8,7 @@ function useCategorias() {
 
   const recarregar = useCallback(
     () =>
-      fetch('http://localhost:3000/categorias')
+      fetch(`${API}/categorias`)
         .then((r) => {
           if (!r.ok) throw new Error();
           return r.json();

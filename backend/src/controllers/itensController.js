@@ -213,6 +213,8 @@ async function criarItem(req, res) {
 // Edita as informações do item; o status muda só pela rota de status
 async function editarItem(req, res) {
   try {
+    if (!idValido(req.params.id_item)) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+
     const { nome_objeto, descricao, categoria, data_horario, local_encontrado } = req.body;
 
     const invalido = validarItem(req.body);
@@ -246,6 +248,8 @@ const STATUS_VALIDOS = ['achado', 'perdido', 'devolvido'];
 
 async function atualizarStatus(req, res) {
   try {
+    if (!idValido(req.params.id_item)) return res.status(404).json({ mensagem: 'Item não encontrado.' });
+
     const { status } = req.body;
 
     if (!STATUS_VALIDOS.includes(status)) {

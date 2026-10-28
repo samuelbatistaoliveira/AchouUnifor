@@ -14,36 +14,44 @@ const CAMPOS = `
 
 // Junta a cada denúncia as URLs das suas fotos (assinadas por 1h, como as dos itens)
 async function comFotos(denuncias) {
-  if (denuncias.length === 0) return denuncias;
+  if (!denuncias || denuncias.length === 0) return denuncias || [];
 
-  const { rows } = await pool.query(
-    'SELECT id_denuncia, caminho FROM imagens_denuncias WHERE id_denuncia = ANY($1) ORDER BY id_imagem',
-    [denuncias.map((d) => d.id_denuncia)]
-  );
+  try {
+    const { rows } = await pool.query(
+      'SELECT id_denuncia, caminho FROM imagens_denuncias WHERE id_denuncia = ANY($1) ORDER BY id_imagem',
+      [denuncias.map((d) => d.id_denuncia)]
+    );
 
-  const fotos = {};
-  if (rows.length > 0) {
-    const { data, error } = await supabase.storage
-      .from('itens')
-      .createSignedUrls(rows.map((r) => r.caminho), 3600);
-    if (error) throw error;
+    const fotos = {};
+    if (rows.length > 0) {
+      const { data, error } = await supabase.storage
+        .from('itens')
+        .createSignedUrls(rows.map((r) => r.caminho), 3600);
+      if (error) {
+        console.error('Erro ao gerar URLs assinadas das denúncias no Supabase:', error);
+      } else if (Array.isArray(data)) {
+        rows.forEach((r, i) => {
+          if (data[i]?.signedUrl) (fotos[r.id_denuncia] ??= []).push(data[i].signedUrl);
+        });
+      }
+    }
 
-    rows.forEach((r, i) => {
-      if (data[i]?.signedUrl) (fotos[r.id_denuncia] ??= []).push(data[i].signedUrl);
-    });
+    return denuncias.map((d) => ({ ...d, fotos: fotos[d.id_denuncia] ?? [] }));
+  } catch (err) {
+    console.error('Erro em comFotos:', err);
+    return denuncias.map((d) => ({ ...d, fotos: [] }));
   }
-
-  return denuncias.map((d) => ({ ...d, fotos: fotos[d.id_denuncia] ?? [] }));
 }
 
 // Admin: todas as denúncias, com o aluno que denunciou; mais recentes primeiro
 async function listarDenuncias(req, res) {
   try {
     const resultado = await pool.query(`
-      SELECT ${CAMPOS}, usuarios.nome AS aluno, usuarios.email_institucional AS email
+      SELECT ${CAMPOS}, usuarios.nome AS aluno, usuarios.email_institucional AS email,
+             usuarios.telefone AS telefone, usuarios.matricula AS matricula
       FROM denuncias
       LEFT JOIN categorias ON categorias.id_categoria = denuncias.id_categoria
-      JOIN usuarios ON usuarios.id_usuario = denuncias.id_usuario
+      LEFT JOIN usuarios ON usuarios.id_usuario = denuncias.id_usuario
       ORDER BY denuncias.data_denuncia DESC
     `);
     res.json(await comFotos(resultado.rows));
@@ -150,7 +158,7 @@ async function atualizarStatusDenuncia(req, res) {
   }
 }
 
-// Aluno remove a própria denúncia enquanto o objeto ainda está perdido (depois disso ela vira histórico)
+// Aluno remove a própria denúncia enquanto o objeto ainda está perdido; Administrador pode remover qualquer denúncia
 async function removerDenuncia(req, res) {
   try {
     const id_denuncia = Number(req.params.id_denuncia);
@@ -158,23 +166,29 @@ async function removerDenuncia(req, res) {
       return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
     }
 
+    const isAdmin = req.usuario.tipo_usuario === 'administrador';
+
     const { rows: [denuncia] } = await pool.query(
-      'SELECT status FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2',
-      [id_denuncia, req.usuario.id_usuario]
+      isAdmin
+        ? 'SELECT status FROM denuncias WHERE id_denuncia = $1'
+        : 'SELECT status FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2',
+      isAdmin ? [id_denuncia] : [id_denuncia, req.usuario.id_usuario]
     );
 
     if (!denuncia) {
       return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
     }
-    if (denuncia.status !== 'perdido') {
+    if (!isAdmin && denuncia.status !== 'perdido') {
       return res.status(409).json({ mensagem: 'Só é possível remover denúncias de objetos ainda perdidos.' });
     }
 
     // as linhas de imagens_denuncias saem junto (ON DELETE CASCADE); os arquivos, logo depois
     const { rows: fotos } = await pool.query('SELECT caminho FROM imagens_denuncias WHERE id_denuncia = $1', [id_denuncia]);
     const removida = await pool.query(
-      "DELETE FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2 AND status = 'perdido'",
-      [id_denuncia, req.usuario.id_usuario]
+      isAdmin
+        ? 'DELETE FROM denuncias WHERE id_denuncia = $1'
+        : "DELETE FROM denuncias WHERE id_denuncia = $1 AND id_usuario = $2 AND status = 'perdido'",
+      isAdmin ? [id_denuncia] : [id_denuncia, req.usuario.id_usuario]
     );
 
     if (removida.rowCount === 0) {

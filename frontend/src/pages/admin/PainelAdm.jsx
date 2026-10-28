@@ -5,6 +5,8 @@ import { API, buscar } from '../../services/api';
 import CategoriasAdm from './CategoriasAdm';
 import UsuariosAdm from './UsuariosAdm';
 import DenunciasAdm from './DenunciasAdm';
+import DevolucoesAdm from './DevolucoesAdm';
+import RelatoriosAdm from './RelatoriosAdm';
 import '../../styles/PainelAdm.css';
 // cada seção tem rota própria: /painel/itens, /painel/usuarios...
 const SECOES = {
@@ -91,11 +93,10 @@ function PainelAdm() {
           <UsuariosAdm />
         ) : secao === 'denuncias' ? (
           <DenunciasAdm />
-        ) : secao !== 'itens' ? (
-          <>
-            <h1 className="pa-titulo">{SECOES[secao]}</h1>
-            <p className="pa-vazio">Esta seção ainda está em construção.</p>
-          </>
+        ) : secao === 'devolucoes' ? (
+          <DevolucoesAdm />
+        ) : secao === 'relatorios' ? (
+          <RelatoriosAdm />
         ) : (
           <>
             <div className="pa-cabecalho">

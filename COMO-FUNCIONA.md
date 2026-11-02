@@ -10,7 +10,7 @@ O AchouUnifor é o sistema de achados e perdidos da UNIFOR. Ele tem dois tipos d
 
 | Quem | O que faz |
 | --- | --- |
-| **Administrador** (setor de segurança) | Registra os objetos achados ou perdidos com fotos, muda o status deles, gerencia usuários e categorias, lê as denúncias de perda dos alunos e envia notificações. |
+| **Administrador** (setor de segurança) | Registra os objetos achados ou perdidos com fotos, muda o status deles, gerencia usuários, categorias e devoluções, acompanha relatórios estatísticos, lê as denúncias de perda dos alunos e envia notificações. |
 | **Aluno** | Vê os itens com status "perdido" (só nome, categoria, data e foto), denuncia a perda de um objeto, acompanha as próprias denúncias e lê as notificações. |
 
 O login é a mesma tela para os dois. O que decide qual site aparece é o campo `tipo_usuario` gravado no token de login.
@@ -85,7 +85,7 @@ O repositório é um **workspace do npm**: um `npm install` na raiz instala o fr
    | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | conexão com o PostgreSQL do Supabase |
    | `JWT_SECRET` | segredo que assina os tokens (qualquer texto longo e aleatório) |
    | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | acesso ao Storage das fotos |
-   | `FRONTEND_URL` (opcional) | endereço usado no link do e-mail de recuperação (padrão `http://localhost:5173`) |
+   | `FRONTEND_URL` (opcional) | endereço usado no link do e-mail de recuperação e no CORS (padrão `http://localhost:5173`) |
    | `SMTP_*` ou `EMAIL_*` (opcional) | envio de e-mail de verdade (ver a seção 8) |
 
 3. **Banco novo?** Rode os scripts de `backend/sql/` no SQL Editor do Supabase, **nesta ordem**:
@@ -93,6 +93,7 @@ O repositório é um **workspace do npm**: um `npm install` na raiz instala o fr
    2. `denuncias.sql`: a tabela de denúncias
    3. `denuncias-perda.sql`: transforma a denúncia em "relato de perda" e cria as fotos das denúncias
    4. `notificacoes.sql`: as notificações
+   5. `indices-performance.sql`: índices B-Tree para acelerar listagens, buscas e joins
 
    Todos podem ser rodados de novo sem estragar nada (`IF NOT EXISTS`). O banco atual do Supabase já tem tudo isso.
 
@@ -135,6 +136,7 @@ AchouUnifor/
 │   ├── .env                segredos (fora do git)
 │   ├── .env.example        modelo do .env
 │   ├── sql/                scripts do banco (base.sql primeiro)
+│   ├── tests/load/         script de teste de carga k6 (k6-carga.js)
 │   └── src/
 │       ├── server.js       cria o Express, liga as rotas e trata erros
 │       ├── config/         database.js (PostgreSQL), supabase.js (Storage), upload.js (multer)
@@ -175,17 +177,18 @@ navegador ──▶ server.js ──▶ routes/xRoutes.js ──▶ seguranca/ �
                  └── no fim, um tratador de erros devolve JSON se algo estourar (ex.: foto grande demais)
 ```
 
-1. **`server.js`** liga o `cors()` (aceita chamadas do frontend), o `express.json()` (lê o corpo em JSON) e pendura cada grupo de rotas num prefixo: `/auth`, `/itens`, `/imagens`, `/categorias`, `/usuarios`, `/denuncias` e `/notificacoes`.
+1. **`server.js`** liga o `cors()` (aceita chamadas do frontend configurado), o `express.json({ limit: "100kb" })` (lê o corpo em JSON) e pendura cada grupo de rotas num prefixo: `/auth`, `/itens`, `/imagens`, `/categorias`, `/usuarios`, `/denuncias`, `/notificacoes` e `/relatorios`.
 2. **`routes/`** diz qual função do controller atende cada URL e quais **porteiros** vêm antes:
-   - `verificarToken`: lê o cabeçalho `Authorization: Bearer <token>`, confere a assinatura com o `JWT_SECRET` e coloca em `req.usuario` o `{ id_usuario, tipo_usuario }`. Sem token ou com token vencido, responde **401**.
+   - `verificarToken`: lê o cabeçalho `Authorization: Bearer <token>`, confere a assinatura com o `JWT_SECRET` (`HS256`) e coloca em `req.usuario` o `{ id_usuario, tipo_usuario }`. Sem token ou com token vencido, responde **401**.
    - `verificarAdmin`: deixa passar só `tipo_usuario === 'administrador'`. Os outros recebem **403**.
+   - `limitarTentativasAuth` (em `authRoutes.js`): limita a 20 tentativas por minuto por IP nas rotas `/auth/*`, respondendo **429** em caso de abuso.
 3. **`controllers/`** valida o que chegou, roda o SQL e responde em JSON. Todo erro inesperado vira `500 { mensagem: 'Erro interno do servidor.' }` e é registrado no terminal.
 
 Padrões que se repetem em todos os controllers:
 - **SQL sempre com parâmetros** (`$1`, `$2`...), nunca com texto colado: isso impede SQL injection.
-- **IDs da URL são validados** (`/^\d+$/`): `/itens/abc` responde 404, não dá erro no banco.
+- **IDs da URL são validados** (`/^[1-9]\d*$/`): `/itens/abc` ou `/itens/0` responde 404, não dá erro no banco.
 - **As respostas de erro sempre têm `{ mensagem }`**, e o frontend mostra essa mensagem na tela.
-- **Nada é apagado de verdade**: usuários e categorias só ficam com `status = 'inativo'`. A exceção é a denúncia, que o aluno pode apagar enquanto ela ainda está "perdido".
+- **Nada é apagado de verdade**: usuários e categorias só ficam com `status = 'inativo'`. A exceção é a denúncia, que o aluno pode apagar enquanto ela ainda está "perdido" (e o admin pode apagar qualquer uma).
 
 ### 5.2 Todas as rotas
 
@@ -196,7 +199,7 @@ Legenda: 🌐 aberta · 🔑 precisa estar logado · 👑 só admin
 | Método | Rota | Quem | O que faz |
 | --- | --- | --- | --- |
 | POST | `/auth/login` | 🌐 | confere e-mail @edu.unifor.br + senha, devolve o token (vale 2h) |
-| POST | `/auth/cadastro` | 🌐 | cria um **aluno** (senha com no mínimo 8 caracteres, e-mail único) |
+| POST | `/auth/cadastro` | 🌐 | cria um **aluno** (senha de 8 a 72 caracteres, e-mail único) |
 | POST | `/auth/esqueci-senha` | 🌐 | envia o e-mail com o link de nova senha (responde a mesma frase exista o e-mail ou não) |
 | GET | `/auth/validar-token?token=` | 🌐 | a tela de nova senha pergunta se o link ainda vale |
 | POST | `/auth/redefinir-senha` | 🌐 | troca a senha usando o token do link |
@@ -226,7 +229,7 @@ Legenda: 🌐 aberta · 🔑 precisa estar logado · 👑 só admin
 | Método | Rota | Quem | O que faz |
 | --- | --- | --- | --- |
 | GET | `/categorias` | 🌐 | categorias ativas, com quantos itens cada uma tem |
-| POST | `/categorias` | 👑 | cria (um nome já removido antes volta a ficar ativo) |
+| POST | `/categorias` | 👑 | cria (até 50 caracteres; um nome já removido antes volta a ficar ativo) |
 | PUT | `/categorias/:id` | 👑 | renomeia |
 | DELETE | `/categorias/:id` | 👑 | desativa (os itens continuam apontando para ela) |
 
@@ -248,7 +251,7 @@ Legenda: 🌐 aberta · 🔑 precisa estar logado · 👑 só admin
 | GET | `/denuncias/minhas` | 🔑 | só as do aluno logado |
 | POST | `/denuncias` | 🔑 | aluno relata uma perda (a data não pode estar no futuro) |
 | PATCH | `/denuncias/:id/status` | 👑 | perdido → encontrado → devolvido |
-| DELETE | `/denuncias/:id` | 🔑 | o dono apaga, só enquanto está "perdido" (apaga as fotos junto) |
+| DELETE | `/denuncias/:id` | 🔑 | o dono apaga enquanto está "perdido" (admin pode apagar qualquer uma; apaga as fotos junto) |
 
 **Notificações (`notificacoesController.js`)**
 
@@ -258,10 +261,17 @@ Legenda: 🌐 aberta · 🔑 precisa estar logado · 👑 só admin
 | GET | `/notificacoes/minhas` | 🔑 | as enviadas para todos + as enviadas só para o aluno logado |
 | POST | `/notificacoes` | 👑 | envia para todos (`id_destinatario` vazio) ou para um aluno |
 
+**Relatórios (`relatoriosController.js`)**
+
+| Método | Rota | Quem | O que faz |
+| --- | --- | --- | --- |
+| GET | `/relatorios` | 👑 | métricas consolidadas (itens por status/categoria, top locais, denúncias, usuários e últimos 30 dias) |
+
 ### 5.3 Segurança
 
-- **Senhas** nunca são guardadas: o banco guarda só o **hash bcrypt** (custo 12). No login, `bcrypt.compare` confere a senha digitada contra o hash.
-- **Token de login (JWT)**: assinado com `JWT_SECRET`, leva `{ id_usuario, tipo_usuario }` e vence em **2 horas**. O frontend o envia em todas as chamadas.
+- **Senhas** nunca são guardadas: o banco guarda só o **hash bcrypt** (custo 12, limitado a 72 caracteres para evitar truncamento e DoS). No login, `bcrypt.compare` confere a senha digitada contra o hash.
+- **Token de login (JWT)**: assinado com `JWT_SECRET` (`HS256`), leva `{ id_usuario, tipo_usuario }` e vence em **2 horas**. O frontend o envia em todas as chamadas.
+- **Rate Limiting**: as rotas `/auth/*` limitam requisições repetidas por IP.
 - **Só e-mails `@edu.unifor.br`** entram e se cadastram (regra no backend e repetida no frontend).
 - **O que o aluno vê é cortado no backend**, não só escondido na tela: `/itens/perdidos` nem manda local, descrição ou quem registrou, e as fotos de itens que não estão "perdido" respondem 404 para o aluno.
 - **O dono confere**: as rotas de denúncia do aluno sempre filtram por `id_usuario` do token, então ninguém vê nem apaga a denúncia de outro aluno.
@@ -357,8 +367,6 @@ Denúncia:  perdido ──▶ encontrado ──▶ devolvido      (admin muda no
 | `tipoUsuario()` | lê o `tipo_usuario` de dentro do token (só para escolher a tela; quem protege os dados é o backend) |
 | `sessaoVencida()` | diz se o token já passou das 2h |
 
-Várias telas (login, cadastro, Início do admin, Gerenciar Item, Perfil, Denunciar e o envio de fotos) usam `fetch` direto, com o mesmo cabeçalho `Authorization`.
-
 ### 7.3 Sessão
 
 - **Lembrar de mim** marcado: o token fica no `localStorage` e sobrevive a fechar o navegador. Desmarcado: fica no `sessionStorage` e some ao fechar.
@@ -369,7 +377,7 @@ Várias telas (login, cadastro, Início do admin, Gerenciar Item, Perfil, Denunc
 
 | Arquivo | Para quê |
 | --- | --- |
-| `hooks/useCategorias.js` | carrega as categorias ativas (rota aberta) e permite recarregar |
+| `hooks/useCategorias.js` | carrega as categorias ativas (rota aberta), indica estado de carregamento e permite recarregar |
 | `hooks/useItem.js` | carrega um item pelo caminho (ex.: `/itens/5`) para telas abertas direto pela URL |
 | `hooks/useFiltrosDaUrl.js` | guarda os filtros na URL (`/?categoria=Eletrônicos&status=achado`): funcionam no F5, no "voltar" e em links compartilhados |
 | `hooks/useVoltar.js` | volta para a tela anterior; se a página foi aberta direto, vai para um endereço padrão |
@@ -387,7 +395,7 @@ Várias telas (login, cadastro, Início do admin, Gerenciar Item, Perfil, Denunc
 **Administrador (`pages/admin/`)**
 - `Inicio.jsx`: todos os itens em cartões, com filtros de busca, categoria, bloco, data e status (a data é filtrada na tela; o resto, no backend). Clicar abre os detalhes.
 - `GerenciarItem.jsx`: `/gerenciar` registra e `/gerenciar/:id` edita. O local vira "Bloco - referência".
-- `PainelAdm.jsx`: menu lateral com Itens (tabela com Editar e Devolver), Usuários (`UsuariosAdm.jsx`), Categorias (`CategoriasAdm.jsx`) e Denúncias (`DenunciasAdm.jsx`). "Devoluções" e "Relatórios" ainda estão em construção.
+- `PainelAdm.jsx`: menu lateral com Itens (tabela com Editar e Devolver), Usuários (`UsuariosAdm.jsx`), Categorias (`CategoriasAdm.jsx`), Devoluções (`DevolucoesAdm.jsx`), Relatórios (`RelatoriosAdm.jsx`, com indicadores, gráficos, filtro de período, exportação CSV e impressão/PDF) e Denúncias (`DenunciasAdm.jsx`).
 - `Notificacoes.jsx` e `CriarNotificacao.jsx`: lista do que foi enviado e o formulário de envio (as mesmas regras do backend: título de 3 a 100 caracteres, mensagem de 10 a 1000, com pelo menos 3 letras).
 
 **Aluno (`pages/aluno/`)**
@@ -446,12 +454,12 @@ Várias telas (login, cadastro, Início do admin, Gerenciar Item, Perfil, Denunc
 
 ## 9. Regras de negócio, num lugar só
 
-- Login e cadastro só com e-mail `@edu.unifor.br`. Senha com no mínimo 8 caracteres.
+- Login e cadastro só com e-mail `@edu.unifor.br`. Senha de 8 a 72 caracteres.
 - O cadastro cria aluno. Só um admin promove outro usuário a admin.
 - O admin não pode remover a si mesmo nem tirar o próprio acesso de admin.
 - O aluno só vê itens "perdido", e só nome, categoria, data e fotos.
 - Item novo nasce "achado" ou "perdido". "Devolvido" só pela mudança de status.
-- A denúncia de perda é vista só pelo admin e pelo dono, tem até 5 fotos e só pode ser apagada enquanto está "perdido".
+- A denúncia de perda é vista só pelo admin e pelo dono, tem até 5 fotos e só pode ser apagada pelo aluno enquanto está "perdido" (admin pode apagar qualquer uma).
 - Notificação: título de 3 a 100 caracteres e mensagem de 10 a 1000, nos dois casos com pelo menos 3 letras.
 - Fotos: JPG, PNG ou WEBP, até 5 MB cada.
 - Categorias e usuários removidos ficam inativos, não somem do banco.
@@ -461,8 +469,6 @@ Várias telas (login, cadastro, Início do admin, Gerenciar Item, Perfil, Denunc
 ## 10. Limitações conhecidas
 
 - Um usuário desativado ou rebaixado continua com o acesso antigo até o token dele vencer (no máximo 2h), porque o backend confia no token sem consultar o banco a cada chamada.
-- O `cors()` aceita chamadas de qualquer site. Em produção, vale limitar ao endereço do frontend.
 - O endereço do backend (`http://localhost:3000`) e a porta estão fixos no código.
 - O fundo animado da tela de login (`assets/fundo-animado.gif`) tem cerca de 7 MB e deixa a primeira abertura lenta.
-- "Devoluções" e "Relatórios" do painel, os links "Ajuda" e "Sobre" do login e as preferências de notificação do Perfil ainda não fazem nada de verdade.
-- Não existem testes automatizados.
+- Os links "Ajuda" e "Sobre" do login e as preferências de notificação do Perfil ainda não fazem nada de verdade.

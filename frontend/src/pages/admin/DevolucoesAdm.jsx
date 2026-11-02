@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
   CheckCircle,
@@ -11,7 +11,7 @@ import {
   ExternalLink,
   X,
 } from 'lucide-react';
-import { API, buscar } from '../../services/api';
+import { buscar, enviar } from '../../services/api';
 
 // "2026-09-12T10:00:00.000Z" -> "12/09/2026"
 const dataFormatada = (iso) =>
@@ -34,7 +34,6 @@ function DevolucoesAdm() {
 
   const carregar = useCallback(async () => {
     try {
-      setCarregando(true);
       const dados = await buscar('/itens');
       setItens(Array.isArray(dados) ? dados : []);
       setErro('');
@@ -51,44 +50,29 @@ function DevolucoesAdm() {
 
   // Altera o status do item (para 'devolvido' ou 'achado')
   async function alterarStatusItem(item, novoStatus) {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     setOcupadoId(item.id_item);
     setErro('');
     setSucesso('');
 
-    try {
-      const resposta = await fetch(`${API}/itens/${item.id_item}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: novoStatus }),
-      });
-      const dados = await resposta.json();
+    const falha = await enviar(`/itens/${item.id_item}/status`, 'PATCH', { status: novoStatus });
+    setOcupadoId(null);
 
-      if (!resposta.ok) {
-        setErro(dados.mensagem || 'Não foi possível atualizar o status do item.');
-        return false;
-      }
-
-      setItens((atuais) =>
-        atuais.map((i) => (i.id_item === item.id_item ? { ...i, status: novoStatus } : i))
-      );
-
-      const msg =
-        novoStatus === 'devolvido'
-          ? `O item "${item.nome_objeto}" foi marcado como devolvido com sucesso!`
-          : `A devolução do item "${item.nome_objeto}" foi desfeita (status: Achado).`;
-      setSucesso(msg);
-      setTimeout(() => setSucesso(''), 5000);
-      return true;
-    } catch {
-      setErro('Não foi possível conectar ao servidor.');
+    if (falha) {
+      setErro(falha);
       return false;
-    } finally {
-      setOcupadoId(null);
     }
+
+    setItens((atuais) =>
+      atuais.map((i) => (i.id_item === item.id_item ? { ...i, status: novoStatus } : i))
+    );
+
+    const msg =
+      novoStatus === 'devolvido'
+        ? `O item "${item.nome_objeto}" foi marcado como devolvido com sucesso!`
+        : `A devolução do item "${item.nome_objeto}" foi desfeita (status: Achado).`;
+    setSucesso(msg);
+    setTimeout(() => setSucesso(''), 5000);
+    return true;
   }
 
   // Executa devolução via modal
@@ -110,23 +94,25 @@ function DevolucoesAdm() {
     await alterarStatusItem(item, 'achado');
   }
 
-  // Métricas
-  const devolvidos = itens.filter((i) => i.status === 'devolvido');
-  const achados = itens.filter((i) => i.status === 'achado');
+  // Métricas memoizadas (evita refiltrar ao abrir/fechar modal de confirmação)
+  const devolvidos = useMemo(() => itens.filter((i) => i.status === 'devolvido'), [itens]);
+  const achados = useMemo(() => itens.filter((i) => i.status === 'achado'), [itens]);
   const totalProcessados = devolvidos.length + achados.length;
   const taxaDevolucao =
     totalProcessados > 0 ? Math.round((devolvidos.length / totalProcessados) * 100) : 0;
 
-  // Filtragem
+  // Filtragem memoizada
   const termo = busca.trim().toLowerCase();
-  const itensExibidos = (abaAtiva === 'devolvidos' ? devolvidos : achados).filter((i) => {
-    if (!termo) return true;
-    return (
-      (i.nome_objeto || '').toLowerCase().includes(termo) ||
-      (i.categoria || '').toLowerCase().includes(termo) ||
-      (i.local_encontrado || '').toLowerCase().includes(termo)
+  const itensExibidos = useMemo(() => {
+    const base = abaAtiva === 'devolvidos' ? devolvidos : achados;
+    if (!termo) return base;
+    return base.filter(
+      (i) =>
+        (i.nome_objeto || '').toLowerCase().includes(termo) ||
+        (i.categoria || '').toLowerCase().includes(termo) ||
+        (i.local_encontrado || '').toLowerCase().includes(termo)
     );
-  });
+  }, [abaAtiva, devolvidos, achados, termo]);
 
   return (
     <>
@@ -237,7 +223,12 @@ function DevolucoesAdm() {
               <td>
                 <div className="pa-item">
                   {item.imagem_url || item.foto ? (
-                    <img src={item.imagem_url || item.foto} alt="" />
+                    <img
+                      src={item.imagem_url || item.foto}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <span className="pa-sem-foto">
                       <ImageOff size={18} />

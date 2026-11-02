@@ -12,8 +12,22 @@ const relatoriosRoutes = require("./routes/relatoriosRoutes")
 
 const app = express()
 
-app.use(cors())
-app.use(express.json())
+const origensPermitidas = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+].filter(Boolean)
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Permite ferramentas sem header Origin (como k6/curl) e o frontend configurado
+        if (!origin || origensPermitidas.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Origem não permitida pelo CORS."))
+    }
+}))
+app.use(express.json({ limit: "100kb" }))
 
 app.use("/itens", itensRoutes)
 app.use("/auth", authRoutes)

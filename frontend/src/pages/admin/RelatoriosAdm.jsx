@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
   Download,
@@ -14,6 +14,13 @@ import {
 } from 'lucide-react';
 import { buscar } from '../../services/api';
 
+// Escapa células CSV para evitar injeção de fórmulas no Excel/LibreOffice (=, +, -, @)
+function celulaCSVSegura(valor) {
+  const texto = String(valor ?? '');
+  const semFormula = /^[=+\-@\t\r]/.test(texto) ? `'${texto}` : texto;
+  return `"${semFormula.replace(/"/g, '""')}"`;
+}
+
 function RelatoriosAdm() {
   const [metricas, setMetricas] = useState(null);
   const [itensBrutos, setItensBrutos] = useState([]);
@@ -21,45 +28,34 @@ function RelatoriosAdm() {
   const [erro, setErro] = useState('');
   const [periodo, setPeriodo] = useState('todos'); // 'todos' | '30dias' | '7dias'
 
-  // Carrega métricas do backend ou calcula a partir dos dados brutos como fallback
-  async function carregarDados() {
-    setCarregando(true);
-    setErro('');
-
+  // Carrega métricas consolidadas e itens sem fotos (evita chamadas desnecessárias ao Storage)
+  const carregarDados = useCallback(async () => {
     try {
-      // Tenta buscar da nova rota de relatórios
-      let dadosRelatorio = null;
-      try {
-        dadosRelatorio = await buscar('/relatorios');
-      } catch {
-        // Se a rota ainda não estiver ativa (ex: backend não reiniciado), busca das rotas existentes
-      }
-
-      // Busca também os itens brutos para exportação em CSV e cálculo de períodos
-      const [itens, denuncias, usuarios] = await Promise.all([
-        buscar('/itens').catch(() => []),
-        buscar('/denuncias').catch(() => []),
-        buscar('/usuarios').catch(() => []),
+      const [dadosRelatorio, itens] = await Promise.all([
+        buscar('/relatorios').catch(() => null),
+        buscar('/itens?sem_fotos=1').catch(() => []),
       ]);
 
-      setItensBrutos(Array.isArray(itens) ? itens : []);
+      const itensArr = Array.isArray(itens) ? itens : [];
+      setItensBrutos(itensArr);
 
       if (dadosRelatorio && dadosRelatorio.itensPorStatus) {
         setMetricas(dadosRelatorio);
       } else {
-        // Fallback: calcula agregações localmente a partir dos dados
-        const itensArr = Array.isArray(itens) ? itens : [];
+        // Fallback: só busca denúncias e usuários se a rota /relatorios não responder
+        const [denuncias, usuarios] = await Promise.all([
+          buscar('/denuncias').catch(() => []),
+          buscar('/usuarios').catch(() => []),
+        ]);
         const denunciasArr = Array.isArray(denuncias) ? denuncias : [];
         const usuariosArr = Array.isArray(usuarios) ? usuarios : [];
 
-        // Itens por status
         const statusMap = {};
         itensArr.forEach((i) => {
           statusMap[i.status] = (statusMap[i.status] || 0) + 1;
         });
         const itensPorStatus = Object.entries(statusMap).map(([status, total]) => ({ status, total }));
 
-        // Itens por categoria
         const catMap = {};
         itensArr.forEach((i) => {
           const cat = i.categoria || 'Sem categoria';
@@ -69,7 +65,6 @@ function RelatoriosAdm() {
           .map(([categoria, total]) => ({ categoria, total }))
           .sort((a, b) => b.total - a.total);
 
-        // Top locais
         const localMap = {};
         itensArr.forEach((i) => {
           if (i.local_encontrado) {
@@ -81,14 +76,12 @@ function RelatoriosAdm() {
           .sort((a, b) => b.total - a.total)
           .slice(0, 8);
 
-        // Denúncias por status
         const denMap = {};
         denunciasArr.forEach((d) => {
           denMap[d.status] = (denMap[d.status] || 0) + 1;
         });
         const denunciasPorStatus = Object.entries(denMap).map(([status, total]) => ({ status, total }));
 
-        // Usuários por tipo
         const userMap = {};
         usuariosArr.forEach((u) => {
           userMap[u.tipo_usuario] = (userMap[u.tipo_usuario] || 0) + 1;
@@ -103,16 +96,17 @@ function RelatoriosAdm() {
           usuariosPorTipo,
         });
       }
+      setErro('');
     } catch (e) {
       setErro(e.message || 'Não foi possível carregar os dados do relatório.');
     } finally {
       setCarregando(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     carregarDados();
-  }, []);
+  }, [carregarDados]);
 
   // Filtragem dos dados brutos por período selecionado
   const itensFiltrados = useMemo(() => {
@@ -180,10 +174,10 @@ function RelatoriosAdm() {
     const cabecalho = ['ID', 'Nome do Objeto', 'Categoria', 'Status', 'Local', 'Data'];
     const linhas = itensBrutos.map((i) => [
       i.id_item,
-      `"${(i.nome_objeto || '').replace(/"/g, '""')}"`,
-      `"${(i.categoria || '').replace(/"/g, '""')}"`,
-      i.status,
-      `"${(i.local_encontrado || '').replace(/"/g, '""')}"`,
+      celulaCSVSegura(i.nome_objeto),
+      celulaCSVSegura(i.categoria),
+      celulaCSVSegura(i.status),
+      celulaCSVSegura(i.local_encontrado),
       i.data_horario ? new Date(i.data_horario).toLocaleDateString('pt-BR') : '',
     ]);
 
@@ -255,7 +249,10 @@ function RelatoriosAdm() {
         <button
           type="button"
           className="rel-btn-recarregar"
-          onClick={carregarDados}
+          onClick={() => {
+            setCarregando(true);
+            carregarDados();
+          }}
           disabled={carregando}
           title="Atualizar dados"
         >

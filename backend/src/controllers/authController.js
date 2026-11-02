@@ -3,20 +3,95 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const { enviarEmailRecuperacao } = require("../services/emailService")
 
+const DOMINIO_INSTITUCIONAL = "@edu.unifor.br"
+const SENHA_MIN = 8
+const SENHA_MAX = 72 // Limite seguro do algoritmo bcrypt (evita truncamento silencioso e DoS de CPU)
+
+/**
+ * Valida um token JWT de recuperação de senha garantindo que:
+ * 1. Possui estrutura válida e `tipo === "recuperacao_senha"`;
+ * 2. O usuário existe no banco e está com `status === "ativo"`;
+ * 3. A assinatura composta (`JWT_SECRET + usuario.senha_hash`) ainda é válida.
+ *
+ * Como o hash da senha atual compõe o segredo de assinatura, qualquer alteração de senha
+ * invalida automaticamente os links emitidos anteriormente (uso único stateless).
+ *
+ * @param {string} token Token JWT recebido na query ou no body.
+ * @returns {Promise<{ ok: true, usuario: object } | { ok: false, status: number, mensagem: string }>}
+ */
+async function obterUsuarioDoTokenRecuperacao(token) {
+    let payload
+    try {
+        payload = jwt.decode(token)
+    } catch {
+        return { ok: false, status: 400, mensagem: "Token inválido." }
+    }
+
+    if (!payload || !payload.id_usuario || payload.tipo !== "recuperacao_senha") {
+        return { ok: false, status: 400, mensagem: "Token de recuperação inválido." }
+    }
+
+    const resultado = await pool.query(
+        "SELECT id_usuario, email_institucional, status, senha_hash FROM usuarios WHERE id_usuario = $1",
+        [payload.id_usuario]
+    )
+
+    if (resultado.rows.length === 0) {
+        return { ok: false, status: 404, mensagem: "Usuário não encontrado." }
+    }
+
+    const usuario = resultado.rows[0]
+
+    if (usuario.status !== "ativo") {
+        return {
+            ok: false,
+            status: 403,
+            mensagem: "Esta conta está desativada. Procure a administração."
+        }
+    }
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET + usuario.senha_hash, {
+            algorithms: ["HS256"]
+        })
+    } catch (erroJwt) {
+        if (erroJwt.name === "TokenExpiredError") {
+            return {
+                ok: false,
+                status: 400,
+                mensagem: "O link de recuperação expirou. Solicite um novo."
+            }
+        }
+        return {
+            ok: false,
+            status: 400,
+            mensagem: "O link de recuperação é inválido ou já foi utilizado."
+        }
+    }
+
+    return { ok: true, usuario }
+}
+
 async function login(req, res) {
     try {
         const email = String(req.body.email || "").trim().toLowerCase()
         const senha = req.body.senha
 
-        if (!email || !senha) {
+        if (!email || typeof senha !== "string" || !senha) {
             return res.status(400).json({
                 mensagem: "E-mail e senha são obrigatórios."
             })
         }
 
-        if (!email.endsWith("@edu.unifor.br")) {
+        if (!email.endsWith(DOMINIO_INSTITUCIONAL)) {
             return res.status(400).json({
-                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
+                mensagem: `Use seu e-mail institucional (${DOMINIO_INSTITUCIONAL}).`
+            })
+        }
+
+        if (senha.length > SENHA_MAX) {
+            return res.status(401).json({
+                mensagem: "E-mail ou senha inválidos."
             })
         }
 
@@ -93,15 +168,15 @@ async function cadastro(req, res) {
             });
         }
 
-        if (!email.endsWith("@edu.unifor.br")) {
+        if (!email.endsWith(DOMINIO_INSTITUCIONAL)) {
             return res.status(400).json({
-                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
+                mensagem: `Use seu e-mail institucional (${DOMINIO_INSTITUCIONAL}).`
             });
         }
 
-        if (senha.length < 8) {
+        if (senha.length < SENHA_MIN || senha.length > SENHA_MAX) {
             return res.status(400).json({
-                mensagem: "A senha deve ter pelo menos 8 caracteres."
+                mensagem: `A senha deve ter entre ${SENHA_MIN} e ${SENHA_MAX} caracteres.`
             });
         }
 
@@ -135,7 +210,11 @@ async function cadastro(req, res) {
     }
 }
 
-// Esqueci a senha: confere se o e-mail tem conta ativa, gera token e envia link por e-mail.
+/**
+ * Solicita a recuperação de senha para um e-mail institucional.
+ * Responde sempre com mensagem genérica quando a conta não existe ou está inativa,
+ * evitando enumeração de usuários cadastrados.
+ */
 async function esqueciSenha(req, res) {
     try {
         const email = String(req.body.email || "").trim().toLowerCase()
@@ -146,9 +225,9 @@ async function esqueciSenha(req, res) {
             })
         }
 
-        if (!email.endsWith("@edu.unifor.br")) {
+        if (!email.endsWith(DOMINIO_INSTITUCIONAL)) {
             return res.status(400).json({
-                mensagem: "Use seu e-mail institucional (@edu.unifor.br)."
+                mensagem: `Use seu e-mail institucional (${DOMINIO_INSTITUCIONAL}).`
             })
         }
 
@@ -182,11 +261,17 @@ async function esqueciSenha(req, res) {
         const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
         const link = `${frontendUrl}/redefinir-senha?token=${encodeURIComponent(token)}`
 
-        await enviarEmailRecuperacao({
+        const envio = await enviarEmailRecuperacao({
             destinatario: usuario.email_institucional,
             nome: usuario.nome,
             link
         })
+
+        if (!envio?.sucesso) {
+            return res.status(500).json({
+                mensagem: "Não foi possível enviar o e-mail de recuperação no momento. Tente novamente."
+            })
+        }
 
         return res.status(200).json({
             mensagem: mensagemGenerica
@@ -213,62 +298,18 @@ async function validarTokenRecuperacao(req, res) {
             })
         }
 
-        let payload
-        try {
-            payload = jwt.decode(token)
-        } catch {
-            return res.status(400).json({
+        const validacao = await obterUsuarioDoTokenRecuperacao(token)
+
+        if (!validacao.ok) {
+            return res.status(validacao.status).json({
                 valido: false,
-                mensagem: "Token inválido."
-            })
-        }
-
-        if (!payload || !payload.id_usuario || payload.tipo !== "recuperacao_senha") {
-            return res.status(400).json({
-                valido: false,
-                mensagem: "Token de recuperação inválido."
-            })
-        }
-
-        const resultado = await pool.query(
-            "SELECT id_usuario, email_institucional, status, senha_hash FROM usuarios WHERE id_usuario = $1",
-            [payload.id_usuario]
-        )
-
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({
-                valido: false,
-                mensagem: "Usuário não encontrado."
-            })
-        }
-
-        const usuario = resultado.rows[0]
-
-        if (usuario.status !== "ativo") {
-            return res.status(403).json({
-                valido: false,
-                mensagem: "Esta conta está desativada. Procure a administração."
-            })
-        }
-
-        try {
-            jwt.verify(token, process.env.JWT_SECRET + usuario.senha_hash)
-        } catch (erroJwt) {
-            if (erroJwt.name === "TokenExpiredError") {
-                return res.status(400).json({
-                    valido: false,
-                    mensagem: "O link de recuperação expirou. Solicite um novo."
-                })
-            }
-            return res.status(400).json({
-                valido: false,
-                mensagem: "O link de recuperação é inválido ou já foi utilizado."
+                mensagem: validacao.mensagem
             })
         }
 
         return res.status(200).json({
             valido: true,
-            email: usuario.email_institucional,
+            email: validacao.usuario.email_institucional,
             mensagem: "Token válido."
         })
 
@@ -294,56 +335,17 @@ async function redefinirSenha(req, res) {
             })
         }
 
-        if (novaSenha.length < 8) {
+        if (novaSenha.length < SENHA_MIN || novaSenha.length > SENHA_MAX) {
             return res.status(400).json({
-                mensagem: "A nova senha deve ter pelo menos 8 caracteres."
+                mensagem: `A nova senha deve ter entre ${SENHA_MIN} e ${SENHA_MAX} caracteres.`
             })
         }
 
-        let payload
-        try {
-            payload = jwt.decode(token)
-        } catch {
-            return res.status(400).json({
-                mensagem: "Token inválido."
-            })
-        }
+        const validacao = await obterUsuarioDoTokenRecuperacao(token)
 
-        if (!payload || !payload.id_usuario || payload.tipo !== "recuperacao_senha") {
-            return res.status(400).json({
-                mensagem: "Token de recuperação inválido."
-            })
-        }
-
-        const resultado = await pool.query(
-            "SELECT id_usuario, status, senha_hash FROM usuarios WHERE id_usuario = $1",
-            [payload.id_usuario]
-        )
-
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({
-                mensagem: "Usuário não encontrado."
-            })
-        }
-
-        const usuario = resultado.rows[0]
-
-        if (usuario.status !== "ativo") {
-            return res.status(403).json({
-                mensagem: "Esta conta está desativada. Procure a administração."
-            })
-        }
-
-        try {
-            jwt.verify(token, process.env.JWT_SECRET + usuario.senha_hash)
-        } catch (erroJwt) {
-            if (erroJwt.name === "TokenExpiredError") {
-                return res.status(400).json({
-                    mensagem: "O link de recuperação expirou. Solicite um novo."
-                })
-            }
-            return res.status(400).json({
-                mensagem: "O link de recuperação é inválido ou já foi utilizado."
+        if (!validacao.ok) {
+            return res.status(validacao.status).json({
+                mensagem: validacao.mensagem
             })
         }
 
@@ -351,7 +353,7 @@ async function redefinirSenha(req, res) {
 
         await pool.query(
             "UPDATE usuarios SET senha_hash = $1, ultima_atualizacao = NOW() WHERE id_usuario = $2",
-            [senhaHash, usuario.id_usuario]
+            [senhaHash, validacao.usuario.id_usuario]
         )
 
         return res.status(200).json({
@@ -373,4 +375,4 @@ module.exports = {
     esqueciSenha,
     validarTokenRecuperacao,
     redefinirSenha
-}
+}

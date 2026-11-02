@@ -5,6 +5,7 @@ const supabase = require('../config/supabase');
 const STATUS_VALIDOS = ['perdido', 'encontrado', 'devolvido'];
 // campo: [limite de caracteres, nome mostrado na mensagem]
 const LIMITES = { nome_objeto: [100, 'O nome'], descricao: [1000, 'A descrição'], local_perda: [255, 'O local'] };
+const idValido = (valor) => /^[1-9]\d*$/.test(valor);
 
 // Campos da denúncia de perda que o admin e o próprio aluno veem
 const CAMPOS = `
@@ -138,7 +139,7 @@ async function atualizarStatusDenuncia(req, res) {
       return res.status(400).json({ mensagem: 'Status inválido.' });
     }
 
-    if (!Number.isInteger(Number(req.params.id_denuncia))) {
+    if (!idValido(req.params.id_denuncia)) {
       return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
     }
 
@@ -162,10 +163,10 @@ async function atualizarStatusDenuncia(req, res) {
 // Aluno remove a própria denúncia enquanto o objeto ainda está perdido; Administrador pode remover qualquer denúncia
 async function removerDenuncia(req, res) {
   try {
-    const id_denuncia = Number(req.params.id_denuncia);
-    if (!Number.isInteger(id_denuncia)) {
+    if (!idValido(req.params.id_denuncia)) {
       return res.status(404).json({ mensagem: 'Denúncia não encontrada.' });
     }
+    const id_denuncia = Number(req.params.id_denuncia);
 
     const isAdmin = req.usuario.tipo_usuario === 'administrador';
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ImageOff } from 'lucide-react';
 
@@ -70,7 +70,8 @@ function Inicio() {
           busca: buscaDebounced,
           categoria,
           bloco,
-          status
+          status,
+          data
         });
 
         const resposta = await fetch(
@@ -119,24 +120,18 @@ function Inicio() {
     return () => {
       controller.abort();
     };
-  }, [buscaDebounced, categoria, bloco, status]);
+  }, [buscaDebounced, categoria, bloco, status, data]);
 
-  // Filtra os itens por data no frontend
-  const itensVisiveis = data
-    ? itens.filter((item) => {
-        if (!item.data_horario) return false;
-
-        const dataItem = new Date(item.data_horario);
-
-        if (Number.isNaN(dataItem.getTime())) {
-          return false;
-        }
-
-        return (
-          dataItem.toLocaleDateString('en-CA') === data
-        );
-      })
-    : itens;
+  // Memoiza a filtragem por data para não reprocessar Datas a cada tecla digitada na busca
+  const itensVisiveis = useMemo(() => {
+    if (!data) return itens;
+    return itens.filter((item) => {
+      if (!item.data_horario) return false;
+      const dataItem = new Date(item.data_horario);
+      if (Number.isNaN(dataItem.getTime())) return false;
+      return dataItem.toLocaleDateString('en-CA') === data;
+    });
+  }, [itens, data]);
 
   return (
     <main className="inicio-conteudo">
@@ -238,6 +233,8 @@ function Inicio() {
                   className="inicio-foto"
                   src={item.imagem_url || item.foto}
                   alt={item.nome_objeto}
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div className="inicio-foto inicio-sem-foto">

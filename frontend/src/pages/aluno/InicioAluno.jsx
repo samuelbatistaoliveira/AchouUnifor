@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ImageOff } from 'lucide-react';
 import useCategorias from '../../hooks/useCategorias';
@@ -35,11 +35,11 @@ function InicioAluno() {
 
   useEffect(() => {
     let cancelado = false;
-    const params = new URLSearchParams({ busca: buscaDebounced, categoria });
+    const params = new URLSearchParams({ busca: buscaDebounced, categoria, data });
     buscar(`/itens/perdidos?${params}`)
       .then((dados) => {
         if (!cancelado) {
-          setItens(dados);
+          setItens(Array.isArray(dados) ? dados : []);
           setErro('');
         }
       })
@@ -52,12 +52,16 @@ function InicioAluno() {
     return () => {
       cancelado = true;
     };
-  }, [buscaDebounced, categoria]);
+  }, [buscaDebounced, categoria, data]);
 
-  // o backend não filtra por data: comparamos só o dia
-  const itensVisiveis = data
-    ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
-    : itens;
+  // Memoiza a filtragem por data para não reprocessar Datas a cada tecla digitada na busca
+  const itensVisiveis = useMemo(
+    () =>
+      data
+        ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
+        : itens,
+    [itens, data]
+  );
 
   return (
     <main className="inicio-conteudo">
@@ -82,7 +86,13 @@ function InicioAluno() {
         {itensVisiveis.map((item) => (
           <article key={item.id_item} className="inicio-card">
             {item.imagem_url || item.foto ? (
-              <img className="inicio-foto" src={item.imagem_url || item.foto} alt={item.nome_objeto} />
+              <img
+                className="inicio-foto"
+                src={item.imagem_url || item.foto}
+                alt={item.nome_objeto}
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
             )}

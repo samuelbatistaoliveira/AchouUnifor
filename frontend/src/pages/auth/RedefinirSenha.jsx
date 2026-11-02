@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import '../../styles/Login.css';
 import { API } from '../../services/api';
 
+const SENHA_MIN = 8;
+const SENHA_MAX = 72;
+
 function RedefinirSenha() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -68,8 +71,8 @@ function RedefinirSenha() {
     e.preventDefault();
     setErro('');
 
-    if (novaSenha.length < 8) {
-      setErro('A nova senha deve ter pelo menos 8 caracteres.');
+    if (novaSenha.length < SENHA_MIN || novaSenha.length > SENHA_MAX) {
+      setErro(`A nova senha deve ter entre ${SENHA_MIN} e ${SENHA_MAX} caracteres.`);
       return;
     }
 
@@ -180,6 +183,7 @@ function RedefinirSenha() {
                   <input
                     type={mostrarSenha ? 'text' : 'password'}
                     placeholder="Mínimo de 8 caracteres"
+                    maxLength={SENHA_MAX}
                     value={novaSenha}
                     onChange={(e) => {
                       setNovaSenha(e.target.value);
@@ -203,6 +207,7 @@ function RedefinirSenha() {
                   <input
                     type={mostrarConfirmar ? 'text' : 'password'}
                     placeholder="Repita a nova senha"
+                    maxLength={SENHA_MAX}
                     value={confirmarSenha}
                     onChange={(e) => {
                       setConfirmarSenha(e.target.value);

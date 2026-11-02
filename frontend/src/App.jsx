@@ -1,22 +1,24 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router';
 import Topbar from './components/Topbar';
-import Login from './pages/auth/Login';
-import Cadastro from './pages/auth/Cadastro';
-import EsqueceuSenha from './pages/auth/EsqueceuSenha';
-import RedefinirSenha from './pages/auth/RedefinirSenha';
-import Inicio from './pages/admin/Inicio';
-import GerenciarItem from './pages/admin/GerenciarItem';
-import Notificacoes from './pages/admin/Notificacoes';
-import CriarNotificacao from './pages/admin/CriarNotificacao';
-import PainelAdm from './pages/admin/PainelAdm';
-import InicioAluno from './pages/aluno/InicioAluno';
-import DenunciarPerda from './pages/aluno/DenunciarPerda';
-import NotificacoesAluno from './pages/aluno/NotificacoesAluno';
-import MinhasDenuncias from './pages/aluno/MinhasDenuncias';
-import DetalhesItem from './pages/comum/DetalhesItem';
-import Perfil from './pages/comum/Perfil';
 import { limparToken, sessaoVencida, tipoUsuario, tokenSalvo } from './services/api';
+
+// Code splitting por rota: cada tela é carregada sob demanda (React.lazy)
+const Login = lazy(() => import('./pages/auth/Login'));
+const Cadastro = lazy(() => import('./pages/auth/Cadastro'));
+const EsqueceuSenha = lazy(() => import('./pages/auth/EsqueceuSenha'));
+const RedefinirSenha = lazy(() => import('./pages/auth/RedefinirSenha'));
+const Inicio = lazy(() => import('./pages/admin/Inicio'));
+const GerenciarItem = lazy(() => import('./pages/admin/GerenciarItem'));
+const Notificacoes = lazy(() => import('./pages/admin/Notificacoes'));
+const CriarNotificacao = lazy(() => import('./pages/admin/CriarNotificacao'));
+const PainelAdm = lazy(() => import('./pages/admin/PainelAdm'));
+const InicioAluno = lazy(() => import('./pages/aluno/InicioAluno'));
+const DenunciarPerda = lazy(() => import('./pages/aluno/DenunciarPerda'));
+const NotificacoesAluno = lazy(() => import('./pages/aluno/NotificacoesAluno'));
+const MinhasDenuncias = lazy(() => import('./pages/aluno/MinhasDenuncias'));
+const DetalhesItem = lazy(() => import('./pages/comum/DetalhesItem'));
+const Perfil = lazy(() => import('./pages/comum/Perfil'));
 
 // Telas com a barra de cima
 function ComTopbar() {
@@ -61,49 +63,55 @@ function App() {
 
   if (!logado) {
     return (
-      <Routes>
-        <Route path="/login" element={<Login aoEntrar={entrar} />} />
-        <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/esqueci-senha" element={<EsqueceuSenha />} />
-        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
-        <Route path="*" element={<Navigate to="/login" replace state={{ de: location }} />} />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/login" element={<Login aoEntrar={entrar} />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/esqueci-senha" element={<EsqueceuSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="*" element={<Navigate to="/login" replace state={{ de: location }} />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   // o login é o mesmo para todos; o tipo do usuário decide quais rotas existem
   if (tipoUsuario() === 'administrador') {
     return (
+      <Suspense fallback={null}>
+        <Routes>
+          <Route element={<ComTopbar />}>
+            <Route index element={<Inicio />} />
+            <Route path="gerenciar/:id?" element={<NovaACadaVisita><GerenciarItem /></NovaACadaVisita>} />
+            <Route path="notificacoes" element={<Notificacoes />} />
+            <Route path="notificacoes/nova" element={<CriarNotificacao />} />
+            <Route path="painel" element={<Navigate to="/painel/itens" replace />} />
+            <Route path="painel/:secao" element={<PainelAdm />} />
+          </Route>
+          <Route path="itens/:id" element={<DetalhesItem />} />
+          <Route path="perfil" element={<Perfil aoSair={sair} />} />
+          <Route path="redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
+  return (
+    <Suspense fallback={null}>
       <Routes>
         <Route element={<ComTopbar />}>
-          <Route index element={<Inicio />} />
-          <Route path="gerenciar/:id?" element={<NovaACadaVisita><GerenciarItem /></NovaACadaVisita>} />
-          <Route path="notificacoes" element={<Notificacoes />} />
-          <Route path="notificacoes/nova" element={<CriarNotificacao />} />
-          <Route path="painel" element={<Navigate to="/painel/itens" replace />} />
-          <Route path="painel/:secao" element={<PainelAdm />} />
+          <Route index element={<InicioAluno />} />
+          <Route path="denunciar" element={<NovaACadaVisita><DenunciarPerda /></NovaACadaVisita>} />
+          <Route path="notificacoes" element={<NotificacoesAluno />} />
+          <Route path="minhas-denuncias" element={<MinhasDenuncias />} />
         </Route>
         <Route path="itens/:id" element={<DetalhesItem />} />
         <Route path="perfil" element={<Perfil aoSair={sair} />} />
         <Route path="redefinir-senha" element={<RedefinirSenha />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route element={<ComTopbar />}>
-        <Route index element={<InicioAluno />} />
-        <Route path="denunciar" element={<NovaACadaVisita><DenunciarPerda /></NovaACadaVisita>} />
-        <Route path="notificacoes" element={<NotificacoesAluno />} />
-        <Route path="minhas-denuncias" element={<MinhasDenuncias />} />
-      </Route>
-      <Route path="itens/:id" element={<DetalhesItem />} />
-      <Route path="perfil" element={<Perfil aoSair={sair} />} />
-      <Route path="redefinir-senha" element={<RedefinirSenha />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    </Suspense>
   );
 }
 

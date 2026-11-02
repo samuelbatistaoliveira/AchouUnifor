@@ -78,11 +78,12 @@ async function criarNotificacao(req, res) {
       }
     }
 
+    // data_criacao vai do Node: o default do banco (CURRENT_TIMESTAMP) grava em UTC e a tela mostrava 3h a mais
     const resultado = await pool.query(
-      `INSERT INTO notificacoes (titulo, mensagem, id_destinatario, id_autor)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO notificacoes (titulo, mensagem, id_destinatario, id_autor, data_criacao)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id_notificacao`,
-      [titulo, mensagem, paraTodos ? null : Number(id_destinatario), req.usuario.id_usuario]
+      [titulo, mensagem, paraTodos ? null : Number(id_destinatario), req.usuario.id_usuario, new Date()]
     );
 
     res.status(201).json(resultado.rows[0]);

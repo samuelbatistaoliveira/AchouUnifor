@@ -142,14 +142,6 @@ function Detalhes({ item, admin, aoStatusAlterado }) {
                         <span className="rotulo">Categoria:</span>
                         <span className="valor">{item.categoria || 'Não informada'}</span>
                     </div>
-                    <div className="linha-especificacao">
-                        <span className="rotulo">Material:</span>
-                        <span className="valor">{item.material || 'Não informado'}</span>
-                    </div>
-                    <div className="linha-especificacao">
-                        <span className="rotulo">Cor:</span>
-                        <span className="valor">{item.cor || 'Não informada'}</span>
-                    </div>
                     <div className="linha-especificacao mt-forte">
                         <span className="rotulo">Data e horário:</span>
                         <span className="valor">{dataFormatada}</span>

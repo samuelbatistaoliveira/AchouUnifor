@@ -77,7 +77,7 @@ async function getItens(req, res) {
       query += ' WHERE ' + condicoes.join(' AND ');
     }
 
-    const resultado = await pool.query(query, valores);
+    const resultado = await pool.query(query + ' ORDER BY itens.data_horario DESC', valores);
     const itensComCapa = await anexarFotosCapa(resultado.rows);
     res.json(itensComCapa);
 

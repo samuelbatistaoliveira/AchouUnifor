@@ -39,7 +39,8 @@ function Login({ aoEntrar }) {
         return;
       }
 
-      localStorage.setItem("token", dados.token);
+      // sem "lembrar", o token some ao fechar o navegador
+      (lembrar ? localStorage : sessionStorage).setItem("token", dados.token);
 
       aoEntrar();
 

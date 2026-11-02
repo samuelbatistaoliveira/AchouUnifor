@@ -196,6 +196,10 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
                 html: htmlContent,
             });
 
+            // sem SMTP no .env o e-mail vai para a caixa de teste do Ethereal: este link abre o e-mail enviado
+            const previa = nodemailer.getTestMessageUrl(info);
+            if (previa) console.log(`📧 Prévia do e-mail (Ethereal): ${previa}`);
+
             return { sucesso: true, messageId: info.messageId };
         } catch (erroEnvio) {
             console.error("Erro ao enviar e-mail via transporter:", erroEnvio.message);
@@ -203,6 +207,8 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
         }
     }
 
+    // sem SMTP e sem Ethereal (ex.: offline em desenvolvimento) o link só aparece aqui no terminal
+    console.log(`📧 E-mail não enviado. Link de recuperação: ${link}`);
     return { sucesso: true };
 }
 

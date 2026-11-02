@@ -48,6 +48,7 @@ scripts/dev-all.js     sobe backend e frontend juntos (npm run dev:all)
 backend/
   .env.example         variáveis que o backend precisa
   sql/                 scripts do banco (base.sql primeiro)
+  tests/load/          script de teste de carga (k6)
   src/
     config/            banco, Supabase e upload
     controllers/       lógica de cada rota
@@ -82,7 +83,7 @@ Cada tela tem seu endereço, e os filtros ficam na URL (ex.: `/?categoria=Eletr�
 | Admin | `/` | início (filtros: `busca`, `categoria`, `bloco`, `data`, `status`) |
 | Admin | `/gerenciar`, `/gerenciar/:id` | registrar / editar item |
 | Admin | `/notificacoes`, `/notificacoes/nova` | notificações enviadas / nova |
-| Admin | `/painel/itens`, `/painel/usuarios?busca=`, `/painel/categorias`, `/painel/denuncias`... | painel administrativo |
+| Admin | `/painel/itens`, `/painel/usuarios?busca=`, `/painel/categorias`, `/painel/devolucoes`, `/painel/relatorios`, `/painel/denuncias` | painel administrativo |
 | Aluno | `/` | início (filtros: `busca`, `categoria`, `data`) |
 | Aluno | `/denunciar` | denunciar perda |
 | Aluno | `/notificacoes` | notificações |
@@ -104,4 +105,4 @@ Cada tela tem seu endereço, e os filtros ficam na URL (ex.: `/?categoria=Eletr�
 
 ## 📍 Situação atual
 
-O sistema já funciona de ponta a ponta: login e cadastro com e-mail institucional, recuperação de senha por e-mail, registro e edição de itens com fotos, painel do administrador (itens, usuários, categorias e denúncias), notificações e a área do aluno (itens perdidos, denúncia de perda e minhas denúncias). As seções "Devoluções" e "Relatórios" do painel ainda estão em construção.
+O sistema já funciona de ponta a ponta: login e cadastro com e-mail institucional, recuperação de senha por e-mail, registro e edição de itens com fotos, painel do administrador completo (itens, usuários, categorias, devoluções, relatórios com exportação CSV/impressão e denúncias), notificações e a área do aluno (itens perdidos, denúncia de perda e minhas denúncias).

@@ -5,7 +5,8 @@ import { buscar } from '../../services/api';
 import '../../styles/InicioAluno.css';
 
 // "2026-10-18T15:30:00.000Z" -> "18/10/2026 15:30"
-const dataHora = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+const dataHora = (iso) =>
+  iso ? new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '';
 
 // Notificações do aluno: primeiro as denúncias que o admin marcou como "encontrado" (correspondência),
 // depois as mensagens que o admin enviou (para todos ou só para ele).
@@ -20,8 +21,10 @@ function NotificacoesAluno() {
   useEffect(() => {
     Promise.all([buscar('/denuncias/minhas'), buscar('/notificacoes/minhas')])
       .then(([denuncias, notificacoes]) => {
-        setEncontradas(denuncias.filter((d) => d.status === 'encontrado'));
-        setMensagens(notificacoes);
+        const listaDenuncias = Array.isArray(denuncias) ? denuncias : [];
+        const listaNotificacoes = Array.isArray(notificacoes) ? notificacoes : [];
+        setEncontradas(listaDenuncias.filter((d) => d.status === 'encontrado'));
+        setMensagens(listaNotificacoes);
       })
       .catch((e) => setErro(e.message || 'Não foi possível carregar as notificações.'))
       .finally(() => setCarregando(false));
@@ -45,8 +48,14 @@ function NotificacoesAluno() {
       <ul className="na-lista">
         {encontradas.map((d) => (
           <li key={d.id_denuncia} className="na-aviso">
-            {d.fotos[0] ? (
-              <img className="na-foto" src={d.fotos[0]} alt="" />
+            {d.fotos?.[0] ? (
+              <img
+                className="na-foto"
+                src={d.fotos[0]}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <span className="na-foto na-sem-foto"><ImageOff size={20} /></span>
             )}

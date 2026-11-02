@@ -1,7 +1,18 @@
 const pool = require('../config/database');
 const supabase = require('../config/supabase');
 
-// Busca em lote (batch) a imagem de capa de cada item e gera signed URLs em uma única chamada
+// Escapa caracteres curinga (% e _) para buscas literais seguras com ILIKE
+const escaparLike = (texto) => String(texto).replace(/[%_\\]/g, '\\$&');
+const dataIsoValida = (valor) => typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor);
+
+/**
+ * Busca em lote (batch) a primeira imagem de cada item usando `DISTINCT ON (id_item)` no PostgreSQL
+ * e gera todas as URLs assinadas (válidas por 1h) em uma única requisição `createSignedUrls` ao Supabase Storage,
+ * evitando o problema de performance de N+1 chamadas de rede.
+ *
+ * @param {Array<object>} itens Lista de itens retornados do banco.
+ * @returns {Promise<Array<object>>} Lista de itens enriquecida com `imagem_url` e `foto`.
+ */
 async function anexarFotosCapa(itens) {
   if (!itens || itens.length === 0) return itens;
 
@@ -41,9 +52,29 @@ async function anexarFotosCapa(itens) {
   }));
 }
 
+/**
+ * Aplica paginação opcional (`limite` e `pagina`) à query SQL caso informada na URL.
+ */
+function aplicarPaginacao(query, valores, reqQuery) {
+  const limiteBruto = Number(reqQuery.limite);
+  if (!Number.isInteger(limiteBruto) || limiteBruto <= 0) return query;
+
+  const limite = Math.min(limiteBruto, 200);
+  const paginaBruta = Number(reqQuery.pagina);
+  const pagina = Number.isInteger(paginaBruta) && paginaBruta > 0 ? paginaBruta : 1;
+  const offset = (pagina - 1) * limite;
+
+  valores.push(limite);
+  const idxLimite = valores.length;
+  valores.push(offset);
+  const idxOffset = valores.length;
+
+  return `${query} LIMIT $${idxLimite} OFFSET $${idxOffset}`;
+}
+
 async function getItens(req, res) {
   try {
-    const { busca, categoria, bloco, status } = req.query;
+    const { busca, categoria, bloco, status, data, sem_fotos } = req.query;
 
     let query = `
       SELECT itens.*, categorias.nome AS categoria
@@ -54,7 +85,7 @@ async function getItens(req, res) {
     const valores = [];
 
     if (busca) {
-      valores.push(`%${busca}%`);
+      valores.push(`%${escaparLike(busca)}%`);
       condicoes.push(`itens.nome_objeto ILIKE $${valores.length}`);
     }
 
@@ -64,7 +95,7 @@ async function getItens(req, res) {
     }
 
     if (bloco) {
-      valores.push(`%${bloco}%`);
+      valores.push(`%${escaparLike(bloco)}%`);
       condicoes.push(`itens.local_encontrado ILIKE $${valores.length}`);
     }
 
@@ -73,11 +104,27 @@ async function getItens(req, res) {
       condicoes.push(`itens.status = $${valores.length}`);
     }
 
+    if (dataIsoValida(data)) {
+      valores.push(data);
+      condicoes.push(
+        `itens.data_horario >= $${valores.length}::date AND itens.data_horario < ($${valores.length}::date + INTERVAL '1 day')`
+      );
+    }
+
     if (condicoes.length > 0) {
       query += ' WHERE ' + condicoes.join(' AND ');
     }
 
-    const resultado = await pool.query(query + ' ORDER BY itens.data_horario DESC', valores);
+    query += ' ORDER BY itens.data_horario DESC';
+    query = aplicarPaginacao(query, valores, req.query);
+
+    const resultado = await pool.query(query, valores);
+
+    // Permite pular a consulta de imagens e assinatura no Supabase Storage (ex.: tela de Relatórios/CSV)
+    if (sem_fotos === '1' || sem_fotos === 'true') {
+      return res.json(resultado.rows);
+    }
+
     const itensComCapa = await anexarFotosCapa(resultado.rows);
     res.json(itensComCapa);
 
@@ -90,7 +137,7 @@ async function getItens(req, res) {
 // Visão do aluno: só itens perdidos e só o básico (sem local, descrição nem quem registrou)
 async function listarPerdidos(req, res) {
   try {
-    const { busca, categoria } = req.query;
+    const { busca, categoria, data } = req.query;
     const valores = [];
     let query = `
       SELECT itens.id_item, itens.nome_objeto, itens.data_horario, categorias.nome AS categoria
@@ -100,7 +147,7 @@ async function listarPerdidos(req, res) {
     `;
 
     if (busca) {
-      valores.push(`%${busca}%`);
+      valores.push(`%${escaparLike(busca)}%`);
       query += ` AND itens.nome_objeto ILIKE $${valores.length}`;
     }
 
@@ -109,7 +156,15 @@ async function listarPerdidos(req, res) {
       query += ` AND categorias.nome = $${valores.length}`;
     }
 
-    const resultado = await pool.query(query + ' ORDER BY itens.data_horario DESC', valores);
+    if (dataIsoValida(data)) {
+      valores.push(data);
+      query += ` AND itens.data_horario >= $${valores.length}::date AND itens.data_horario < ($${valores.length}::date + INTERVAL '1 day')`;
+    }
+
+    query += ' ORDER BY itens.data_horario DESC';
+    query = aplicarPaginacao(query, valores, req.query);
+
+    const resultado = await pool.query(query, valores);
     const itensComCapa = await anexarFotosCapa(resultado.rows);
     res.json(itensComCapa);
 
@@ -119,8 +174,8 @@ async function listarPerdidos(req, res) {
   }
 }
 
-// id da URL (/itens/abc ou /itens/-1 viram 404, não erro do banco)
-const idValido = (valor) => /^\d+$/.test(valor);
+// id da URL (/itens/abc, /itens/0 ou /itens/-1 viram 404, não erro do banco)
+const idValido = (valor) => /^[1-9]\d*$/.test(valor);
 
 // Um item pelo id, com tudo (admin): abre /itens/:id e /gerenciar/:id no frontend
 async function buscarItem(req, res) {
@@ -283,4 +338,4 @@ module.exports = {
   criarItem,
   editarItem,
   atualizarStatus,
-};
+};

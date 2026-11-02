@@ -61,6 +61,7 @@ function escaparHtml(str) {
 async function enviarEmailRecuperacao({ destinatario, nome, link }) {
     const primeiroNomeRaw = nome ? nome.split(" ")[0] : "Usuário";
     const primeiroNome = escaparHtml(primeiroNomeRaw);
+    const linkSeguro = escaparHtml(link);
     const remetente = process.env.SMTP_FROM || '"AchouUNIFOR" <suporte@achouunifor.com>';
 
     const htmlContent = `
@@ -160,13 +161,13 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
                 <p>Para escolher uma nova senha e recuperar o acesso, clique no botão abaixo:</p>
                 
                 <div class="btn-container">
-                    <a href="${link}" class="btn-reset" target="_blank">Redefinir Minha Senha</a>
+                    <a href="${linkSeguro}" class="btn-reset" target="_blank">Redefinir Minha Senha</a>
                 </div>
 
                 <p style="font-size: 13px; color: #64748b;">
                     Se o botão não funcionar, copie e cole o seguinte link no seu navegador:
                 </p>
-                <div class="link-alt">${link}</div>
+                <div class="link-alt">${linkSeguro}</div>
 
                 <p style="font-size: 13px; color: #64748b; margin-top: 24px;">
                     <strong>Atenção:</strong> Por motivos de segurança, este link é válido por <strong>1 hora</strong>. Se você não solicitou a redefinição de senha, nenhuma ação é necessária e sua senha atual continuará segura.

@@ -1,8 +1,16 @@
 const pool = require('../config/database');
 
 const NOME_DUPLICADO = '23505'; // código do Postgres para violar o UNIQUE (nome)
+const MAX_NOME_CATEGORIA = 50;
+const idValido = (valor) => /^[1-9]\d*$/.test(valor);
 
-// Categorias ativas com quantos itens cada uma tem
+/**
+ * Lista todas as categorias ativas em ordem alfabética, incluindo a contagem total de itens
+ * vinculados a cada categoria (`total_itens`).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 async function listarCategorias(req, res) {
   try {
     const resultado = await pool.query(`
@@ -21,12 +29,26 @@ async function listarCategorias(req, res) {
   }
 }
 
+/**
+ * Cria uma nova categoria ou reativa uma categoria anteriormente desativada com o mesmo nome.
+ * Utiliza `ON CONFLICT (nome) DO UPDATE ... WHERE categorias.status = 'inativo'` para evitar
+ * duplicação e preservar o histórico de itens antigos.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 async function criarCategoria(req, res) {
   try {
-    const nome = req.body.nome?.trim();
+    const nome = typeof req.body.nome === 'string' ? req.body.nome.trim() : '';
 
     if (!nome) {
       return res.status(400).json({ mensagem: 'Informe o nome da categoria.' });
+    }
+
+    if (nome.length > MAX_NOME_CATEGORIA) {
+      return res.status(400).json({
+        mensagem: `O nome da categoria pode ter no máximo ${MAX_NOME_CATEGORIA} caracteres.`
+      });
     }
 
     // um nome removido antes volta a ficar ativo em vez de duplicar
@@ -51,18 +73,28 @@ async function criarCategoria(req, res) {
   }
 }
 
-const idValido = (valor) => /^\d+$/.test(valor);
-
+/**
+ * Renomeia uma categoria ativa existente, respeitando a restrição UNIQUE do banco.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 async function renomearCategoria(req, res) {
   try {
     if (!idValido(req.params.id_categoria)) {
       return res.status(404).json({ mensagem: 'Categoria não encontrada.' });
     }
 
-    const nome = req.body.nome?.trim();
+    const nome = typeof req.body.nome === 'string' ? req.body.nome.trim() : '';
 
     if (!nome) {
       return res.status(400).json({ mensagem: 'Informe o nome da categoria.' });
+    }
+
+    if (nome.length > MAX_NOME_CATEGORIA) {
+      return res.status(400).json({
+        mensagem: `O nome da categoria pode ter no máximo ${MAX_NOME_CATEGORIA} caracteres.`
+      });
     }
 
     const resultado = await pool.query(
@@ -87,7 +119,13 @@ async function renomearCategoria(req, res) {
   }
 }
 
-// Desativa em vez de apagar: os itens continuam apontando para ela
+/**
+ * Realiza a exclusão lógica (soft delete) da categoria alterando seu status para 'inativo'.
+ * Dessa forma, os itens já registrados permanecem íntegros apontando para a chave estrangeira.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 async function removerCategoria(req, res) {
   try {
     if (!idValido(req.params.id_categoria)) {

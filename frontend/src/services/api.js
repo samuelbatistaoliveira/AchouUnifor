@@ -1,7 +1,16 @@
 export const API = 'http://localhost:3000';
 
+/**
+ * Obtém o token JWT armazenado no navegador (`localStorage` quando "Lembrar de mim"
+ * está ativo ou `sessionStorage` para sessão temporária).
+ *
+ * @returns {string | null} Token JWT ou `null` caso não exista.
+ */
 export const tokenSalvo = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
+/**
+ * Remove o token JWT tanto do `localStorage` quanto do `sessionStorage`.
+ */
 export function limparToken() {
   localStorage.removeItem('token');
   sessionStorage.removeItem('token');
@@ -14,7 +23,14 @@ function sessaoRecusada() {
   window.location.reload();
 }
 
-// GET autenticado: devolve o JSON ou lança um Error com a mensagem do backend
+/**
+ * Executa uma requisição GET autenticada (caso haja token salvo) para o backend.
+ * Redireciona automaticamente para o login caso receba status `401`.
+ *
+ * @param {string} caminho Caminho relativo da rota (ex.: `'/categorias'` ou `'/itens'`).
+ * @returns {Promise<any>} Dados retornados em JSON pelo servidor.
+ * @throws {Error} Erro contendo a mensagem amigável do backend ou falha de conexão.
+ */
 export async function buscar(caminho) {
   const token = tokenSalvo();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -31,7 +47,15 @@ export async function buscar(caminho) {
   return dados;
 }
 
-// Faz a chamada autenticada e devolve a mensagem de erro do backend, ou '' se deu certo
+/**
+ * Executa uma requisição de escrita (`POST`, `PUT`, `PATCH`, `DELETE`) autenticada para o backend.
+ * Redireciona automaticamente para o login caso receba status `401`.
+ *
+ * @param {string} caminho Caminho relativo da rota (ex.: `'/categorias'`).
+ * @param {'POST' | 'PUT' | 'PATCH' | 'DELETE'} metodo Método HTTP.
+ * @param {object} [corpo] Objeto serializado como JSON no corpo da requisição.
+ * @returns {Promise<string>} String vazia `''` em caso de sucesso, ou a mensagem de erro.
+ */
 export async function enviar(caminho, metodo, corpo) {
   const token = tokenSalvo();
   const headers = { 'Content-Type': 'application/json' };
@@ -58,7 +82,12 @@ export async function enviar(caminho, metodo, corpo) {
   }
 }
 
-// Conteúdo do token salvo, ou null. Não confere a assinatura: quem protege os dados é o backend.
+/**
+ * Decodifica o payload base64url do JWT salvo no navegador sem validar assinatura
+ * (a validação criptográfica de acesso ocorre sempre no backend).
+ *
+ * @returns {{ id_usuario?: number, tipo_usuario?: string, exp?: number } | null}
+ */
 function dadosDoToken() {
   try {
     const token = tokenSalvo();

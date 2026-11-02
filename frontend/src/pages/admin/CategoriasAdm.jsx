@@ -3,7 +3,7 @@ import useCategorias from '../../hooks/useCategorias';
 import { enviar } from '../../services/api';
 
 function CategoriasAdm() {
-  const { categorias, erro: erroLista, recarregar } = useCategorias();
+  const { categorias, carregando, erro: erroLista, recarregar } = useCategorias();
   const [nova, setNova] = useState('');
   const [editando, setEditando] = useState(null); // { id, nome }
   const [ocupado, setOcupado] = useState(false);
@@ -108,7 +108,9 @@ function CategoriasAdm() {
         </form>
       </div>
 
-      {categorias.length === 0 && !erroLista && <p className="pa-vazio">Nenhuma categoria cadastrada.</p>}
+      {!carregando && categorias.length === 0 && !erroLista && (
+        <p className="pa-vazio">Nenhuma categoria cadastrada.</p>
+      )}
     </>
   );
 }

@@ -81,12 +81,19 @@ html:has(.container-geral) {
 /* --- Conteúdo Principal com Fundo --- */
 .conteudo-principal {
   flex: 1;
+  background-color: #093f97; /* Fallback imediato enquanto o GIF de fundo carrega */
   background-image: url('../assets/fundo-animado.gif'); /* Substitua pelo nome do seu GIF */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
   min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conteudo-principal {
+    background-image: linear-gradient(135deg, #093f97 0%, #0b2545 100%);
+  }
 }
 
 /* margin auto centraliza na vertical sem cortar o topo se faltar espaço */

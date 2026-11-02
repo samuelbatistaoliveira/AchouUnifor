@@ -1,26 +1,53 @@
 import { useCallback, useEffect, useState } from 'react';
-import { API } from '../services/api';
+import { buscar } from '../services/api';
 
-// Categorias ativas do banco: [{ id_categoria, nome, total_itens }]; `recarregar` busca de novo
+/**
+ * @typedef {Object} CategoriaItem
+ * @property {number} id_categoria Identificador único da categoria.
+ * @property {string} nome Nome de exibição da categoria.
+ * @property {number} total_itens Quantidade total de itens vinculados à categoria.
+ */
+
+// Cache em memória da sessão para evitar requisições repetidas a cada troca de tela no menu
+let cacheCategorias = null;
+
+/**
+ * Hook responsável por buscar e manter a lista de categorias ativas do sistema.
+ * Utiliza cache em memória na navegação entre páginas e atualiza o cache quando `recarregar()` é chamado.
+ *
+ * @returns {{
+ *   categorias: CategoriaItem[],
+ *   carregando: boolean,
+ *   erro: string,
+ *   recarregar: () => Promise<void>
+ * }}
+ */
 function useCategorias() {
-  const [categorias, setCategorias] = useState([]);
+  const [categorias, setCategorias] = useState(() => cacheCategorias ?? []);
+  const [carregando, setCarregando] = useState(() => cacheCategorias === null);
   const [erro, setErro] = useState('');
 
   const recarregar = useCallback(
     () =>
-      fetch(`${API}/categorias`)
-        .then((r) => {
-          if (!r.ok) throw new Error();
-          return r.json();
+      buscar('/categorias')
+        .then((dados) => {
+          const lista = Array.isArray(dados) ? dados : [];
+          cacheCategorias = lista;
+          setCategorias(lista);
+          setErro('');
         })
-        .then((dados) => { setCategorias(dados); setErro(''); })
-        .catch(() => setErro('Não foi possível carregar as categorias.')),
+        .catch(() => setErro('Não foi possível carregar as categorias.'))
+        .finally(() => setCarregando(false)),
     []
   );
 
-  useEffect(() => { recarregar(); }, [recarregar]);
+  useEffect(() => {
+    if (cacheCategorias === null) {
+      recarregar();
+    }
+  }, [recarregar]);
 
-  return { categorias, erro, recarregar };
+  return { categorias, carregando, erro, recarregar };
 }
 
 export default useCategorias;

@@ -29,25 +29,40 @@ Entre os recursos planejados para a plataforma estão:
 
 > O conjunto de funcionalidades poderá sofrer alterações durante o desenvolvimento, conforme os requisitos definidos para o sistema.
 
+## 🚀 Como rodar
+
+Precisa de **Node.js 22.12 ou mais novo**. Na raiz do projeto:
+
+```bash
+npm install                          # instala frontend e backend de uma vez
+cp backend/.env.example backend/.env # e preencha com os dados do Supabase
+npm run dev:all                      # backend em :3000 e frontend em :5173
+```
+
+Abra http://localhost:5173. O passo a passo completo (banco do zero, primeiro admin, e-mail) e a explicação de como tudo se conecta estão em **[COMO-FUNCIONA.md](COMO-FUNCIONA.md)**.
+
 ## 📁 Estrutura de pastas
 
 ```
+scripts/dev-all.js     sobe backend e frontend juntos (npm run dev:all)
 backend/
-  sql/                 scripts do banco
+  .env.example         variáveis que o backend precisa
+  sql/                 scripts do banco (base.sql primeiro)
   src/
     config/            banco, Supabase e upload
     controllers/       lógica de cada rota
     routes/            rotas do Express
     seguranca/         verificarToken e verificarAdmin
+    services/          envio de e-mail (recuperação de senha)
     server.js
 frontend/src/
   pages/
-    auth/              login, cadastro, esqueci a senha
+    auth/              login, cadastro, esqueci a senha, redefinir senha
     admin/             telas do administrador
     aluno/             telas do aluno
     comum/             telas usadas pelos dois (perfil, detalhes do item)
   components/          pedaços reaproveitados (Topbar, CampoFotos)
-  hooks/               useCategorias, useImagensItens, useItem, useFiltrosDaUrl, useVoltar
+  hooks/               useCategorias, useItem, useFiltrosDaUrl, useVoltar
   services/api.js      chamadas ao backend
   utils/constantes.js  listas fixas (blocos, status)
   styles/              arquivos .css
@@ -61,7 +76,7 @@ Cada tela tem seu endereço, e os filtros ficam na URL (ex.: `/?categoria=Eletr�
 
 | Quem | Rota | Tela |
 | --- | --- | --- |
-| Todos | `/login`, `/cadastro`, `/esqueci-senha` | entrada |
+| Todos | `/login`, `/cadastro`, `/esqueci-senha`, `/redefinir-senha?token=` | entrada |
 | Todos | `/itens/:id` | detalhes do item |
 | Todos | `/perfil` | perfil |
 | Admin | `/` | início (filtros: `busca`, `categoria`, `bloco`, `data`, `status`) |
@@ -89,4 +104,4 @@ Cada tela tem seu endereço, e os filtros ficam na URL (ex.: `/?categoria=Eletr�
 
 ## 📍 Situação atual
 
-O projeto encontra-se em etapa inicial de desenvolvimento, envolvendo o levantamento das necessidades dos usuários, definição dos requisitos e planejamento das funcionalidades que serão implementadas.
+O sistema já funciona de ponta a ponta: login e cadastro com e-mail institucional, recuperação de senha por e-mail, registro e edição de itens com fotos, painel do administrador (itens, usuários, categorias e denúncias), notificações e a área do aluno (itens perdidos, denúncia de perda e minhas denúncias). As seções "Devoluções" e "Relatórios" do painel ainda estão em construção.

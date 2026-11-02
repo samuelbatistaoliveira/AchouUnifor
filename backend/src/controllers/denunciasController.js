@@ -100,13 +100,14 @@ async function criarDenuncia(req, res) {
       return res.status(400).json({ mensagem: 'A data da perda não pode estar no futuro.' });
     }
 
+    // data_denuncia vai do Node: o default do banco (CURRENT_TIMESTAMP) grava em UTC e a tela mostrava 3h a mais
     const resultado = await pool.query(
-      `INSERT INTO denuncias (id_usuario, nome_objeto, descricao, local_perda, data_perda, id_categoria, status)
-       SELECT $1, $2, $3, $4, $5, id_categoria, 'perdido'
+      `INSERT INTO denuncias (id_usuario, nome_objeto, descricao, local_perda, data_perda, id_categoria, status, data_denuncia)
+       SELECT $1, $2, $3, $4, $5, id_categoria, 'perdido', $7
        FROM categorias
        WHERE nome = $6 AND status = 'ativo'
        RETURNING id_denuncia, nome_objeto`,
-      [req.usuario.id_usuario, nome_objeto, descricao || null, local_perda, data_perda, categoria]
+      [req.usuario.id_usuario, nome_objeto, descricao || null, local_perda, data_perda, categoria, new Date()]
     );
 
     if (resultado.rows.length === 0) {

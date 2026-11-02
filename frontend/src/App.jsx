@@ -16,7 +16,7 @@ import NotificacoesAluno from './pages/aluno/NotificacoesAluno';
 import MinhasDenuncias from './pages/aluno/MinhasDenuncias';
 import DetalhesItem from './pages/comum/DetalhesItem';
 import Perfil from './pages/comum/Perfil';
-import { tipoUsuario, tokenSalvo } from './services/api';
+import { limparToken, sessaoVencida, tipoUsuario, tokenSalvo } from './services/api';
 
 // Telas com a barra de cima
 function ComTopbar() {
@@ -39,9 +39,12 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // cada tela nova começa do topo
+  // cada tela nova começa do topo; com o token vencido, volta para o login
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (logado && sessaoVencida()) sair();
+    // só a troca de tela dispara a conferência; logado/sair mudam junto com ela
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   function entrar() {
@@ -51,8 +54,7 @@ function App() {
   }
 
   function sair() {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
+    limparToken();
     setLogado(false);
     navigate('/login', { replace: true });
   }

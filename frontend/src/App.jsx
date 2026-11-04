@@ -1,191 +1,117 @@
-import { useState } from 'react';
-import { HelpCircle, Info, Search, FileText, Bell, User, Lock, Eye, EyeOff, ExternalLink, ArrowRight } from 'lucide-react';
-import './App.css';
-import logoUnifor from './assets/logo-achouunifor.png';
+import { Fragment, Suspense, lazy, useEffect, useState } from 'react';
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router';
+import Topbar from './components/Topbar';
+import { limparToken, sessaoVencida, tipoUsuario, tokenSalvo } from './services/api';
 
-function App() {
-  const [matricula, setMatricula] = useState('');
-  const [senha, setSenha] = useState('');
-  const [lembrar, setLembrar] = useState(true);
-  const [mostrarSenha, setMostrarSenha] = useState(false);
+// Code splitting por rota: cada tela é carregada sob demanda (React.lazy)
+const Login = lazy(() => import('./pages/auth/Login'));
+const Cadastro = lazy(() => import('./pages/auth/Cadastro'));
+const EsqueceuSenha = lazy(() => import('./pages/auth/EsqueceuSenha'));
+const RedefinirSenha = lazy(() => import('./pages/auth/RedefinirSenha'));
+const Inicio = lazy(() => import('./pages/admin/Inicio'));
+const GerenciarItem = lazy(() => import('./pages/admin/GerenciarItem'));
+const Notificacoes = lazy(() => import('./pages/admin/Notificacoes'));
+const CriarNotificacao = lazy(() => import('./pages/admin/CriarNotificacao'));
+const PainelAdm = lazy(() => import('./pages/admin/PainelAdm'));
+const InicioAluno = lazy(() => import('./pages/aluno/InicioAluno'));
+const DenunciarPerda = lazy(() => import('./pages/aluno/DenunciarPerda'));
+const NotificacoesAluno = lazy(() => import('./pages/aluno/NotificacoesAluno'));
+const MinhasDenuncias = lazy(() => import('./pages/aluno/MinhasDenuncias'));
+const DetalhesItem = lazy(() => import('./pages/comum/DetalhesItem'));
+const Perfil = lazy(() => import('./pages/comum/Perfil'));
 
-  async function handleLogin(e) {
-  e.preventDefault();
-  console.log("handleLogin foi chamado");
-
-
-  try {
-    const resposta = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        matricula: matricula,
-        senha: senha
-      })
-    });
-
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      alert(dados.mensagem);
-      return;
-    }
-
-    localStorage.setItem("token", dados.token);
-
-    alert("Login realizado com sucesso!");
-
-  } catch (erro) {
-    console.error("Erro ao realizar login:", erro);
-    alert("Não foi possível conectar ao servidor.");
-  }
+// Telas com a barra de cima
+function ComTopbar() {
+  return (
+    <div className="inicio">
+      <Topbar />
+      <Outlet />
+    </div>
+  );
 }
 
+// Clicar no menu da tela em que já se está abre ela do zero (ex.: formulário vazio)
+function NovaACadaVisita({ children }) {
+  const { key } = useLocation();
+  return <Fragment key={key}>{children}</Fragment>;
+}
+
+function App() {
+  const [logado, setLogado] = useState(() => !!tokenSalvo());
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // cada tela nova começa do topo; com o token vencido, volta para o login
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (logado && sessaoVencida()) sair();
+    // só a troca de tela dispara a conferência; logado/sair mudam junto com ela
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  function entrar() {
+    setLogado(true);
+    // volta para a tela que a pessoa tentou abrir antes de fazer login
+    navigate(location.state?.de ?? '/', { replace: true });
+  }
+
+  function sair() {
+    limparToken();
+    setLogado(false);
+    navigate('/login', { replace: true });
+  }
+
+  if (!logado) {
+    return (
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/login" element={<Login aoEntrar={entrar} />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/esqueci-senha" element={<EsqueceuSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="*" element={<Navigate to="/login" replace state={{ de: location }} />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
+  // o login é o mesmo para todos; o tipo do usuário decide quais rotas existem
+  if (tipoUsuario() === 'administrador') {
+    return (
+      <Suspense fallback={null}>
+        <Routes>
+          <Route element={<ComTopbar />}>
+            <Route index element={<Inicio />} />
+            <Route path="gerenciar/:id?" element={<NovaACadaVisita><GerenciarItem /></NovaACadaVisita>} />
+            <Route path="notificacoes" element={<Notificacoes />} />
+            <Route path="notificacoes/nova" element={<CriarNotificacao />} />
+            <Route path="painel" element={<Navigate to="/painel/itens" replace />} />
+            <Route path="painel/:secao" element={<PainelAdm />} />
+          </Route>
+          <Route path="itens/:id" element={<DetalhesItem />} />
+          <Route path="perfil" element={<Perfil aoSair={sair} />} />
+          <Route path="redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   return (
-    <div className="container-geral">
-      {/* Barra de Navegação Superior */}
-      <header className="navbar">
-        <div className="navbar-esquerda">
-          <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
-          <div className="divisor-v" />
-          <Search size={24} className="icone-sacola" />
-          <span>Sistema de Achados e Perdidos</span>
-        </div>
-        <div className="navbar-direita">
-          <a href="#"><HelpCircle size={18} /> Ajuda</a>
-          <a href="#"><Info size={18} /> Sobre</a>
-        </div>
-      </header>
-
-      {/* Conteúdo Principal com Imagem de Fundo */}
-      <main className="conteudo-principal">
-        <div className="flex-layout">
-
-          {/* Coluna da Esquerda (Texto e Recursos) */}
-          <div className="secao-texto">
-            <h2>AchouUNIFOR</h2>
-            <h3>Conectando você aos seus objetos.</h3>
-            <p>
-              Consulte os itens encontrados no campus e registre uma denúncia do seu item perdido de forma rápida e segura.
-            </p>
-
-            <div className="lista-recursos">
-              <div className="item-recurso">
-                <div className="circulo-icone"><Search size={20} /></div>
-                <div className="conteudo-texto">
-                  <strong>Consulte itens</strong>
-                  <p>Veja se seu objeto foi encontrado no setor de segurança da UNIFOR.</p>
-                </div>
-              </div>
-
-              <div className="item-recurso">
-                <div className="circulo-icone"><FileText size={20} /></div>
-                <div className="conteudo-texto">
-                  <strong>Registre uma denúncia</strong>
-                  <p>Informe os detalhes do seu item perdido e seja notificado quando ele for encontrado.</p>
-                </div>
-              </div>
-
-              <div className="item-recurso">
-                <div className="circulo-icone"><Bell size={20} /></div>
-                <div className="conteudo-texto">
-                  <strong>Receba notificações</strong>
-                  <p>Acompanhe o status da sua denúncia em tempo real.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna da Direita (Cartão de Login) */}
-          <div className="secao-form">
-            <div className="cartao-login">
-              <div className="logo-cartao">
-                <Search size={40} className="icone-sacola-grande" />
-                <h4>
-                  Achou<span className="destaque-unifor">UNIFOR</span>
-                </h4>
-                <p>Sistema de Achados e Perdidos</p>
-              </div>
-
-              <div className="divisor-h" />
-
-              <p className="instrucao-login">
-                Use sua matrícula e a senha da sua conta institucional da UNIFOR para acessar o sistema.
-              </p>
-
-              <form className="formulario" onSubmit={handleLogin}>
-                <div className="grupo-input">
-                  <label>Matrícula</label>
-                  <div className="input-com-icone">
-                    <User size={18} className="icone-input" />
-                    <input
-                      type="text"
-                      placeholder="Ex.: 20212345"
-                      maxLength={8}
-                      value={matricula}
-                      onChange={(e) => setMatricula(e.target.value.replace(/\D/g, ''))}
-                    />
-                  </div>
-                </div>
-
-                <div className="grupo-input">
-                  <label>Senha</label>
-                  <div className="input-com-icone">
-                    <Lock size={18} className="icone-input" />
-
-                    {/* O tipo muda entre 'text' e 'password' dependendo do estado */}
-                    <input
-                      type={mostrarSenha ? "text" : "password"}
-                      placeholder="Digite sua senha"
-                      maxLength={8}
-                      value={senha}
-                      onChange={(e) => setSenha(e.target.value.replace(/\D/g, ''))}
-                    />
-
-                    {/* O ícone muda e ao clicar inverte o valor de mostrarSenha */}
-                    {mostrarSenha ? (
-                      <Eye size={18} className="icone-olho" onClick={() => setMostrarSenha(false)} />
-                    ) : (
-                      <EyeOff size={18} className="icone-olho" onClick={() => setMostrarSenha(true)} />
-                    )}
-                  </div>
-                </div>
-
-                <div className="linha-acoes">
-                  <label className="checkbox-container">
-                    <input type="checkbox" checked={lembrar} onChange={() => setLembrar(!lembrar)} />
-                    <span className="checkmark"></span>
-                    Lembrar de mim
-                  </label>
-                  <a href="#" className="link-esqueceu">
-                    Esqueci minha senha <ExternalLink size={14} />
-                  </a>
-                </div>
-
-                <button type="submit" className="botao-entrar">
-                  Entrar <ArrowRight size={18} />
-                </button>
-              </form>
-
-              <div className="divisor-ou">
-                <span>ou</span>
-              </div>
-
-              <div className="info-alerta">
-                <Info size={20} />
-                <div>
-                  <strong>Não tem conta no AchouUNIFOR.</strong>
-                  <p>Alunos e administradores acessam o sistema com a mesma conta institucional da UNIFOR.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </main>
-    </div>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route element={<ComTopbar />}>
+          <Route index element={<InicioAluno />} />
+          <Route path="denunciar" element={<NovaACadaVisita><DenunciarPerda /></NovaACadaVisita>} />
+          <Route path="notificacoes" element={<NotificacoesAluno />} />
+          <Route path="minhas-denuncias" element={<MinhasDenuncias />} />
+        </Route>
+        <Route path="itens/:id" element={<DetalhesItem />} />
+        <Route path="perfil" element={<Perfil aoSair={sair} />} />
+        <Route path="redefinir-senha" element={<RedefinirSenha />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

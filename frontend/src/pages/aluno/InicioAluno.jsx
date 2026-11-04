@@ -1,0 +1,112 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { ImageOff } from 'lucide-react';
+import useCategorias from '../../hooks/useCategorias';
+import useFiltrosDaUrl from '../../hooks/useFiltrosDaUrl';
+import { buscar } from '../../services/api';
+import '../../styles/Inicio.css';
+import '../../styles/InicioAluno.css';
+
+// "2026-12-25T12:03:01.000Z" -> "25/12/2026"
+const formatarData = (iso) => new Date(iso).toLocaleDateString('pt-BR');
+
+// Início do aluno: só itens perdidos e só o básico (o backend não manda local nem horário).
+// Filtros ficam na URL: /?busca=&categoria=&data=
+function InicioAluno() {
+  const navigate = useNavigate();
+  const [filtro, mudarFiltro] = useFiltrosDaUrl();
+  const busca = filtro('busca');
+  const categoria = filtro('categoria');
+  const data = filtro('data');
+  const [itens, setItens] = useState([]);
+  const [erro, setErro] = useState('');
+  const { categorias } = useCategorias();
+
+  // Debounce de 300ms na busca textual para evitar requisições a cada tecla
+  const [buscaDebounced, setBuscaDebounced] = useState(busca);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBuscaDebounced(busca);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [busca]);
+
+  useEffect(() => {
+    let cancelado = false;
+    const params = new URLSearchParams({ busca: buscaDebounced, categoria, data });
+    buscar(`/itens/perdidos?${params}`)
+      .then((dados) => {
+        if (!cancelado) {
+          setItens(Array.isArray(dados) ? dados : []);
+          setErro('');
+        }
+      })
+      .catch((e) => {
+        if (!cancelado) {
+          setErro(e.message || 'Não foi possível carregar os itens.');
+        }
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [buscaDebounced, categoria, data]);
+
+  // Memoiza a filtragem por data para não reprocessar Datas a cada tecla digitada na busca
+  const itensVisiveis = useMemo(
+    () =>
+      data
+        ? itens.filter((i) => new Date(i.data_horario).toLocaleDateString('en-CA') === data)
+        : itens,
+    [itens, data]
+  );
+
+  return (
+    <main className="inicio-conteudo">
+      <div className="inicio-filtros">
+        <input
+          type="search"
+          placeholder="Buscar item (ex.: garrafa, mochila, chave)"
+          aria-label="Buscar item"
+          value={busca}
+          onChange={(e) => mudarFiltro('busca', e.target.value)}
+        />
+        <select aria-label="Categoria" value={categoria} onChange={(e) => mudarFiltro('categoria', e.target.value)}>
+          <option value="">Categoria</option>
+          {categorias.map((c) => <option key={c.id_categoria}>{c.nome}</option>)}
+        </select>
+        <input type="date" aria-label="Data" value={data} onChange={(e) => mudarFiltro('data', e.target.value)} />
+      </div>
+
+      {erro && <p className="inicio-erro">{erro}</p>}
+
+      <div className="inicio-lista">
+        {itensVisiveis.map((item) => (
+          <article key={item.id_item} className="inicio-card">
+            {item.imagem_url || item.foto ? (
+              <img
+                className="inicio-foto"
+                src={item.imagem_url || item.foto}
+                alt={item.nome_objeto}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="inicio-foto inicio-sem-foto"><ImageOff size={32} /></div>
+            )}
+            <div className="inicio-card-corpo">
+              <h3>{item.nome_objeto}</h3>
+              <p>{item.categoria} · {formatarData(item.data_horario)}</p>
+              <button className="aluno-ver" onClick={() => navigate(`/itens/${item.id_item}`)}>Ver Item</button>
+            </div>
+          </article>
+        ))}
+        {itensVisiveis.length === 0 && !erro && <p>Nenhum item perdido encontrado.</p>}
+      </div>
+    </main>
+  );
+}
+
+export default InicioAluno;

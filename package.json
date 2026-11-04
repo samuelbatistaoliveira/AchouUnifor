@@ -10,15 +10,9 @@
     "dev": "npm run dev:frontend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run start --workspace=backend",
-    "dev:all": "npm run dev:backend & npm run dev:frontend",
+    "dev:all": "node scripts/dev-all.js",
     "install:all": "npm install",
     "build": "npm run build --workspace=frontend"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "lucide-react": "^1.48.0",
-    "pg": "^8.23.0"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true

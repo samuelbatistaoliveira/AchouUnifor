@@ -1,0 +1,291 @@
+/* --- CONTAINER GERAL --- */
+.ecra-detalhes-geral {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+}
+
+/* --- CONTEÚDO --- */
+.container-detalhes {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+.botao-voltar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1e3a8a;
+  color: white;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  transition: background-color 0.2s;
+}
+
+.botao-voltar:hover {
+  background-color: #1e40af;
+}
+
+.conteudo-detalhes {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Duas colunas iguais */
+  gap: 48px;
+  align-items: start;
+}
+
+/* --- COLUNA ESQUERDA (IMAGENS) --- */
+.coluna-imagens {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.imagem-principal {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* Proporção fixa */
+  max-height: 450px;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagem-exibida {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Encaixa a imagem sem cortar e sem a deformar */
+}
+
+.miniaturas {
+  display: flex;
+  gap: 12px;
+}
+
+.miniatura {
+  width: 64px;
+  height: 64px;
+  background-color: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.miniatura.ativa {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* --- COLUNA DIREITA (INFORMAÇÕES) --- */
+.coluna-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.coluna-info h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #0f172a;
+}
+
+.especificacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 1.05rem;
+  margin-bottom: 24px;
+}
+
+.linha-especificacao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rotulo {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.valor {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.mt-forte {
+  margin-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 12px;
+}
+
+/* --- ADMIN: descrição e botão de editar --- */
+.detalhe-descricao {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.detalhe-descricao .valor {
+  white-space: pre-wrap;
+}
+
+/* editar + alterar status, empilhados e centralizados como no desenho */
+.detalhe-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 260px;
+  align-self: center;
+  margin-top: 24px;
+}
+
+.detalhe-acoes > * {
+  width: 100%;
+}
+
+.detalhe-status-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.detalhe-status-campo select {
+  padding: 10px;
+  border: 1.5px solid #94a3b8;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.detalhe-dica {
+  margin-top: -6px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.detalhe-alterar-status {
+  padding: 11px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #2f80ed;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-alterar-status:hover:not(:disabled) {
+  background: #1f6fd9;
+}
+
+.detalhe-alterar-status:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.detalhe-ok,
+.detalhe-erro {
+  margin: 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.detalhe-ok {
+  color: #16a34a;
+}
+
+.detalhe-erro {
+  color: #dc2626;
+}
+
+.detalhe-editar {
+  align-self: center;
+  padding: 10px 28px;
+  border: 2px solid #2f80ed;
+  border-radius: 8px;
+  background: white;
+  color: #2f80ed;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detalhe-editar:hover {
+  background: #eef5ff;
+}
+
+/* --- AVISO DE SEGURANÇA --- */
+.aviso-seguranca {
+  background-color: #fef3c7; /* Fundo amarelo suave */
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.tarjeta-aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e; /* Tom de aviso escuro */
+  margin-bottom: 8px;
+}
+
+.tarjeta-aviso strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.icone-trava-aviso {
+  flex-shrink: 0;
+}
+
+.texto-seguranca {
+  margin: 0;
+  color: #451a03;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* --- RESPONSIVIDADE (SE O ECRÃ FOR PEQUENO) --- */
+@media (max-width: 768px) {
+  .conteudo-detalhes {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .navbar-detalhes {
+    padding: 12px 24px;
+  }
+}

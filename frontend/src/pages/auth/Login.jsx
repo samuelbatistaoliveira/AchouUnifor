@@ -1,0 +1,241 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { HelpCircle, Info, Search, FileText, Bell, Lock, Eye, EyeOff, ExternalLink, ArrowRight, Mail } from 'lucide-react';
+import '../../styles/Login.css';
+import logoUnifor from '../../assets/logo-achouunifor.png';
+import { motion } from 'framer-motion';
+import { API } from '../../services/api';
+
+function Login({ aoEntrar }) {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [lembrar, setLembrar] = useState(true);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setErro('');
+    setCarregando(true);
+
+    try {
+      const resposta = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          senha: senha
+        })
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        setErro(dados.mensagem || "E-mail ou senha inválidos.");
+        return;
+      }
+
+      // sem "lembrar", o token some ao fechar o navegador
+      (lembrar ? localStorage : sessionStorage).setItem("token", dados.token);
+
+      aoEntrar();
+
+    } catch (erro) {
+      console.error("Erro ao realizar login:", erro);
+      setErro("Não foi possível conectar ao servidor. Tente novamente.");
+    } finally {
+        setCarregando(false);
+    }
+  }
+
+  return (
+    <motion.div
+      className="container-geral"
+      initial={{ opacity: 0, x: -30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 1.0, ease: "easeOut" }}
+    >
+      {/* Barra de Navegação Superior */}
+      <header className="navbar">
+        <div className="navbar-esquerda">
+          <img src={logoUnifor} alt="Logótipo AchouUnifor" className="logo-navbar" />
+          <div className="divisor-v" />
+          <Search size={24} className="icone-sacola" />
+          <span>Sistema de Achados e Perdidos</span>
+        </div>
+        <div className="navbar-direita">
+          <a href="#"><HelpCircle size={18} /> Ajuda</a>
+          <a href="#"><Info size={18} /> Sobre</a>
+        </div>
+      </header>
+
+      {/* Conteúdo Principal com Imagem de Fundo */}
+      <main className="conteudo-principal">
+        <div className="flex-layout">
+
+          {/* Coluna da Esquerda (Texto e Recursos) */}
+          <div className="secao-texto">
+            <h2>AchouUNIFOR</h2>
+            <h3>Conectando você aos seus objetos.</h3>
+            <p>
+              Consulte os itens encontrados no campus e registre uma denúncia do seu item perdido de forma rápida e segura.
+            </p>
+
+            <div className="lista-recursos">
+              <div className="item-recurso">
+                <div className="circulo-icone"><Search size={20} /></div>
+                <div className="conteudo-texto">
+                  <strong>Consulte itens</strong>
+                  <p>Veja se seu objeto foi encontrado no setor de segurança da UNIFOR.</p>
+                </div>
+              </div>
+
+              <div className="item-recurso">
+                <div className="circulo-icone"><FileText size={20} /></div>
+                <div className="conteudo-texto">
+                  <strong>Registre uma denúncia</strong>
+                  <p>Informe os detalhes do seu item perdido e seja notificado quando ele for encontrado.</p>
+                </div>
+              </div>
+
+              <div className="item-recurso">
+                <div className="circulo-icone"><Bell size={20} /></div>
+                <div className="conteudo-texto">
+                  <strong>Receba notificações</strong>
+                  <p>Acompanhe o status da sua denúncia em tempo real.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Coluna da Direita (Cartão de Login) */}
+          <div className="secao-form">
+            <div className="cartao-login">
+              <div className="logo-cartao">
+                <Search size={40} className="icone-sacola-grande" />
+                <h4>
+                  Achou<span className="destaque-unifor">UNIFOR</span>
+                </h4>
+                <p>Sistema de Achados e Perdidos</p>
+              </div>
+
+              <div className="divisor-h" />
+
+              <p className="instrucao-login">
+                Use seu e-mail institucional (@edu.unifor.br) e a senha da sua conta da UNIFOR para acessar o sistema.
+              </p>
+
+              <form className="formulario" onSubmit={handleLogin}>
+
+                {/* CAMPO DE E-MAIL */}
+                <div className="grupo-input">
+                  <label>E-mail</label>
+                  <div className="input-com-icone">
+                    <Mail size={18} className="icone-input" />
+                    <input
+                      type="email"
+                      required
+                      pattern=".+@edu\.unifor\.br"
+                      title="Use seu e-mail institucional (@edu.unifor.br)"
+                      placeholder="seuemail@edu.unifor.br"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* CAMPO DE SENHA */}
+                <div className="grupo-input">
+                  <label>Senha</label>
+                  <div className="input-com-icone">
+                    <Lock size={18} className="icone-input" />
+                    <input
+                      type={mostrarSenha ? "text" : "password"}
+                      required
+                      placeholder="Digite sua senha"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                    />
+                    {mostrarSenha ? (
+                      <Eye size={18} className="icone-olho" onClick={() => setMostrarSenha(false)} />
+                    ) : (
+                      <EyeOff size={18} className="icone-olho" onClick={() => setMostrarSenha(true)} />
+                    )}
+                  </div>
+                </div>
+
+                {erro && (
+                <div
+                  role="alert"
+                  style={{
+                  color: "#b91c1c",
+                  backgroundColor: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  padding: "10px 12px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  marginBottom: "12px"
+                  }}
+                  >
+                  {erro}
+              </div>
+              )}
+
+                <div className="linha-acoes">
+                  <label className="checkbox-container">
+                    <input type="checkbox" checked={lembrar} onChange={() => setLembrar(!lembrar)} />
+                    <span className="checkmark"></span>
+                    Lembrar de mim
+                  </label>
+
+                  <Link to="/esqueci-senha" className="link-esqueceu">
+                    Esqueci minha senha <ExternalLink size={14} />
+                  </Link>
+                </div>
+
+                {/* BOTÕES ATUALIZADOS */}
+                <div className="botoes-acao">
+                  <button
+                  type="submit"
+                  className="botao-entrar"
+                  disabled={carregando}
+                  >
+                  {carregando ? "Entrando..." : "Entrar"}
+                  {!carregando && <ArrowRight size={18} />}
+                </button>
+                  <button
+                    type="button"
+                    className="botao-criar-conta"
+                    onClick={() => navigate('/cadastro')}
+                  >
+                    Criar conta
+                  </button>
+                </div>
+
+              </form>
+
+              <div className="divisor-ou">
+                <span>ou</span>
+              </div>
+
+              <div className="info-alerta">
+                <Info size={20} />
+                <div>
+                  <strong>Não tem conta no AchouUNIFOR.</strong>
+                  <p>Alunos e administradores acessam o sistema com a mesma conta institucional da UNIFOR.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </motion.div>
+  );
+}
+
+export default Login; 

@@ -1,6 +1,6 @@
 # 🔎 AchouUnifor
 
-Sistema web criado para auxiliar a comunidade acadêmica da Universidade de Fortaleza (UNIFOR) na comunicação e no gerenciamento de objetos perdidos e encontrados dentro do campus.
+Sistema web criado para auxiliar a comunidade acadêmica da Universidade de Fortaleza (UNIFOR) na comunicação e no gerenciamento de objetos perdidos e encontrados dentro do campus
 
 ## 🎯 Objetivo
 

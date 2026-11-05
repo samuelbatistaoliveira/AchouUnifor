@@ -210,8 +210,62 @@ async function listarImagensItem(req, res) {
     }
 }
 
+async function excluirImagem(req, res) {
+    try {
+        const { id_imagem } = req.params;
+
+        if (!idValido(id_imagem)) {
+            return res.status(400).json({
+                mensagem: 'ID da imagem inválido.'
+            });
+        }
+
+        const resultado = await pool.query(
+            `SELECT id_imagem, id_item, caminho
+             FROM imagens_itens
+             WHERE id_imagem = $1`,
+            [id_imagem]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                mensagem: 'Imagem não encontrada.'
+            });
+        }
+
+        const imagem = resultado.rows[0];
+
+        // Remove o arquivo do Supabase Storage
+        const { error } = await supabase.storage
+            .from('itens')
+            .remove([imagem.caminho]);
+
+        if (error) {
+            throw error;
+        }
+
+        // Remove o registro da imagem no PostgreSQL
+        await pool.query(
+            'DELETE FROM imagens_itens WHERE id_imagem = $1',
+            [id_imagem]
+        );
+
+        return res.status(200).json({
+            mensagem: 'Imagem excluída com sucesso.'
+        });
+
+    } catch (erro) {
+        console.error('Erro ao excluir imagem:', erro);
+
+        return res.status(500).json({
+            mensagem: 'Erro ao excluir imagem.'
+        });
+    }
+}
+
 module.exports = {
     uploadImagem,
     uploadImagemDenuncia,
-    listarImagensItem
+    listarImagensItem,
+    excluirImagem
 };

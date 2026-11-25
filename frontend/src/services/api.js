@@ -1,4 +1,4 @@
-export const API = 'http://localhost:3000';
+export const API = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Obtém o token JWT armazenado no navegador (`localStorage` quando "Lembrar de mim"

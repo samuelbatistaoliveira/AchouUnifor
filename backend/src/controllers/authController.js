@@ -258,8 +258,10 @@ async function esqueciSenha(req, res) {
             { expiresIn: "1h" }
         )
 
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
-        const link = `${frontendUrl}/redefinir-senha?token=${encodeURIComponent(token)}`
+        const baseFrontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+        const resetUrl = new URL("/redefinir-senha", baseFrontendUrl)
+        resetUrl.searchParams.set("token", token)
+        const link = resetUrl.toString()
 
         const envio = await enviarEmailRecuperacao({
             destinatario: usuario.email_institucional,

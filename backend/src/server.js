@@ -12,35 +12,63 @@ const relatoriosRoutes = require("./routes/relatoriosRoutes")
 
 const app = express()
 
-const origensPermitidas = [
-    process.env.FRONTEND_URL,
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-].filter(Boolean)
+function origemPermitida(origin) {
+    if (!origin) return true
+
+    const origemNormalizada = origin.replace(/\/$/, "")
+    const origensEnv = [
+        process.env.FRONTEND_URL?.replace(/\/$/, ""),
+        process.env.CORS_ORIGIN?.replace(/\/$/, "")
+    ].filter(Boolean)
+
+    if (origensEnv.includes(origemNormalizada)) return true
+
+    try {
+        const { hostname } = new URL(origemNormalizada)
+        if (
+            hostname === "localhost" ||
+            hostname === "127.0.0.1" ||
+            hostname.endsWith(".vercel.app")
+        ) {
+            return true
+        }
+    } catch {
+        return false
+    }
+
+    return false
+}
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Permite ferramentas sem header Origin (como k6/curl) e o frontend configurado
-        if (!origin || origensPermitidas.includes(origin)) {
+        if (origemPermitida(origin)) {
             return callback(null, true)
         }
-        return callback(new Error("Origem não permitida pelo CORS."))
-    }
+        console.warn("Origem bloqueada pelo CORS:", origin)
+        return callback(null, false)
+    },
+    credentials: true
 }))
 app.use(express.json({ limit: "100kb" }))
 
-app.use("/itens", itensRoutes)
-app.use("/auth", authRoutes)
-app.use("/usuarios", usuariosRoutes)
-app.use("/imagens", imagensRoutes)
-app.use("/categorias", categoriasRoutes)
-app.use("/denuncias", denunciasRoutes)
-app.use("/notificacoes", notificacoesRoutes)
-app.use("/relatorios", relatoriosRoutes)
+const apiRouter = express.Router()
 
-app.get("/", (req, res) => {
+apiRouter.use("/itens", itensRoutes)
+apiRouter.use("/auth", authRoutes)
+apiRouter.use("/usuarios", usuariosRoutes)
+apiRouter.use("/imagens", imagensRoutes)
+apiRouter.use("/categorias", categoriasRoutes)
+apiRouter.use("/denuncias", denunciasRoutes)
+apiRouter.use("/notificacoes", notificacoesRoutes)
+apiRouter.use("/relatorios", relatoriosRoutes)
+
+apiRouter.get("/", (req, res) => {
     res.send("Backend do AchouUNIFOR funcionando!")
 })
+
+// Suporta tanto o prefixo público /api/* (rewrite da Vercel) quanto chamadas diretas /* (testes/dev local)
+app.use("/api", apiRouter)
+app.use("/", apiRouter)
 
 // Middleware global de tratamento de erros
 app.use((err, req, res, next) => {
@@ -67,6 +95,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log("Servidor rodando na porta 3000")
-})
+if (require.main === module) {
+    const port = process.env.PORT || 3000
+    app.listen(port, () => {
+        console.log(`Servidor rodando na porta ${port}`)
+    })
+}
+
+module.exports = app
